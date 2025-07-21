@@ -1,0 +1,83 @@
+-- INSERT INTO `business_settings` (`id`, `type`, `value`, `lang`, `created_at`, `updated_at`) VALUES (NULL, 'home_center_banner', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+-- INSERT INTO `business_settings` (`id`, `type`, `value`, `lang`, `created_at`, `updated_at`) VALUES (NULL, 'home_mid_section_banner', NULL, NULL, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP);
+
+
+-- ALTER TABLE `page_translations` ADD `heading5` VARCHAR(255) NULL DEFAULT NULL AFTER `heading4`, ADD `heading6` VARCHAR(255) NULL DEFAULT NULL AFTER `heading5`, ADD `heading7` VARCHAR(255) NULL DEFAULT NULL AFTER `heading6`, ADD `heading8` VARCHAR(255) NULL DEFAULT NULL AFTER `heading7`, ADD `heading9` VARCHAR(255) NULL DEFAULT NULL AFTER `heading8`;
+
+
+-- CREATE TABLE IF NOT EXISTS `home_sliders` (
+--   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+--   `name` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+--   `image` int DEFAULT NULL,
+--   `mobile_image` int DEFAULT NULL,
+--   `title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+--   `sub_title` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+--   `btn_text` varchar(191) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+--   `link_type` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+--   `link_ref` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+--   `link_ref_id` int DEFAULT NULL,
+--   `link` varchar(191) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+--   `sort_order` int DEFAULT '1',
+--   `status` tinyint(1) NOT NULL DEFAULT '1',
+--   `created_at` timestamp NULL DEFAULT NULL,
+--   `updated_at` timestamp NULL DEFAULT NULL,
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- CREATE TABLE IF NOT EXISTS `recently_viewed_products` (
+--   `id` int NOT NULL AUTO_INCREMENT,
+--   `user_id` int UNSIGNED DEFAULT NULL,
+--   `guest_token` varchar(255) DEFAULT NULL,
+--   `product_id` int NOT NULL,
+--   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   PRIMARY KEY (`id`),
+--   KEY `product_id` (`product_id`),
+--   KEY `user_id` (`user_id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ALTER TABLE `recently_viewed_products`
+--   ADD CONSTRAINT `recently_viewed_products_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+--   ADD CONSTRAINT `recently_viewed_products_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+
+--   CREATE TABLE IF NOT EXISTS `carts` (
+--   `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+--   `user_id` int DEFAULT NULL,
+--   `temp_user_id` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+--   `product_id` int DEFAULT NULL,
+--   `product_stock_id` int DEFAULT NULL,
+--   `variation` text COLLATE utf8mb3_unicode_ci,
+--   `quantity` int NOT NULL DEFAULT '0',
+--   `price` double(20,2) DEFAULT '0.00',
+--   `offer_price` double(20,2) DEFAULT NULL,
+--   `offer_id` int DEFAULT NULL,
+--   `offer_tag` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+--   `tax` double(20,2) DEFAULT '0.00',
+--   `shipping_cost` double(20,2) DEFAULT '0.00',
+--   `shipping_type` varchar(30) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci NOT NULL DEFAULT '',
+--   `discount` double(10,2) NOT NULL DEFAULT '0.00',
+--   `offer_discount` double(10,2) NOT NULL DEFAULT '0.00',
+--   `coupon_code` varchar(255) CHARACTER SET utf8mb3 COLLATE utf8mb3_unicode_ci DEFAULT NULL,
+--   `coupon_applied` tinyint NOT NULL DEFAULT '0',
+--   `status` tinyint(1) NOT NULL DEFAULT '0',
+--   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+--   PRIMARY KEY (`id`),
+--   KEY `product_id` (`product_id`),
+--   KEY `product_stock_id` (`product_stock_id`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb3 COLLATE=utf8mb3_unicode_ci;
+
+-- ALTER TABLE `carts`
+--   ADD CONSTRAINT `carts_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE,
+--   ADD CONSTRAINT `carts_ibfk_2` FOREIGN KEY (`product_stock_id`) REFERENCES `product_stocks` (`id`) ON DELETE CASCADE;
+
+-- ALTER TABLE `wishlists` ADD `product_stock_id` INT NULL DEFAULT NULL AFTER `product_id`;
+
+-- ALTER TABLE `wishlists` ADD FOREIGN KEY (`product_id`) REFERENCES `products`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+-- ALTER TABLE `wishlists` ADD FOREIGN KEY (`product_stock_id`) REFERENCES `product_stocks`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+-- ALTER TABLE `orders` ADD `return_request` TINYINT(1) NULL DEFAULT '0' AFTER `cancel_reason`, ADD `return_request_date` INT NOT NULL AFTER `return_request`, ADD `return_approval` INT NOT NULL AFTER `return_request_date`, ADD `return_approval_date` INT NOT NULL AFTER `return_approval`, ADD `return_reason` INT NOT NULL AFTER `return_approval_date`;
+
+-- ALTER TABLE `orders` CHANGE `return_request_date` `return_request_date` DATETIME NULL DEFAULT NULL, CHANGE `return_approval` `return_approval` TINYINT(1) NOT NULL DEFAULT '0' COMMENT '0 - Pending, 1 - Approved', CHANGE `return_approval_date` `return_approval_date` DATETIME NULL DEFAULT NULL, CHANGE `return_reason` `return_reason` TEXT NULL DEFAULT NULL;
