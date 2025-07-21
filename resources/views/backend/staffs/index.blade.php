@@ -22,7 +22,7 @@
             <div class="col-md-4 input-group  mb-1">
                 <select name="role_id"  class="form-control form-control-sm aiz-selectpicker">
                     <option value="">All Roles</option>
-                    @foreach(App\models\Role::where('is_active',1)->get() as $role)
+                    @foreach(App\Models\Role::where('is_active',1)->get() as $role)
                         <option value="{{ $role->name }}" {{ $role_id == $role->name ? 'selected' : '' }}>
                             {{ $role->name }}
                         </option>
