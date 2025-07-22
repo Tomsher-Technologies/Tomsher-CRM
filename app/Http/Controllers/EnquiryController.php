@@ -350,7 +350,7 @@ class EnquiryController extends Controller
             'comment' => $enquiryStatusData->comment ?? '',
             'status_date' => $enquiryStatusData->status_date ?? date('Y-m-d'),
             'status' => $status,
-            'approved_cost' => $enquiryStatusData->approved_cost
+            'approved_cost' => $enquiryStatusData->approved_cost ?? 0
         ]);
     }
 
