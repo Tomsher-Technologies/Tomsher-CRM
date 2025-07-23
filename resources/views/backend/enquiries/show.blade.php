@@ -86,9 +86,38 @@
                         <h6><strong >{{ ucwords(str_replace('_',' ', $history->status)) }}</strong></h6>
                         <small class="text-muted">on {{ \Carbon\Carbon::parse($history->status_date)->format('d M Y') }}</small>
                         <small class="text-muted">&nbsp; By: {{ $history->changedBy->name ?? 'System' }}</small>
-                        @if(!empty($history->submitted_cost) && $history->submitted_cost != 0.00)
-                            <br><span class="text-info mt-1">Submitted Cost: AED {{ $history->submitted_cost }}</span>
+
+                        @if($history->status === 'proposal_submitted')
+                            @php
+                                $proposalItems = $history->proposalItems()->get();
+                            @endphp
+                            <br>
+                            <table class="table table-bordered aiz-table w-50 mt-2">
+                                <thead>
+                                    <tr>
+                                        <th class="text-center">#</th>
+                                        <th class="text-center">Cost</th>
+                                        <th class="text-center">Internal Days</th>
+                                        <th class="text-center">Client Days</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach ($proposalItems as $it => $items)
+                                    @php
+                                        $selected = ($items->selected == 1) ? 'background: lightgreen;' : '';
+                                    @endphp
+                                        <tr style="{{ $selected }}">
+                                            <td class="text-center">{{ $it+1 }}</td>
+                                            <td class="text-center">{{ $items->cost }}</td>
+                                            <td class="text-center">{{ $items->internal_days }}</td>
+                                            <td class="text-center">{{ $items->client_days }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                           
                         @endif
+
                         @if(!empty($history->approved_cost) && $history->approved_cost != 0.00)
                             <br><span class="text-success mt-1">Approved Cost: AED {{ $history->approved_cost }}</span>
                         @endif
