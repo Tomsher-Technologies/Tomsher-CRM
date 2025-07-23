@@ -37,6 +37,19 @@
                 </div>
 
                 <div class="col-md-3 mb-1">
+                    <select name="source_mode" id="source_mode" class="form-control form-control-sm aiz-selectpicker"
+                        data-live-search="true">
+                        <option value="">All Source Modes</option>
+                        <option value="inhouse" {{ request('source_mode') == "inhouse" ? 'selected' : '' }}>
+                            Inhouse Lead
+                        </option>
+                        <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
+                            Self Lead
+                        </option>
+                    </select>
+                </div>
+
+                <div class="col-md-3 mb-1">
                     <select name="project_type_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                         <option value="">All Project Categories</option>
                         @foreach ($projectTypes as $type)
@@ -108,6 +121,7 @@
                         <th style="width:20%;">Customer</th>
                         <th class="text-center">Enquiry Source</th>
                         {{-- <th>Project Category</th> --}}
+                        <th>Source Mode</th>
                         <th class="text-center">Status</th>
                         <th class="text-center">Enquiry Date</th>
                         <th class="text-center">Enquiry Owner</th>
@@ -170,6 +184,7 @@
                                         <em>N/A</em>
                                     @endif
                                 </td> --}}
+                                <td class="text-center">{{ ($enquiry->source_mode != NULL) ? ucfirst($enquiry->source_mode).' Lead' : '' }}</td>
                                 <td class="text-center">
                                     
                                     <span class="badge  badge-inline " style="background: {{$statuses[$enquiry->status]['bg'] ?? '' }}; color:{{$statuses[$enquiry->status]['list_color'] ?? '' }}">

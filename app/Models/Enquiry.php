@@ -10,7 +10,7 @@ class Enquiry extends Model
     use HasFactory;
 
     protected $fillable = [
-        'enquiry_code','customer_id', 'enquiry_date', 'status', 'enquiry_source_id','project_type_id', 'project_details', 'comments','added_by', 'updated_by','updated_at','submitted_cost', 'approved_cost', 'project_created', 'owner_id'
+        'enquiry_code','customer_id', 'enquiry_date', 'status', 'enquiry_source_id','source_mode','project_type_id', 'project_details', 'comments','added_by', 'updated_by','updated_at','submitted_cost', 'approved_cost', 'project_created', 'owner_id'
     ];
 
     public function customer()
