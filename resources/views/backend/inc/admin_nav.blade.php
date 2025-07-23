@@ -11,9 +11,7 @@
             <div class="d-flex justify-content-around align-items-center align-items-stretch">
                 <div class="aiz-topbar-item">
                     <div class="d-flex align-items-center">
-                        {{-- <a class="btn btn-icon btn-circle btn-light" href="{{ route('home')}}" target="_blank" title="{{  trans('messages.browse_website') }}">
-                            <i class="las la-globe"></i>
-                        </a> --}}
+                        
                     </div>
                 </div>
             </div>
@@ -21,9 +19,30 @@
             <div class="d-flex justify-content-around align-items-center align-items-stretch ml-3">
                 <div class="aiz-topbar-item">
                     <div class="d-flex align-items-center">
-                        <a class="btn btn-soft-danger d-flex align-items-center" href="{{ route('cache.clear')}}">
+
+                        <a class="btn btn-soft-danger btn-sm d-flex align-items-center" href="{{ route('cache.clear')}}">
                             <i class="las la-hdd fs-20"></i>
                             <span class="fw-500 ml-1 mr-0 d-none d-md-block">{{  trans('messages.clear_cache') }}</span>
+                        </a>
+
+                        <a class="btn btn-soft-primary btn-sm d-flex align-items-center ml-1" href="{{ route('customers.index')}}">
+                            <i class="las la-users fs-20"></i>&nbsp;
+                            <span class="fw-500 d-none d-md-block">Customers</span>
+                        </a>
+
+                        <a class="btn btn-soft-success btn-sm d-flex align-items-center ml-1" href="{{ route('enquiries.index')}}">
+                            <i class="las la-envelope-open fs-20"></i> &nbsp;
+                            <span class="fw-500 d-none d-md-block">Enquiries</span>
+                        </a>
+
+                        <a class="btn btn-soft-info d-flex btn-sm align-items-center ml-1" href="{{ route('followups.index')}}">
+                            <i class="las la-calendar fs-20"></i>&nbsp;
+                            <span class="fw-500 d-none d-md-block">Follow-ups</span>
+                        </a>
+
+                        <a class="btn btn-soft-secondary d-flex btn-sm align-items-center ml-1" href="{{ route('projects.index')}}">
+                            <i class="las la-cogs fs-20"></i>&nbsp;
+                            <span class="fw-500 d-none d-md-block">Projects</span>
                         </a>
                     </div>
                 </div>

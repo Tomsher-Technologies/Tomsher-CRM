@@ -45,6 +45,22 @@
         </div>
 
         <div class="col-md-6 mb-1">
+            <label for="source_mode" class="form-label">Source Mode <span class="text-danger">*</span></label>
+            <select name="source_mode" id="source_mode" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
+                <option value="">-- Select Source Mode--</option>
+                <option value="inhouse" {{ old('source_mode', $enquiry->source_mode ?? '') == "inhouse" ? 'selected' : '' }}>
+                    Inhouse Lead
+                </option>
+                <option value="self" {{ old('source_mode', $enquiry->source_mode ?? '') == "self" ? 'selected' : '' }}>
+                    Self Lead
+                </option>
+            </select>
+            @error('source_mode')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div class="col-md-6 mb-1">
             <label for="project_type_id" class="form-label">Project Category</label>
             <select name="project_type_id[]" id="project_type_id" multiple class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                 {{-- <option value="">-- Select Type --</option> --}}
