@@ -23,6 +23,6 @@ class EnquiryStatusHistory extends Model
 
     public function proposalItems()
     {
-        return $this->hasMany(EnquiryProposalItem::class);
+        return $this->hasMany(EnquiryProposalItem::class,'status_history_id');
     }
 }
