@@ -57,6 +57,7 @@
                     <th style="word-break: break-all;width:20%;">Company Name</th>
                     <th style="width:20%;">Primary Contact</th>
                     <th class="text-center">Total Projects</th>
+                    <th class="text-center">Total Enquiries</th>
                     <th class="text-center">Salesperson</th>
                     <th class="text-center">{{trans('messages.status')}}</th>
                     <th class="text-center">{{trans('messages.options')}}</th>
@@ -74,7 +75,7 @@
                             
                                 @if($primary)
                                     <div>
-                                        <strong>{{ $primary->name }}</strong>
+                                        {{ $primary->name }}
                                         <a href="javascript:void(0)" class="show-popup" data-id="{{ $cust->id }}">
                                             <i class="las la-info-circle fs-16 text-primary" style="cursor: pointer;"></i>
                                         </a>
@@ -113,6 +114,12 @@
                             <td class="text-center">
                                 <a href="{{ route('projects.index',['customer_id' => $cust->id]) }}">
                                     {{ $cust->projects->count() ?? 0 }}
+                                </a>
+                            </td>
+
+                            <td class="text-center">
+                                <a href="{{ route('enquiries.index',['customer_id' => $cust->id]) }}">
+                                    {{ $cust->enquiries->count() ?? 0 }}
                                 </a>
                             </td>
 
