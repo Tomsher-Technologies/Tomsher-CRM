@@ -49,6 +49,10 @@ class EnquiryController extends Controller
         if ($request->filled('enquiry_source_id')) {
             $query->where('enquiry_source_id', $request->enquiry_source_id);
         }
+
+        if ($request->filled('source_mode')) {
+            $query->where('source_mode', $request->source_mode);
+        }
     
         if ($request->filled('project_type_id')) {
             $query->whereHas('projectTypes', function ($q) use ($request) {
@@ -97,6 +101,7 @@ class EnquiryController extends Controller
             'enquiry_date' => 'required|date',
             'enquiry_source_id' => 'required|exists:enquiry_sources,id',
             'project_details' => 'required|string',
+            'source_mode' => 'required',
             'status' => 'nullable|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam',
             'comments' => 'nullable|string'
         ]);
@@ -190,7 +195,8 @@ class EnquiryController extends Controller
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'enquiry_date' => 'nullable|date',
-            'enquiry_source_id' => 'nullable|exists:enquiry_sources,id',
+            'enquiry_source_id' => 'required|exists:enquiry_sources,id',
+            'source_mode' => 'required',
             'project_details' => 'nullable|string',
             'comments' => 'nullable|string',
         ]);

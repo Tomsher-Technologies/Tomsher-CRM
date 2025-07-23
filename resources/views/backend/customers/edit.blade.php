@@ -53,7 +53,7 @@
                         <input type="url" class="form-control form-control-sm" name="google_map_link" value="{{ $customer->google_location }}">
                     </div>
                     <div class="col-md-4 mb-1">
-                        <label class="form-label">Emirate (If Country is Dubai)</label>
+                        <label class="form-label">Emirate (If Country is UAE)</label>
                         <select class="form-control form-control-sm aiz-selectpicker" id="emirate" name="emirate">
                             <option value="">Select Emirate</option>
                             @foreach ($emirates as $em)
