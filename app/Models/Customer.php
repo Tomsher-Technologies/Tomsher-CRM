@@ -40,6 +40,10 @@ class Customer extends Model
         return $this->hasMany(Project::class);
     }
 
+    public function enquiries(){
+        return $this->hasMany(Enquiry::class);
+    }
+
     public function sale_person()
     {
         return $this->belongsTo(User::class,'sales_person');
