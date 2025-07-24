@@ -7,6 +7,7 @@ use App\Models\Enquiry;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Validator;
 use Carbon\Carbon;
 use DB;
 
@@ -112,13 +113,23 @@ class EnquiryFollowupController extends Controller
 
     public function store(Request $request)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'enquiry_id' => 'required|exists:enquiries,id',
             'followup_type' => 'required|in:call,email,whatsapp,meeting',
             'sub_type' => 'required|string',
             'followup_time' => 'required_if:followup_type,!=meeting',
-            'followup_from' => 'required_if:followup_type,meeting|date',
-            'followup_to' => 'required_if:followup_type,meeting|date|after:followup_from',
+            
+            'followup_from' => [
+                Rule::requiredIf($request->followup_type === 'meeting'),
+                'nullable',
+                'date',
+            ],
+            'followup_to' => [
+                Rule::requiredIf($request->followup_type === 'meeting'),
+                'nullable',
+                'date',
+                'after:followup_from',
+            ],
             'comment' => 'required|string',
             'location' => [
                             'string',
@@ -128,7 +139,10 @@ class EnquiryFollowupController extends Controller
                             }),
                         ],
         ]);
-
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
+        
         $enquiry = Enquiry::find($request->enquiry_id);
 
         $followup = EnquiryFollowup::create([
@@ -199,10 +213,25 @@ class EnquiryFollowupController extends Controller
             'followup_type' => 'required|in:call,email,whatsapp,meeting',
             'sub_type' => 'required|string',
             'followup_time' => 'required_if:followup_type,!=meeting',
-            'followup_from' => 'required_if:followup_type,meeting|date',
-            'followup_to' => 'required_if:followup_type,meeting|date|after:followup_from',
+            'followup_from' => [
+                Rule::requiredIf($request->followup_type === 'meeting'),
+                'nullable',
+                'date',
+            ],
+            'followup_to' => [
+                Rule::requiredIf($request->followup_type === 'meeting'),
+                'nullable',
+                'date',
+                'after:followup_from',
+            ],
             'comment' => 'required|string',
-            'location' => 'nullable|string',
+            'location' => [
+                            'string',
+                            'nullable',
+                            Rule::requiredIf(function () use ($request) {
+                                return $request->followup_type === 'meeting' && $request->sub_type === 'in-person';
+                            }),
+                        ],
         ]);
 
         $followup = EnquiryFollowup::findOrFail($id);
