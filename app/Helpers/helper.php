@@ -3,7 +3,7 @@
 use App\Models\BusinessSetting;
 use App\Utility\CategoryUtility;
 use App\Models\EnquiryStatus;
-
+use App\Models\EnquiryFollowup;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Request;
@@ -213,4 +213,11 @@ function getEnquiryStatuses(){
                                 })
                                 ->toArray();
     return $stutuses;
+}
+
+function getDueFutureFollowups($enquiryId){
+    $followups = EnquiryFollowup::where('enquiry_id', $enquiryId)
+                    ->where('status', 'pending')
+                    ->count();
+    return $followups;
 }
