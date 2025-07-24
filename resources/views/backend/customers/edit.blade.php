@@ -270,7 +270,7 @@
                     const whatsapp = $(this).find('.contact-whatsapp').val().trim();
 
                     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    const phonePattern = /^[0-9]{7,15}$/;
+                    const phonePattern = /^[+]?[0-9]{7,15}$/; 
 
                     if (name !== "") {
                         if (!email && !landline && !mobile && !whatsapp) {

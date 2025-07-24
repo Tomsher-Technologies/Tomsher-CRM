@@ -245,7 +245,7 @@
 
                     // Regex patterns
                     const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                    const phonePattern = /^[0-9]{7,15}$/; // Simplified phone number rule
+                    const phonePattern = /^[+]?[0-9]{7,15}$/; 
 
                     if (name !== "") {
                         if (!email && !landline && !mobile && !whatsapp) {
