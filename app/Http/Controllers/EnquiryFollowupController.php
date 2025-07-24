@@ -317,12 +317,22 @@ class EnquiryFollowupController extends Controller
         
         if (!auth()->user()->can('view_all_users_followups')) {
             $userId = auth()->user()->id;
+            // $query->where(function ($q) use ($userId) {
+            //             $q->where('created_by', $userId)
+            //             ->orWhereHas('participants', function ($subQ) use ($userId) {
+            //                 $subQ->where('user_id', $userId);
+            //             });
+            //         });
+
             $query->where(function ($q) use ($userId) {
-                        $q->where('created_by', $userId)
+                $q->where('followup_type', 'meeting') // show all meetings
+                ->orWhere(function ($q2) use ($userId) {
+                    $q2->where('created_by', $userId)
                         ->orWhereHas('participants', function ($subQ) use ($userId) {
                             $subQ->where('user_id', $userId);
                         });
-                    });
+                });
+            });
         } 
     
         if ($request->filled('status')) {

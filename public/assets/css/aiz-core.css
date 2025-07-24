@@ -5547,8 +5547,8 @@ input[type="number"] {
     color: var(--danger);
 }
 .btn-soft-warning {
-    background-color: var(--soft-warning);
-    color: var(--warning);
+    background-color: rgb(255 197 25 / 36%);
+    color: #d1a00d;
 }
 .btn-soft-info {
     background-color: var(--soft-info);
