@@ -131,8 +131,11 @@
                 <tbody>
                     @can('view_enquiries')
                         @foreach ($enquiries as $key => $enquiry)
-                            <tr>
-                                <td class="text-center">{{ $key + 1 + ($enquiries->currentPage() - 1) * $enquiries->perPage() }}
+                            @php
+                                $pendingFollowups = getDueFutureFollowups($enquiry->id);
+                            @endphp
+                            <tr @if ($pendingFollowups != 0)  style="background:#ffdc2826" @endif>
+                                <td class="text-center">{{ $key + 1 + ($enquiries->currentPage() - 1) * $enquiries->perPage() }} - {{ $pendingFollowups }}
                                 </td>
                                 <td>{{ $enquiry->enquiry_code ?? '' }}</td>
                                 <td style="position: relative;">
