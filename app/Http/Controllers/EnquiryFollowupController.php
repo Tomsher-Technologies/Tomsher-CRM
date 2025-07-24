@@ -334,7 +334,7 @@ class EnquiryFollowupController extends Controller
         $events = $followups->map(function ($f) {
 
             $followupTime = \Carbon\Carbon::parse($f->followup_time);
-
+            $followupFromTime = \Carbon\Carbon::parse($f->followup_from);
             if($f->status === 'completed'){
                 $color = '#079f19';
             }
@@ -343,10 +343,18 @@ class EnquiryFollowupController extends Controller
             }else if($f->status === 'rescheduled'){
                 $color = '#ffc519';
             }else{
-                if($followupTime->isFuture()){
-                    $color = '#abe4fb';
+                if($f->followup_type === 'meeting'){
+                    if($followupFromTime->isFuture()){
+                        $color = '#abe4fb';
+                    }else{
+                        $color = '#c50c0c';
+                    }
                 }else{
-                    $color = '#c50c0c';
+                    if($followupTime->isFuture()){
+                        $color = '#abe4fb';
+                    }else{
+                        $color = '#c50c0c';
+                    }
                 }
             }
             
