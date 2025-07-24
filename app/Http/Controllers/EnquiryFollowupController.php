@@ -208,7 +208,7 @@ class EnquiryFollowupController extends Controller
 
     public function update(Request $request, $id)
     {
-        $request->validate([
+        $validator = Validator::make($request->all(), [
             'enquiry_id' => 'required|exists:enquiries,id',
             'followup_type' => 'required|in:call,email,whatsapp,meeting',
             'sub_type' => 'required|string',
@@ -233,6 +233,10 @@ class EnquiryFollowupController extends Controller
                             }),
                         ],
         ]);
+
+        if ($validator->fails()) {
+            return redirect()->back()->withErrors($validator)->withInput();
+        }
 
         $followup = EnquiryFollowup::findOrFail($id);
 
