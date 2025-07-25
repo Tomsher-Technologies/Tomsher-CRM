@@ -257,6 +257,10 @@ class EnquiryFollowupController extends Controller
             'post_comment' => $request->post_comment,
         ]);
 
+         DB::table('enquiry_followup_participants')
+                ->where('followup_id', $followup->id)
+                ->delete();
+
         if ($request->followup_type === 'meeting') {
             $participantIds = $request->participants ?? [];
 
