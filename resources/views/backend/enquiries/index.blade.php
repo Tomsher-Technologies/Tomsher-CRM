@@ -135,7 +135,7 @@
                                 $pendingFollowups = getDueFutureFollowups($enquiry->id);
                             @endphp
                             <tr @if ($pendingFollowups != 0)  style="background:#ffdc2812" @endif>
-                                <td class="text-center">{{ $key + 1 + ($enquiries->currentPage() - 1) * $enquiries->perPage() }} - {{ $pendingFollowups }}
+                                <td class="text-center">{{ $key + 1 + ($enquiries->currentPage() - 1) * $enquiries->perPage() }}
                                 </td>
                                 <td>{{ $enquiry->enquiry_code ?? '' }}</td>
                                 <td style="position: relative;">
