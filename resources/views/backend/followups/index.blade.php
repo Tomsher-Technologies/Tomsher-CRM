@@ -118,10 +118,13 @@
                             <td class="text-center">{{ $key + 1 + ($followups->currentPage() - 1) * $followups->perPage() }}
                             
                             <td class="text-center">{!! $icon !!} {{ ucfirst($followup->followup_type) }}</td>
-                            <td>
+                            <td style="position: relative;">
                                 <span> <strong class="text-muted fs-12">Enquiry : </strong>
                                     <a href="{{ route('enquiries.show', $followup->enquiry) }}" target="_blank" >
                                         {{ $followup->enquiry->enquiry_code ?? '' }} - {{ $followup->enquiry->customer->company_name ?? '' }}
+                                    </a>
+                                    <a href="javascript:void(0)" class="show-popup" data-id="{{ $followup->id }}">
+                                        <i class="las la-info-circle fs-16 text-primary" style="cursor: pointer;"></i>
                                     </a>
                                 </span>
                                 <br>
@@ -134,6 +137,36 @@
                                 @endif
                                 
                                 <span> <strong class="text-muted fs-12">Added By :</strong> {{ $followup->added_by->name ?? '' }}</span>
+
+                                @php $primary = $followup->enquiry->customer->main_contact; @endphp
+                                    <!-- Stylish Popup -->
+                                    <div class="popup-card" id="popup-{{ $followup->id }}">
+                                        <div class="popup-card-header">
+                                            <span><i class="las la-id-card"></i> Contact Info</span>
+                                            <i class="las la-times close-popup" data-id="{{ $followup->id }}"></i>
+                                        </div>
+                                        <div class="popup-card-body">
+                                            @if ($primary->name)
+                                                <div><i class="las la-user"></i> <strong>Name:</strong> {{ $primary->name }}</div>
+                                            @endif
+                                            @if ($primary->designation)
+                                                <div><i class="las la-user-tie"></i> <strong>Designation:</strong> {{ $primary->designation }}</div>
+                                            @endif
+                                            @if ($primary->email)
+                                                <div><i class="las la-envelope"></i> <strong>Email:</strong> {{ $primary->email }}</div>
+                                            @endif
+                                            @if ($primary->landline_number)
+                                                <div><i class="las la-phone"></i> <strong>Landline:</strong> {{ $primary->landline_number }}</div>
+                                            @endif
+                                            @if ($primary->mobile_number)
+                                                <div><i class="las la-mobile"></i> <strong>Mobile:</strong> {{ $primary->mobile_number }}</div>
+                                            @endif
+                                            @if ($primary->whatsapp_number)
+                                                <div><i class="lab la-whatsapp"></i> <strong>WhatsApp:</strong> {{ $primary->whatsapp_number }}</div>
+                                            @endif
+                                        </div>
+                                    </div>
+
                             </td>
                             <td class="text-center">{{ ucfirst($followup->sub_type) }}</td>
                             <td class="text-center">
@@ -149,22 +182,41 @@
                                 @php
                                     $statusClass = '';
                                 @endphp
-                                @if ($followup->status == 'pending')
-                                    @php
-                                        $followupTime = \Carbon\Carbon::parse($followup->followup_time);
-                                    @endphp
-                                    {{-- $followupTime->isToday() ||  --}}
-                                    @if($followupTime->isFuture())
+                                @if ($followup->status === 'pending')
+                                    @if ($followup->followup_type === 'meeting')
                                         @php
-                                            $statusClass = 'pending-upcoming';
+                                            $followupTime = \Carbon\Carbon::parse($followup->followup_from);
                                         @endphp
-                                        <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                        {{-- $followupTime->isToday() ||  --}}
+                                        @if($followupTime->isFuture())
+                                            @php
+                                                $statusClass = 'pending-upcoming';
+                                            @endphp
+                                            <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                        @else
+                                            @php
+                                                $statusClass = 'pending-due';
+                                            @endphp
+                                            <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                        @endif
                                     @else
                                         @php
-                                            $statusClass = 'pending-due';
+                                            $followupTime = \Carbon\Carbon::parse($followup->followup_time);
                                         @endphp
-                                        <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                        {{-- $followupTime->isToday() ||  --}}
+                                        @if($followupTime->isFuture())
+                                            @php
+                                                $statusClass = 'pending-upcoming';
+                                            @endphp
+                                            <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                        @else
+                                            @php
+                                                $statusClass = 'pending-due';
+                                            @endphp
+                                            <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                        @endif
                                     @endif
+
                                 @elseif($followup->status == 'completed')
                                     @php
                                         $statusClass = 'completed';
@@ -305,6 +357,72 @@
 
 @endsection
 
+
+@section('style')
+<style>
+    .popup-card {
+        display: none;
+        position: absolute;
+        top: 40px;
+        right: 0;
+        width: 280px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+        z-index: 9999;
+        overflow: hidden;
+        animation: fadeIn 0.3s ease;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    .popup-card-header {
+        background: linear-gradient(135deg, #0058a2, #43a1ef);
+        color: #fff;
+        padding: 5px 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-weight: 600;
+        font-size: 14px;
+    }
+
+    .popup-card-header i.close-popup {
+        cursor: pointer;
+        font-size: 16px;
+        color: #fff;
+        transition: 0.3s;
+    }
+
+    .popup-card-header i.close-popup:hover {
+        color: #ffc107;
+    }
+
+    .popup-card-body {
+        padding: 15px 16px;
+        font-size: 12px;
+        color: #444;
+    }
+
+    .popup-card-body div {
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .popup-card-body i {
+        color: #007bff;
+        font-size: 16px;
+    }
+
+    /* Animation */
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    </style>
+@endsection
+
 @section('script')
 <script>
     $(document).ready(function () {
@@ -342,6 +460,27 @@
                 $('#modal-participants-wrapper').hide();
             }
             $('#modal-time').html(timeDisplay);
+        });
+
+        $(document).on('click', '.show-popup', function (e) {
+            e.stopPropagation();
+            $('.popup-card').hide(); // hide others
+            const id = $(this).data('id');
+            $('#popup-' + id).fadeIn(200);
+        });
+
+        $(document).on('click', '.close-popup', function (e) {
+            e.stopPropagation();
+            const id = $(this).data('id');
+            $('#popup-' + id).fadeOut(200);
+        });
+
+        $(document).on('click', function () {
+            $('.popup-card').fadeOut(200);
+        });
+
+        $(document).on('click', '.popup-card', function (e) {
+            e.stopPropagation(); // prevent outside click from closing if clicking inside
         });
     });
 </script>
