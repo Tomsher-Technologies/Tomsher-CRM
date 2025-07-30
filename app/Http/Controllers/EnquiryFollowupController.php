@@ -70,13 +70,25 @@ class EnquiryFollowupController extends Controller
         } 
 
         if ($request->filled('date_range')) {
-            $date_var = array_map('trim', explode("to", $request->date_range));
+            $date = $request->date_range;
+            // $from = date('Y-m-d', strtotime(explode(" to ", $date)[0]));
+            // $to   = date('Y-m-d', strtotime(explode(" to ", $date)[1]));
+            [$fromRaw, $toRaw] = explode(" to ", $date);
 
-            $from = Carbon::createFromFormat('d-m-Y H:i:s', $date_var[0])->format('Y-m-d H:i:s');
-            $to   = Carbon::createFromFormat('d-m-Y H:i:s', $date_var[1])->format('Y-m-d H:i:s');
+            $from = Carbon::createFromFormat('d-m-Y', trim($fromRaw))->startOfDay();
+            $to   = Carbon::createFromFormat('d-m-Y', trim($toRaw))->endOfDay();
 
-            $query->where('followup_time', '>=' ,$from);
-            $query->where('followup_time', '<=' ,$to);
+            // $query->where('followup_time', '>=' ,$from);
+            // $query->where('followup_time', '<=' ,$to);
+            $query->where(function ($q) use ($from, $to) {
+                $q->where(function ($subQ) use ($from, $to) {
+                    $subQ->where('followup_type', 'meeting')
+                        ->whereBetween('followup_from', [$from, $to]);
+                })->orWhere(function ($subQ) use ($from, $to) {
+                    $subQ->where('followup_type', '!=', 'meeting')
+                        ->whereBetween('followup_time', [$from, $to]);
+                });
+            });
         }
 
         $followups = $query->orderByRaw("
