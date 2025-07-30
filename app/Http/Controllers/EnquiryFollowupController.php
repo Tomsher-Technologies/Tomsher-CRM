@@ -395,7 +395,7 @@ class EnquiryFollowupController extends Controller
             $primary = $f->enquiry->customer?->main_contact;
 
             $eventHtml = '<i class="las la-user"></i> &nbsp;' . $primary->name . '<br>' .
-             '<i class="las la-envelope"></i> &nbsp;' . $primary->email . '<br>' .
+            (!empty($primary->email) ? '<i class="las la-envelope"></i> &nbsp;' . $primary->email . '<br>' : '') .
              (!empty($primary->landline_number) ? '<i class="las la-phone"></i> &nbsp;' . $primary->landline_number . '<br>' : '') .
              (!empty($primary->mobile_number) ? '<i class="las la-mobile"></i> &nbsp;' . $primary->mobile_number . '<br>' : '') .
              (!empty($primary->whatsapp_number) ? '<i class="lab la-whatsapp"></i> &nbsp;' . $primary->whatsapp_number . '<br>' : '');
