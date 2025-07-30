@@ -101,6 +101,10 @@
                             <td><span id="modal-enquiry"></span></td>
                         </tr>
                         <tr>
+                            <td style="width:25%;"><strong>Customer Info</strong></td>
+                            <td><span id="modal-customer"></span></td>
+                        </tr>
+                        <tr>
                             <td style="width:25%;"><strong>Follow-up Type</strong></td>
                             <td><span id="modal-type" ></span></td>
                         </tr>
@@ -197,10 +201,17 @@
                 extraParams: filters
             },
             eventContent: function(info) {
+                const viewType = info.view.type; 
                 const iconHtml = info.event.extendedProps.icon ?? '';
                 const title = info.event.title;
                 const color = info.event.extendedProps.color;
-                const timeText = info.timeText;
+                 // shorten title in month view
+                const displayTitle = viewType === 'dayGridMonth' && title.length > 8
+                    ? title.substring(0, 8) + '…'
+                    : title;
+
+                const timeText = info.timeText + ' - ' + displayTitle;
+
                 const wrapper = document.createElement('div');
                 wrapper.classList.add('d-flex', 'align-items-center');
                 console.log(timeText);
@@ -226,6 +237,7 @@
 
                 document.getElementById('modal-subject').innerHTML = event.extendedProps.subject;
                 document.getElementById('modal-enquiry').innerHTML = event.extendedProps.enquiry;
+                document.getElementById('modal-customer').innerHTML = event.extendedProps.customer;
                 document.getElementById('modal-type').innerHTML = icon +' '+ event.extendedProps.type;
                 document.getElementById('modal-subtype').innerHTML = event.extendedProps.sub_type;
                 

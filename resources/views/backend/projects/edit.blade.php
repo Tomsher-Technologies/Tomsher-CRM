@@ -70,11 +70,14 @@
                     @php
                         $statuses = [
                             'pending' => ['label' => 'Pending', 'bg' => '#abe4fb', 'color' => '#000'],
+                            'project_assigned' => ['label' => 'Project Assigned', 'bg' => '#abe4fb', 'color' => '#000'],
                             'kickoff_completed' => ['label' => 'Kickoff Completed', 'bg' => '#4db2ff', 'color' => '#000'],
                             'design_stage' => ['label' => 'Design Stage', 'bg' => '#FFEB3B', 'color' => '#000'],
                             'static' => ['label' => 'Static', 'bg' => '#81f98f', 'color' => '#000'],
                             'beta' => ['label' => 'Beta', 'bg' => '#0b9c1c', 'color' => '#000'],
                             'on_hold' => ['label' => 'On Hold', 'bg' => '#FF9800', 'color' => '#000'],
+                            'ongoing' => ['label' => 'Ongoing', 'bg' => '#FF9800', 'color' => '#000'],
+                            'completed' => ['label' => 'Completed', 'bg' => '#F44336', 'color' => '#000'],
                             'canceled' => ['label' => 'Canceled', 'bg' => '#F44336', 'color' => '#000'],
                         ];
                     @endphp
@@ -306,7 +309,7 @@ calculateRemaining();
             totalPaid += totalReceived;
         });
 
-        let remainingBalance = totalWithTax - totalPaid;
+        let remainingBalance = totalCost - totalPaid;
         if(remainingBalance < 0){
             $('#remaining-amount').css('color', 'red');
         }else{

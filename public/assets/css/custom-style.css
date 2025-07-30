@@ -47,14 +47,16 @@
 .not_responding { background-color: #FF9800;  color: #000;} 
 .invalid_spam { background-color: #212121;  color: #fff;} 
 
-.pending{ background-color: #abe4fb; color: #000;}
+.pending{ background-color: #4b515352; color: #000;}
+.project_assigned{ background-color: #abe4fb; color: #000;}
 .kickoff_completed{ background-color: #4db2ff; color: #000; }
 .design_stage{ background-color: #FFEB3B; color: #000; }
-.static{ background-color: #81f98f; color: #000; }
-.beta{ background-color: #0b9c1c; color: #fff; }
-.on_hold{ background-color: #FF9800; color: #000; }
+.static{ background-color: #81f98f8a; color: #000; }
+.beta{ background-color: #05e31fb3; color: #000; }
+.on_hold{ background-color: #e85858ab; color: #000; }
+.ongoing{ background-color: #FF9800; color: #000; }
 .canceled{ background-color: #F44336; color: #fff; }
-.completed{ background-color: #079f19; color: #fff;}
+.completed{ background-color: #06a118; color: #fff;}
 
 .pending-upcoming{ background-color: #abe4fb; color: #000;}
 .pending-due{ background-color: #c50c0c; color: #fff;}

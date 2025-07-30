@@ -392,9 +392,18 @@ class EnquiryFollowupController extends Controller
                 case 'meeting': $icon = '<i class="las fs-20 la-handshake text-warning me-1"></i>'; break;
             }
 
+            $primary = $f->enquiry->customer?->main_contact;
+
+            $eventHtml = '<i class="las la-user"></i> &nbsp;' . $primary->name . '<br>' .
+             '<i class="las la-envelope"></i> &nbsp;' . $primary->email . '<br>' .
+             (!empty($primary->landline_number) ? '<i class="las la-phone"></i> &nbsp;' . $primary->landline_number . '<br>' : '') .
+             (!empty($primary->mobile_number) ? '<i class="las la-mobile"></i> &nbsp;' . $primary->mobile_number . '<br>' : '') .
+             (!empty($primary->whatsapp_number) ? '<i class="lab la-whatsapp"></i> &nbsp;' . $primary->whatsapp_number . '<br>' : '');
+
+          
             return [
                 'id' => $f->id,
-                'title' => $f->enquiry->enquiry_code ?? '',
+                'title' => $f->enquiry->customer->company_name ?? '',
                 'start' => $f->followup_type === 'meeting' ? $f->followup_from : $f->followup_time,
                 'end'   => $f->followup_type === 'meeting' ? $f->followup_to : null,
                 'color' => $color,
@@ -413,7 +422,8 @@ class EnquiryFollowupController extends Controller
                     'color' => $color,
                     'created_by' => $f->added_by->name ?? '',
                     'created_by_user' => $f->created_by,
-                    'participants' => $f->participants->where('pivot.is_main', false)->pluck('name')->join(', ')
+                    'participants' => $f->participants->where('pivot.is_main', false)->pluck('name')->join(', '),
+                    'customer' => $eventHtml
                 ]
             ];
         });
