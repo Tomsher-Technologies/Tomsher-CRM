@@ -138,7 +138,7 @@ class ProjectController extends Controller
         }
 
         $project->paid_amount = $total_paid_amount;
-        $project->pending_amount = ($request->project_total_cost + ($request->project_total_cost * 0.05)) - $total_paid_amount; // 5% tax included
+        $project->pending_amount = $request->project_total_cost - $total_paid_amount; // 5% tax included
         $project->save();
 
         // Check if status has changed
@@ -232,7 +232,7 @@ class ProjectController extends Controller
         }
 
         $project->paid_amount = $total_paid_amount;
-        $project->pending_amount = ($request->project_total_cost + ($request->project_total_cost * 0.05)) - $total_paid_amount; // 5% tax included
+        $project->pending_amount = ($request->project_total_cost) - $total_paid_amount; // 5% tax included
         $project->save();
 
         // Check if status has changed
