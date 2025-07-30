@@ -92,13 +92,14 @@
                                 $proposalItems = $history->proposalItems()->get();
                             @endphp
                             <br>
-                            <table class="table table-bordered aiz-table w-50 mt-2">
+                            <table class="table table-bordered aiz-table w-75 mt-2">
                                 <thead>
                                     <tr>
-                                        <th class="text-center">#</th>
-                                        <th class="text-center">Cost</th>
-                                        <th class="text-center">Internal Days</th>
-                                        <th class="text-center">Client Days</th>
+                                        <th class="text-center w-10">#</th>
+                                        <th class="text-start w-50">Title</th>
+                                        <th class="text-center w-20">Cost</th>
+                                        <th class="text-center w-10">Internal Days</th>
+                                        <th class="text-center w-10">Client Days</th>
                                     </tr>
                                 </thead>
                                 <tbody>
@@ -108,6 +109,7 @@
                                     @endphp
                                         <tr style="{{ $selected }}">
                                             <td class="text-center">{{ $it+1 }}</td>
+                                            <td class="text-start">{{ $items->title }}</td>
                                             <td class="text-center">{{ $items->cost }}</td>
                                             <td class="text-center">{{ $items->internal_days }}</td>
                                             <td class="text-center">{{ $items->client_days }}</td>
