@@ -41,7 +41,7 @@
             <!-- Time Range -->
             <div class="col-md-4 mb-1">
                 <label>Date</label>
-                <input type="text" class="form-control form-control-sm aiz-date-range" name="date_range" placeholder="Select Date" data-time-picker="true" data-format="DD-MM-Y HH:mm:ss" data-separator=" to " autocomplete="off"  value="{{ $date_range }}">
+                <input type="text" class="form-control form-control-sm aiz-date-range" name="date_range" placeholder="Select Date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off"  value="{{ $date_range }}">
             </div>
 
             <!-- Type Filter -->
