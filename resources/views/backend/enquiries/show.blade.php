@@ -1,34 +1,66 @@
 @extends('backend.layouts.app',['title' => 'Show Enquiry'])
 @section('content')
+<style>
+    .primary-contact{
+        border: 2px solid #0abb75 !important;
+    }
+    .info-label {
+        font-weight: 600;
+        color: #000;
+        font-size: 14px;
+        margin-bottom: 4px;
+    }
+    .info-value {
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 16px;
+    }
+    .section-title {
+        font-size: 14px;
+        font-weight: 600;
+        color: #2c3e50;
+        border-left: 5px solid #0d6efd;
+        padding-left: 12px;
+        margin-bottom: 15px;
+    }
+    .info-box {
+        background-color: #fff;
+        padding: 10px;
+        border-radius: 10px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    }
+</style>
+
 <div class="container">
     <div class="card shadow mb-4">
         <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-            <h4 class="mb-0">Enquiry Details</h4>
+            <h5 class="mb-0">Enquiry Details</h5>
             <a href="{{ Session::has('enquiries_last_url') ? Session::get('enquiries_last_url') : route('enquiries.index') }}" class="btn btn-light btn-sm">Back to List</a>
         </div>
 
         <div class="card-body">
             <div class="row mb-4">
                 <div class="col-md-6">
-                    <h6 class="text-muted">Customer</h6>
-                    <p class="mb-2"><strong>{{ $enquiry->customer->company_name.' ['.$enquiry->customer->customer_code.']' }}</strong></p>
+                    <div class="text-muted">Customer</div>
+                    <div class="mb-1"><strong>{{ $enquiry->customer->company_name.' ['.$enquiry->customer->customer_code.']' }}</strong></div>
 
-                    <h6 class="text-muted">Enquiry Date</h6>
-                    <p class="mb-2">{{ $enquiry->enquiry_date ? \Carbon\Carbon::parse($enquiry->enquiry_date)->format('d M Y') : '-' }}</p>
+                    <div class="text-muted">Enquiry Date</div>
+                    <div class="mb-1">{{ $enquiry->enquiry_date ? \Carbon\Carbon::parse($enquiry->enquiry_date)->format('d M Y') : '-' }}</div>
 
-                    <h6 class="text-muted">Enquiry Source</h6>
-                    <p class="mb-2">{{ $enquiry->source->name ?? '-' }}</p>
+                    <div class="text-muted">Enquiry Source</div>
+                    <div class="mb-1">{{ $enquiry->source->name ?? '-' }}</div>
 
-                    <h6 class="text-muted">Enquiry Owner</h6>
-                    <p class="mb-2">{{ $enquiry->owner->name ?? '-' }}</p>
+                    <div class="text-muted">Enquiry Owner</div>
+                    <div class="mb-1">{{ $enquiry->owner->name ?? '-' }}</div>
                 </div>
 
                 <div class="col-md-6">
-                    <h6 class="text-muted">Added By</h6>
-                    <p class="mb-2">{{ $enquiry->addedBy->name ?? '-' }}</p>
+                    <div class="text-muted">Added By</div>
+                    <div class="mb-1">{{ $enquiry->addedBy->name ?? '-' }}</div>
 
-                    <h6 class="text-muted">Status</h6>
-                    <p class="mb-2">
+                    <div class="text-muted">Status</div>
+                    <div class="mb-1">
                         @php
                             $statuses = getEnquiryStatuses();
                         @endphp
@@ -36,9 +68,9 @@
                             {{ ucfirst(str_replace('_', ' ', $enquiry->status)) }}
                         </span>
                     
-                    </p>
+                    </div>
 
-                    <h6 class="text-muted">Project Categories</h6>
+                    <div class="text-muted">Project Categories</div>
                     @if($enquiry->projectTypes->count())
                         <ul class="list-unstyled">
                             @foreach($enquiry->projectTypes as $type)
@@ -46,12 +78,8 @@
                             @endforeach
                         </ul>
                     @else
-                        <p class="text-muted">-</p>
+                        <div class="text-muted">-</div>
                     @endif
-
-                   
-
-                    
                 </div>
             </div>
 
@@ -61,16 +89,126 @@
             <p>{!! nl2br(e($enquiry->project_details)) !!}</p>
 
             @if($enquiry->comments)
-                <h6 class="mt-4 mb-3">Internal Comments</h6>
-                <p class="text-muted">{!! nl2br(e($enquiry->comments)) !!}</p>
+                <div class="mt-4 mb-3">Internal Comments</div>
+                <div class="text-muted">{!! nl2br(e($enquiry->comments)) !!}</div>
             @endif
-
             <hr>
             <p class="text-right text-muted">
                 <small>Last updated on {{ $enquiry->updated_at->format('d M Y h:i A') }}</small>
             </p>
+
+            <div class="info-box">
+                <div class="section-title"><i class="fas fa-building me-1"></i> Company Information</div>
+                <div class="row gy-4">
+                    <div class="col-md-4">
+                        <div class="text-muted">Customer Code</div>
+                        <div class="mb-1">{{ $enquiry->customer->customer_code }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Company Name</div>
+                        <div class="mb-1">{{ $enquiry->customer->company_name }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Company Email</div>
+                        <div class="mb-1">{{ $enquiry->customer->company_email ?? 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Industry</div>
+                        <div class="mb-1">{{ $enquiry->customer->industry->name ?? 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Website</div>
+                        <div class="mb-1">
+                            @if($enquiry->customer->website_link)
+                                <a href="{{ $enquiry->customer->website_link }}" target="_blank">{{ $enquiry->customer->website_link }}</a>
+                            @else
+                                N/A
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Registered Country</div>
+                        <div class="mb-1">{{ $enquiry->customer->country->name ?? 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Emirate</div>
+                        <div class="mb-1">{{ $enquiry->customer->uae_emirate->name ?? 'N/A' }}</div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">New to Company</div>
+                        <div class="mb-1">
+                            @if($enquiry->customer->ntc)
+                                <span class="badge bg-success badge-md">Yes</span>
+                            @else
+                                <span class="badge bg-warning badge-md">No</span>
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Google Map</div>
+                        <div class="mb-1">
+                            @if($enquiry->customer->google_location)
+                                <a href="{{ $enquiry->customer->google_location }}" target="_blank" class="text-primary">View Location</a>
+                            @else
+                                N/A
+                            @endif
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="text-muted">Address</div>
+                        <div class="mb-1">{{ $enquiry->customer->company_address ?? 'N/A' }}</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Contact Persons -->
+            <div class="info-box">
+                <div class="section-title"><i class="fas fa-users me-1"></i> Contact Persons</div>
+                <div class="row g-2">
+                    @forelse($enquiry->customer->contacts as $contact)
+                        <div class="col-md-6 mt-2">
+                            <div class="bg-white border rounded px-4 py-2 shadow-sm h-100 {{ ($contact->is_primary == 1) ? 'primary-contact' : ''}}">
+                                <div class="row gy-2">
+                                    <div class="col-md-6">
+                                        <div class="text-muted">Name 
+                                            @if($contact->is_primary)
+                                                <span class="badge bg-success badge-inline badge-sm ml-1 text-white">Primary</span>
+                                            @endif
+                                        </div>
+                                        <div class="mb-1">{{ $contact->name }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted">Email</div>
+                                        <div class="mb-1">{{ $contact->email ?? 'N/A' }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted">Landline</div>
+                                        <div class="mb-1">{{ $contact->landline_number ?? 'N/A' }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted">Mobile</div>
+                                        <div class="mb-1">{{ $contact->mobile_number ?? 'N/A' }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted">WhatsApp</div>
+                                        <div class="mb-1">{{ $contact->whatsapp_number ?? 'N/A' }}</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="text-muted">Designation</div>
+                                        <div class="mb-1">{{ $contact->designation ?? 'N/A' }}</div>
+                                    </div>
+                                    
+                                </div>
+                            </div>
+                        </div>
+                    @empty
+                        <p class="text-muted">No contact persons added yet.</p>
+                    @endforelse
+                </div>
+            </div>
         </div>
     </div>
+
+    
 
     <div class="card">
         <div class="card-header">
