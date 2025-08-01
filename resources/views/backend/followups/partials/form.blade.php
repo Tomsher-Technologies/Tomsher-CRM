@@ -55,7 +55,7 @@
 <!-- Time -->
 <div class="form-group  col-12" id="followup-time-group" style="{{ old('followup_type', $followup->followup_type) != 'meeting' ? '' : 'display: none;' }}">
     <label>Time <span class="text-danger">*</span></label>
-    <input type="text" name="followup_time" id="followup_time" class="form-control form-control-sm" value="{{ old('followup_time', isset($followup) ? \Carbon\Carbon::parse($followup->followup_time)->format('Y-m-d h:i:s') : '') }}">
+    <input type="text" name="followup_time" id="followup_time" class="form-control form-control-sm" value="{{ old('followup_time', isset($followup) ? \Carbon\Carbon::parse($followup->followup_time)->format('Y-m-d H:i:s') : '') }}">
     @error('followup_time')
         <span class="text-danger">{{$message}}</span>
     @enderror
@@ -64,7 +64,7 @@
 <div class="form-group col-6" id="meeting-from-group" style="{{ old('followup_type', $followup->followup_type) == 'meeting' ? '' : 'display: none;' }}">
     <label>Meeting From <span class="text-danger">*</span></label>
     <input type="datetime-local" name="followup_from" id="followup_from" class="form-control form-control-sm"
-           value="{{ old('followup_from', (($followup->followup_from != NULL) ? \Carbon\Carbon::parse($followup->followup_from)->format('Y-m-d h:i:s') : '')) }}"/>
+           value="{{ old('followup_from', (($followup->followup_from != NULL) ? \Carbon\Carbon::parse($followup->followup_from)->format('Y-m-d H:i:s') : '')) }}"/>
     @error('followup_from')
         <span class="text-danger">{{$message}}</span>
     @enderror
@@ -73,7 +73,7 @@
 <div class="form-group col-6" id="meeting-to-group" style="{{ old('followup_type', $followup->followup_type) == 'meeting' ? '' : 'display: none;' }}">
     <label>Meeting To <span class="text-danger">*</span></label>
     <input type="datetime-local" name="followup_to" id="followup_to" class="form-control form-control-sm"
-           value="{{ old('followup_to', (($followup->followup_to != NULL) ? \Carbon\Carbon::parse($followup->followup_to)->format('Y-m-d h:i:s') : '')) }}"/>
+           value="{{ old('followup_to', (($followup->followup_to != NULL) ? \Carbon\Carbon::parse($followup->followup_to)->format('Y-m-d H:i:s') : '')) }}"/>
     @error('followup_to')
         <span class="text-danger">{{$message}}</span>
     @enderror
