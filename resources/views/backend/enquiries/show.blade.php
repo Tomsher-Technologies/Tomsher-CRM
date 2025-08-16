@@ -333,7 +333,16 @@
                                 <td class="text-center">{{ $key+1 }}</td>
                                 <td class="text-center">{!! $icon !!} {{ ucfirst($followup->followup_type) }}</td>
                                 <td class="text-center">{{ ucfirst($followup->sub_type) }}</td>
-                                <td class="text-center">{{ \Carbon\Carbon::parse($followup->followup_time)->format('d M Y, h:i A') }}</td>
+                                <td class="text-center">
+                                    
+                                     @if ($followup->followup_type === 'meeting')
+                                        <div><strong>From:</strong> {{ \Carbon\Carbon::parse($followup->followup_from)->format('d, M Y h:i A') }}</div>
+                                        <div><strong>To:</strong> {{ \Carbon\Carbon::parse($followup->followup_to)->format('d, M Y h:i A') }}</div>
+                                    @else
+                                        <div>{{ \Carbon\Carbon::parse($followup->followup_time)->format('d, M Y h:i A') }}</div>
+                                    @endif
+
+                                </td>
                                 <td>{{ $followup->subject }}</td>
                                 <td>{{ $followup->location ?? '-' }}</td>
                                 <td class="text-center">
