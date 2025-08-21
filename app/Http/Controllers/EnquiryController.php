@@ -80,7 +80,7 @@ class EnquiryController extends Controller
             $query->where('owner_id', auth()->user()->id);
         } 
         
-        $enquiries = $query->orderBY('created_at','desc')->paginate(15);
+        $enquiries = $query->orderBY('created_at','desc')->paginate(30);
         return view('backend.enquiries.index', compact('enquiries','customers', 'sources', 'projectTypes','users'));
     }
 
