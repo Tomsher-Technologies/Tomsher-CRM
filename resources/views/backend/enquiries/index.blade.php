@@ -113,6 +113,23 @@
                     <a href="{{ route('enquiries.index') }}" class="btn btn-secondary w-100  ml-1">Reset</a>
                 </div>
             </form>
+            
+            <div class="d-flex flex-wrap">
+                <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
+                    <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
+                </div>
+                <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
+                    <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
+                </div>
+                <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
+                    <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
+                </div>
+            </div>
+
+
             <table class="table aiz-table table-bordered mb-0">
                 <thead>
                     <tr>
@@ -133,8 +150,20 @@
                         @foreach ($enquiries as $key => $enquiry)
                             @php
                                 $pendingFollowups = getDueFutureFollowups($enquiry->id);
+
+                                $backGroundColor = '';
+                                if($pendingFollowups != 0){
+                                    $backGroundColor = '#ffdc2812';
+                                }else{
+
+                                    if(in_array($enquiry->status, ['project_rejected','not_interested','not_responding','invalid_spam']) ){
+                                        $backGroundColor = '#d3d3d36e';
+                                    }elseif ($enquiry->status === 'project_approved') {
+                                        $backGroundColor = '#90ee903b';
+                                    }
+                                }
                             @endphp
-                            <tr @if ($pendingFollowups != 0)  style="background:#ffdc2812" @endif>
+                            <tr style="background-color:{{ $backGroundColor }}" data-id="{{ $enquiry->status }}">
                                 <td class="text-center">{{ $key + 1 + ($enquiries->currentPage() - 1) * $enquiries->perPage() }}
                                 </td>
                                 <td>{{ $enquiry->enquiry_code ?? '' }}</td>
