@@ -10,7 +10,7 @@
         </div>
         <div class="card-body">
             <!-- Filter Form -->
-            <form method="GET" class="row g-3 mb-4">
+            <form method="GET" class="row g-3">
                 <div class="col-md-3 mb-1">
                     <select name="customer_id" class="form-control  form-control-sm aiz-selectpicker" data-live-search="true">
                         <option value="">All Customers</option>
@@ -114,22 +114,6 @@
                 </div>
             </form>
             
-            <div class="d-flex flex-wrap">
-                <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
-                </div>
-                <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
-                </div>
-                <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
-                </div>
-            </div>
-
-
             <table class="table aiz-table table-bordered mb-0">
                 <thead>
                     <tr>
@@ -267,6 +251,21 @@
                 @can('view_enquiries')
                     {{ $enquiries->appends(request()->input())->links('pagination::bootstrap-5') }}
                 @endcan
+            </div>
+
+            <div class="d-flex flex-wrap mt-4">
+                <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
+                    <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
+                </div>
+                <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
+                    <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
+                </div>
+                <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
+                    <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
+                </div>
             </div>
         </div>
     </div>
