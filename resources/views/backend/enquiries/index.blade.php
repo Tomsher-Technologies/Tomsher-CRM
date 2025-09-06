@@ -158,6 +158,13 @@
                                             <i class="las la-info-circle fs-16 text-primary" style="cursor: pointer;"></i>
                                         </a>
                                     </div>
+                                    @if($enquiry->projectTypes->count())
+                                        <ul style="font-size: 10px;" class="pl-3 mb-0 mt-1 text-muted">
+                                            @foreach($enquiry->projectTypes as $type)
+                                                <li > {{ $type->name }}</li>
+                                            @endforeach
+                                        </ul>
+                                    @endif
 
                                     @php $primary = $enquiry->customer->main_contact; @endphp
                                     <!-- Stylish Popup -->
