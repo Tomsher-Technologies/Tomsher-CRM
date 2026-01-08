@@ -12,6 +12,9 @@ use App\Models\EnquiryTransferHistory;
 use App\Models\EnquiryFollowup;
 use App\Models\Project;
 use App\Models\EnquiryProposalItem;
+use App\Models\EnquiryScopeOfWork;
+use App\Models\EnquiryScopeHistory;
+use App\Models\EnquiryScopeComment;
 use App\Models\SalespersonAssignment;
 use Illuminate\Http\Request;
 
@@ -32,6 +35,7 @@ class EnquiryController extends Controller
     {
         $request->session()->put('enquiries_last_url', url()->full());
         $request->session()->put('previous_section', 'enquiry');
+        $request->session()->put('enquiry_scopes_last_url', url()->full());
 
         $customers = Customer::orderBy('company_name', 'asc')->get();
         $sources = EnquirySource::orderBy('name', 'asc')->get();
@@ -102,7 +106,7 @@ class EnquiryController extends Controller
             'enquiry_source_id' => 'required|exists:enquiry_sources,id',
             'project_details' => 'required|string',
             'source_mode' => 'required',
-            'status' => 'nullable|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam',
+            'status' => 'nullable|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,ongoing_discussion,preparing_scope',
             'comments' => 'nullable|string'
         ]);
 
@@ -238,11 +242,23 @@ class EnquiryController extends Controller
         }
        
         flash('Enquiry updated successfully.')->success();
-        return redirect()->route('enquiries.index');
+
+        $previous = $request->session()->get('previous_section');
+
+        if($previous === 'enquiry_view'){
+            $route = $request->session()->get('enquiry_view_last_url');
+            return redirect($route);
+        }else{
+            $route = $request->session()->get('enquiries_last_url');
+            return redirect($route);
+        }
     }
 
-    public function show(Enquiry $enquiry)
+    public function show(Request $request, Enquiry $enquiry)
     {
+        $request->session()->put('previous_section', 'enquiry_view');
+        $request->session()->put('enquiry_view_last_url', url()->full());
+
         $enquiry = Enquiry::with(['followups' => function($query) {
             $query->orderBy('followup_time', 'asc');
         }])->findOrFail($enquiry->id);
@@ -259,14 +275,26 @@ class EnquiryController extends Controller
     {
         $request->validate([
             'enquiry_id' => 'required|exists:enquiries,id',
-            'status' => 'required|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,signed_payment_pending',
+            'status' => 'required|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,signed_payment_pending,ongoing_discussion,preparing_scope',
             'status_date' => 'required|date',
             'comment' => 'nullable|string',
             // 'submitted_cost' => 'required_if:status,proposal_submitted|nullable|numeric',
             'approved_cost' => 'required_if:status,project_approved|nullable|numeric',
+
+            'scope_title' => 'required_if:status,preparing_scope|nullable|string|max:255',
+            'scope_content' => 'required_if:status,preparing_scope|nullable|string',
         ]);
 
         $enquiry = Enquiry::findOrFail($request->enquiry_id);
+
+        if($enquiry->status == 'preparing_scope' && $request->status != 'preparing_scope'){
+            $scope = EnquiryScopeOfWork::where('enquiry_id', $enquiry->id)->first();
+            if($scope){
+                $scope->update([
+                    'status' => 'closed'
+                ]);
+            }
+        }
         $enquiry->update([
             'status' => $request->status,
             'updated_by' => auth()->id()
@@ -331,6 +359,51 @@ class EnquiryController extends Controller
             $enquiry->save();
         }
 
+        if ($request->status === 'preparing_scope') {
+
+            $scope = EnquiryScopeOfWork::where('enquiry_id', $enquiry->id)->first();
+
+            if ($scope) {
+                if ($scope->scope_content !== $request->scope_content) {
+                    EnquiryScopeHistory::create([
+                        'scope_of_work_id' => $scope->id,
+                        'scope_content' => $request->scope_content,
+                        'edited_by' => auth()->id(),
+                    ]);
+                }
+
+                if($scope->sales_comment != $request->comment){
+                    $scope->comments()->create([
+                        'comment'    => $request->comment,
+                        'is_sales_team' => 1,
+                        'commented_by' => auth()->id(),
+                    ]);
+                }
+
+                $scope->update([
+                    'title' => $request->scope_title,
+                    'status' => 'open',
+                    'scope_content' => $request->scope_content,
+                    'sales_comment' => $request->comment,
+                    'updated_by' => auth()->id(),
+                ]);
+            }else {
+                $scope = EnquiryScopeOfWork::create([
+                    'enquiry_id' => $enquiry->id,
+                    'title' => $request->scope_title,
+                    'scope_content' => $request->scope_content,
+                    'sales_comment' => $request->comment,
+                    'created_by' => auth()->id(),
+                ]);
+
+                $scope->comments()->create([
+                    'comment'    => $request->comment,
+                    'is_sales_team' => 1,
+                    'commented_by' => auth()->id(),
+                ]);
+            }
+        }
+
         flash('Enquiry status updated successfully.')->success();
         return response()->json(['success' => true]);
     }
@@ -349,6 +422,10 @@ class EnquiryController extends Controller
                 $query->where('status', 1);  // Filter proposal items where status is 1
              }])->findOrFail($id);
         }
+
+        if($status == 'preparing_scope'){
+            $scope = EnquiryScopeOfWork::where('enquiry_id', $id)->first();
+        }
         
         $enquiryStatusData = EnquiryStatusHistory::where('enquiry_id', $id)->where('status', $status)->orderBy('id','desc')->first();
         return response()->json([
@@ -356,7 +433,9 @@ class EnquiryController extends Controller
             'comment' => $enquiryStatusData->comment ?? '',
             'status_date' => $enquiryStatusData->status_date ?? date('Y-m-d'),
             'status' => $status,
-            'approved_cost' => $enquiryStatusData->approved_cost ?? 0
+            'approved_cost' => $enquiryStatusData->approved_cost ?? 0,
+            'scope_title' => $scope->title ?? '',
+            'scope_content' => $scope->scope_content ?? ''
         ]);
     }
 

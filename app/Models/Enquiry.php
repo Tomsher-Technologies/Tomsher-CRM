@@ -60,4 +60,10 @@ class Enquiry extends Model
     {
         return $this->hasMany(EnquiryProposalItem::class);
     }
+
+
+    public function scopeOfWork()
+    {
+        return $this->hasOne(EnquiryScopeOfWork::class);
+    }
 }

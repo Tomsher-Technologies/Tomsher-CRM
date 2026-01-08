@@ -140,6 +140,8 @@
                         <a href="{{ Session::has('enquiries_last_url') ? Session::get('enquiries_last_url') : route('enquiries.index') }}" class="btn btn-info mt-3" >Cancel</a>
                     @elseif (Session::has('previous_section') && Session::get('previous_section') === 'followup')
                         <a href="{{ Session::has('followups_last_url') ? Session::get('followups_last_url') : route('followups.index') }}" class="btn btn-info mt-3" >Cancel</a>
+                    @elseif (Session::has('previous_section') && Session::get('previous_section') === 'enquiry_view')
+                        <a href="{{ Session::has('enquiry_view_last_url') ? Session::get('enquiry_view_last_url') : route('enquiries.index') }}" class="btn btn-info mt-3" >Cancel</a>
                     @else
                         <a href="{{ route('followups.index') }}" class="btn btn-info mt-3" >Cancel</a>
                     @endif
