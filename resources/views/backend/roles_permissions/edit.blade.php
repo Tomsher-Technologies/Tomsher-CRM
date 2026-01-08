@@ -38,7 +38,7 @@
                                     <label class="parent-label checkbox-label">
                                         <input type="checkbox" name="permissions[]" value="{{ $parent->name }}"
                                             class="parent-checkbox  demo-sw" {{ $selected }} data-parent="{{ $parent->name }}">
-                                        {{ $parent->title }}
+                                        <span class="mleft5">{{ $parent->title }}</span>
                                     </label>
                                 
                                     <div class="child-container mt-3" style="margin-left: 20px;">
@@ -52,7 +52,7 @@
                                             <label class="child-label checkbox-label">
                                                 <input type="checkbox" name="permissions[]" value="{{ $child->name }}"
                                                     class="child-checkbox  demo-sw" {{ $selectedChild }} data-parent="{{ $parent->name }}">
-                                                {{ $child->title }}
+                                                <span class="mleft5">{{ $child->title }}</span>
                                             </label>
                                         @endforeach
                                     </div>
@@ -107,7 +107,7 @@
     /* Style for parent checkboxes */
     .parent-label {
         font-weight: bold;
-        font-size: 14px;
+        font-size: 12px;
         display: flex;
         align-items: center;
         /* margin-bottom: 5px; */
@@ -126,10 +126,14 @@
         gap: 10px;
     }
 
+    .mleft5{
+        margin-left: 5px;
+    }
+
     /* Custom styled checkboxes */
     input[type="checkbox"] {
-        width: 18px;
-        height: 18px;
+        width: 15px;
+        height: 15px;
         margin-right: 2px;
         cursor: pointer;
     }

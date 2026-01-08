@@ -193,7 +193,11 @@ class EnquiryFollowupController extends Controller
         $previous = $request->session()->get('previous_section');
 
         if($previous === 'enquiry'){
-            return redirect()->route('enquiries.index');
+            $route = $request->session()->get('enquiries_last_url');
+            return redirect($route);
+        }elseif($previous === 'enquiry_view'){
+            $route = $request->session()->get('enquiry_view_last_url');
+            return redirect($route);
         }else{
             return redirect()->route('followups.index');
         }

@@ -123,7 +123,7 @@
                         <th class="text-center">Enquiry Source</th>
                         {{-- <th>Project Category</th> --}}
                         <th>Source Mode</th>
-                        <th class="text-center">Status</th>
+                        <th class="text-center">Current Status</th>
                         <th class="text-center">Enquiry Date</th>
                         <th class="text-center">Enquiry Owner</th>
                         <th  style="width:15%;" class="text-center">Actions</th>
@@ -222,27 +222,36 @@
                                 <td class="text-center">{{ $enquiry->owner->name ?? '' }}</td>
                                 <td class="text-center">
                                     <a href="{{ route('enquiries.show', $enquiry) }}"
-                                        class="btn btn-soft-warning btn-sm btn-icon btn-circle mt-1" title="View enquiry details">
-                                        <i class="las la-eye"></i>
+                                        class="btn btn-soft-warning btn-sm btn-icon btn-circle m-auto" title="View enquiry details">
+                                        <i class="las la-eye" style="margin-top: 3px;"></i>
                                     </a>
 
                                     @can('edit_enquiries')
                                         <a href="{{ route('enquiries.edit', $enquiry) }}"
-                                            class="btn btn-soft-success btn-sm btn-icon btn-circle mt-1" title="Edit enquiry details">
-                                            <i class="las la-edit"></i>
+                                            class="btn btn-soft-success btn-sm btn-icon btn-circle m-auto" title="Edit enquiry details">
+                                            <i class="las la-edit" style="margin-top: 3px;"></i>
                                         </a>
                                     @endcan
 
-                                    <a href="javascript:void(0)" class="btn-change-status-icon btn btn-sm btn-icon btn-circle change-status-btn mt-1" data-id="{{ $enquiry->id }}" data-status="{{ $enquiry->status }}" title="Change Status">
-                                        <i class="las la-exchange-alt"></i>
+                                    <a href="javascript:void(0)" class="btn-change-status-icon btn btn-sm btn-icon btn-circle change-status-btn m-auto" data-id="{{ $enquiry->id }}" data-status="{{ $enquiry->status }}" title="Change Status">
+                                        <i class="las la-exchange-alt" style="margin-top: 2px;"></i>
                                     </a>
 
                                     @can('add_followups')
                                         <!-- Follow-up icon with tooltip -->
-                                        <a href="{{ route('followups.create', $enquiry->id) }}" title="Add Follow-up" class="btn btn-soft-secondary btn-sm btn-icon btn-circle mt-1">
-                                            <i class="las la-calendar-plus"></i>
+                                        <a href="{{ route('followups.create', $enquiry->id) }}" title="Add Follow-up" class="btn btn-soft-secondary btn-sm btn-icon btn-circle m-auto">
+                                            <i class="las la-calendar-plus" style="margin-top: 2px;"></i>
                                         </a>
                                     @endcan
+
+                                    @if($enquiry->scopeOfWork)
+                                        <!-- Scope of Work button -->
+                                        <a href="{{ route('enquiry-scopes.show', $enquiry->scopeOfWork->id) }}" 
+                                        class="btn btn-soft-info btn-sm btn-icon btn-circle m-auto" 
+                                        title="View Scope of Work">
+                                            <i class="las la-file-alt" style="margin-top: 3px;"></i>
+                                        </a>
+                                    @endif
 
                                     {{-- <form action="{{ route('enquiries.destroy', $enquiry) }}" method="POST" style="display:inline-block;">
                                     @csrf @method('DELETE')
@@ -283,6 +292,7 @@
             <form id="status-change-form" action="{{ route('enquiries.changeStatus') }}" method="POST">
                 @csrf
                 <input type="hidden" name="enquiry_id" id="status-enquiry-id">
+                <input type="hidden" id="original-status">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h5 class="modal-title">Change Enquiry Status</h5>
@@ -293,7 +303,7 @@
                         <div id="status-modal-errors" class="alert alert-danger" style="display:none;"></div>
 
                         <div class="form-group">
-                            <label>Status</label>
+                            <label ><b>Status</b></label>
                             <select name="status" id="enquiry-status-select" class="form-control form-control-sm aiz-selectpicker" data-live-search="true" required>
                                 <option value="">Select</option>
                                 @foreach ($statuses as $key => $data)
@@ -312,17 +322,25 @@
                         </div>
 
                         <div class="form-group">
-                            <label>Status Date</label>
+                            <label><b> Date</b></label>
                             <input type="date" name="status_date" id="status_date" class="form-control form-control-sm status_date" required>
                         </div>
 
+                        <div class="form-group d-none" id="preparing-scope-section">
+                            <label class="mt-2"><b>Scope Title</b></label>
+                            <input type="text" name="scope_title"  id="scope_title" class="form-control form-control-sm">
+
+                            <label class="mt-2"><b>Scope of Work</b></label>
+                            <textarea name="scope_content" id="scope_content" class="aiz-text-editor form-control form-control-sm" rows="4"></textarea>
+                        </div>
+
                         <div class="form-group">
-                            <label>Comment</label>
+                            <label><b>Comment</b></label>
                             <textarea name="comment" id="statusComment" class="form-control form-control-sm"></textarea>
                         </div>
 
                         <div class="form-group d-none" id="proposal-items-section">
-                            <h6>Proposal Items</h6>
+                            <h6><b>Proposal Items</b></h6>
                             <div id="proposal-items-wrapper" class="px-3">
                                 {{-- <div class="proposal-item row mb-2">
                                     <div class="col-md-12 mt-1">
@@ -351,14 +369,14 @@
                         </div>
 
                         <div class="form-group d-none" id="proposal-items-section-approved">
-                            <h6>Submitted Proposal Items</h6>
+                            <h6><b>Submitted Proposal Items</b></h6>
                             <div id="proposal-items-approved-wrapper" class="px-3">
 
                             </div>
                         </div>
 
                         <div class="form-group d-none" id="approved-cost-field">
-                            <label>Approved Cost</label>
+                            <label><b>Approved Cost</b></label>
                             <input type="number" step="0.01" name="approved_cost" id="approved_cost" class="form-control form-control-sm">
                         </div>
                     </div>
@@ -480,6 +498,8 @@
 @endsection
 
 @section('script')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script>
    $(document).ready(function () {
         // Trigger modal and prefill status
@@ -494,6 +514,7 @@
             $('.status_date').val(statusDate);
             $('textarea[name="comment"]').val(comment);
             $('#status-modal-errors').hide().html('');
+            $('#original-status').val(currentStatus);
 
             $('#statusChangeModal').modal('show');
         });
@@ -503,7 +524,10 @@
         // Show/Hide conditional fields
         $('#enquiry-status-select').on('change', function () {
             const selectedStatus = $(this).val();
+
             $('#approved-cost-field').addClass('d-none');
+            $('#preparing-scope-section').addClass('d-none');
+
             if (selectedStatus === 'proposal_submitted') {
                 // Show the proposal section
                 $('#proposal-items-section').removeClass('d-none');
@@ -512,6 +536,11 @@
                 $('#proposal-items-section-approved').addClass('d-none');
             } else {
                 $('#proposal-items-section').addClass('d-none');
+                $('#proposal-items-section-approved').addClass('d-none');
+            }
+
+            if (selectedStatus === 'preparing_scope') {
+                $('#preparing-scope-section').removeClass('d-none');
             }
 
             const enquiryId = $('#status-enquiry-id').val();
@@ -522,10 +551,15 @@
                 const comment = response.comment;
                 const status_date = response.status_date;
                 const approvedCost = response.approved_cost;
+                const scope_content = response.scope_content;
+                const scope_title = response.scope_title;
 
                 $('#statusComment').val(comment);
                 $('#status_date').val(status_date);
                 $('#approved_cost').val(approvedCost);
+                $('#scope_title').val(scope_title);
+                $('#scope_content').summernote('code', scope_content);
+
                 if (selectedStatus === 'proposal_submitted') {
                     if (items.length === 0) {
                         addProposalItem(); // add one empty by default
@@ -535,6 +569,8 @@
                             proposalItemIndex = index + 1;
                         });
                     }
+                }else{
+                    $('#proposal-items-wrapper').empty();
                 }
 
                 if(selectedStatus == 'project_approved'){
@@ -614,6 +650,7 @@
             `;
         }
         // Submit via AJAX
+        let pendingSubmit = false;
         $('#status-change-form').on('submit', function (e) {
             e.preventDefault();
             const form = $(this);
@@ -621,15 +658,53 @@
             const data = form.serialize();
             var flag = true;
 
+            const originalStatus = $('#original-status').val();
             var selectedStatus = $('#enquiry-status-select').val();
+
+            if (originalStatus === selectedStatus && !pendingSubmit) {
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'The selected status is the same as the current status. Do you want to continue?',
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, continue',
+                    cancelButtonText: 'Cancel',
+                    reverseButtons: true
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        pendingSubmit = true;
+                        $('#status-change-form').submit();
+                    }
+                });
+                return;
+            }
+
+            pendingSubmit = false;
+
             if(selectedStatus == 'project_approved'){
-                let selectedId = $('input[name="selected_proposal_item_id"]:checked').val();
-                if (!selectedId) {
-                    e.preventDefault();
-                    AIZ.plugins.notify('danger', "Please select a proposal item.");
+                let proposalItemsExist = $('input[name="selected_proposal_item_id"]').length > 0;
+
+                if (proposalItemsExist) {
+                    let selectedId = $('input[name="selected_proposal_item_id"]:checked').val();
+
+                    if (!selectedId) {
+                        e.preventDefault();
+                        AIZ.plugins.notify('danger', "Please select a proposal item.");
+                        flag = false;
+                    }
+                }
+            }
+            if (selectedStatus === 'preparing_scope') {
+                if (!$('input[name="scope_title"]').val()) {
+                    AIZ.plugins.notify('danger', 'Scope title is required');
+                    flag = false;
+                }
+                if (!$('textarea[name="scope_content"]').val()) {
+                    AIZ.plugins.notify('danger', 'Scope content is required');
                     flag = false;
                 }
             }
+
             if(flag == true){
                 $.ajax({
                     type: 'POST',
@@ -651,9 +726,7 @@
                 });
             }
         });
-
-       
-
+        
         $('#add-proposal-item').on('click', function () {
             let newItem = `
                 <div class="proposal-item row mb-1 p-2" style="border: 1px solid #c7c7c7;">
