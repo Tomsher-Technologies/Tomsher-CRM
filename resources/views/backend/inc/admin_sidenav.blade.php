@@ -16,7 +16,7 @@
                 
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('admin.dashboard') }}" class="aiz-side-nav-link">
-                            <i class="las la-home aiz-side-nav-icon"></i>
+                            <i class="las la-home aiz-side-nav-icon fs-18"></i>
                             <span class="aiz-side-nav-text">{{  trans('messages.dashboard') }}</span>
                         </a>
                     </li>
@@ -24,7 +24,7 @@
                     @can('view_followup_calendar')
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('followups.calendar') }}" class="aiz-side-nav-link">
-                                <i class="las la-calendar aiz-side-nav-icon"></i>
+                                <i class="las la-calendar aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Follow-ups Calendar</span>
                             </a>
                         </li>
@@ -33,7 +33,7 @@
                     @canany(['manage_customers'])
                         <li class="aiz-side-nav-item">
                             <a href="#" class="aiz-side-nav-link">
-                                <i class="las la-users aiz-side-nav-icon"></i>
+                                <i class="las la-users aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Customers</span>
                                 <span class="aiz-side-nav-arrow"></span>
                             </a>
@@ -60,7 +60,7 @@
                     @canany(['manage_enquiries'])
                         <li class="aiz-side-nav-item">
                             <a href="#" class="aiz-side-nav-link">
-                                <i class="las la-envelope-open aiz-side-nav-icon"></i>
+                                <i class="las la-envelope-open aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Enquiries</span>
                                 <span class="aiz-side-nav-arrow"></span>
                             </a>
@@ -87,7 +87,7 @@
                     @canany(['manage_followups'])
                         <li class="aiz-side-nav-item">
                             <a href="#" class="aiz-side-nav-link">
-                                <i class="las la-calendar aiz-side-nav-icon"></i>
+                                <i class="las la-calendar aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Follow-ups</span>
                                 <span class="aiz-side-nav-arrow"></span>
                             </a>
@@ -121,10 +121,19 @@
                         </li>
                     @endcanany
 
+                    @canany(['manage_enquiry_scope_work'])
+                        <li class="aiz-side-nav-item">
+                            <a href="{{ route('enquiry-scopes.index') }}" class="aiz-side-nav-link {{ areActiveRoutes(['enquiry-scopes.index','enquiry-scopes.show']) }}">
+                                <i class="las la-file-alt aiz-side-nav-icon fs-18"></i>
+                                <span class="aiz-side-nav-text">Enquiry Scopes</span>
+                            </a>
+                        </li>
+                    @endcanany
+
                     @canany(['manage_projects'])
                         <li class="aiz-side-nav-item">
                             <a href="#" class="aiz-side-nav-link">
-                                <i class="las la-cogs aiz-side-nav-icon"></i>
+                                <i class="las la-cogs aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Projects</span>
                                 <span class="aiz-side-nav-arrow"></span>
                             </a>
@@ -152,7 +161,7 @@
                     @canany(['manage_enquiry_source'])
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('enquiry_sources.index') }}" class="aiz-side-nav-link">
-                                <i class="las la-inbox aiz-side-nav-icon"></i>
+                                <i class="las la-inbox aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Enquiry Sources</span>
                             </a>
                         </li>
@@ -161,7 +170,7 @@
                     @canany(['manage_industries'])
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('industries.index') }}" class="aiz-side-nav-link">
-                                <i class="las la-industry aiz-side-nav-icon"></i>
+                                <i class="las la-industry aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Industries</span>
                             </a>
                         </li>
@@ -170,7 +179,7 @@
                     @canany(['manage_project_type'])
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('project_category.index') }}" class="aiz-side-nav-link">
-                                <i class="las la-stream aiz-side-nav-icon"></i>
+                                <i class="las la-stream aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Project Categories</span>
                             </a>
                         </li>
@@ -179,7 +188,7 @@
                     @canany(['manage_technologies'])
                         <li class="aiz-side-nav-item">
                             <a href="{{ route('technologies.index') }}" class="aiz-side-nav-link">
-                                <i class="las la-code aiz-side-nav-icon"></i>
+                                <i class="las la-code aiz-side-nav-icon fs-18"></i>
                                 <span class="aiz-side-nav-text">Technologies</span>
                             </a>
                         </li>
@@ -189,7 +198,7 @@
                     <li class="aiz-side-nav-item">
                         <a href="{{ route('uploaded-files.index') }}"
                             class="aiz-side-nav-link {{ areActiveRoutes(['uploaded-files.create']) }}">
-                            <i class="las la-folder-open aiz-side-nav-icon"></i>
+                            <i class="las la-folder-open aiz-side-nav-icon fs-18"></i>
                             <span class="aiz-side-nav-text">{{ trans('messages.uploaded_files') }}</span>
                         </a>
                     </li>
@@ -200,7 +209,7 @@
                 @canany(['manage_staffs'])
                     <li class="aiz-side-nav-item">
                         <a href="#" class="aiz-side-nav-link">
-                            <i class="las la-users aiz-side-nav-icon"></i>
+                            <i class="las la-users aiz-side-nav-icon fs-18"></i>
                             <span class="aiz-side-nav-text">{{  trans('messages.staffs') }}</span>
                             <span class="aiz-side-nav-arrow"></span>
                         </a>
@@ -227,7 +236,7 @@
                 @canany(['manage_roles'])
                     <li class="aiz-side-nav-item">
                         <a href="#" class="aiz-side-nav-link">
-                            <i class="las la-user-tie aiz-side-nav-icon"></i>
+                            <i class="las la-user-tie aiz-side-nav-icon fs-18"></i>
                             <span class="aiz-side-nav-text">{{ trans('messages.roles_permissions')}}</span>
                             <span class="aiz-side-nav-arrow"></span>
                         </a>

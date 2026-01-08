@@ -14,6 +14,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\EnquiryFollowupController;
+use App\Http\Controllers\EnquiryScopeOfWorkController;
 
 Route::group(['middleware' => ['guest']], function () {
     Route::get('login', [AuthController::class, 'showLoginForm'])->name('admin.login');
@@ -75,6 +76,13 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('enquiries', EnquiryController::class);
     Route::post('/enquiries/change-status', [EnquiryController::class, 'changeStatus'])->name('enquiries.changeStatus');
     Route::get('/enquiries/{id}/proposal-items/{status}', [EnquiryController::class, 'getProposalItems']);
+
+    Route::get('/enquiry-scopes', [EnquiryScopeOfWorkController::class, 'index'])->name('enquiry-scopes.index');
+    Route::get('/enquiry-scopes/{id}', [EnquiryScopeOfWorkController::class, 'show'])->name('enquiry-scopes.show');
+    Route::put('/enquiry-scopes/{id}', [EnquiryScopeOfWorkController::class, 'update'])->name('enquiry-scopes.update');
+    Route::post('/enquiry-scopes/{scope}/comments', [EnquiryScopeOfWorkController::class, 'storeComment'])->name('enquiry-scopes.comments.store');
+
+
 
     Route::get('/projects', [ProjectController::class, 'index'])->name('projects.index');
     Route::get('/project/create', [ProjectController::class, 'create'])->name('projects.create');
