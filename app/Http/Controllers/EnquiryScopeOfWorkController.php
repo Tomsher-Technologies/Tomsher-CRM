@@ -12,6 +12,15 @@ use App\Models\EnquirySource;
 
 class EnquiryScopeOfWorkController extends Controller
 {
+    function __construct()
+    {
+        $this->middleware('auth');
+       
+        $this->middleware('permission:manage_enquiry_scope_work',  ['only' => ['index']]);
+        $this->middleware('permission:view_enquiry_scope_work',  ['only' => ['show']]);
+        $this->middleware('permission:edit_enquiry_scope_work',  ['only' => ['update','storeComment']]);
+    }
+
     public function index(Request $request)
     {
         $request->session()->put('enquiry_scopes_last_url', url()->full());
