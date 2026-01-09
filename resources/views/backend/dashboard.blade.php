@@ -108,7 +108,7 @@
             <div class="card w-100">
                 <div class="card-header">
                     <h6>
-                        Enquiries by Status
+                        Enquiries by Current Status
                     </h6>
                 </div>
                 <div class="card-body col-lg-12">
