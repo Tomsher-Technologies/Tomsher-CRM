@@ -69,7 +69,7 @@
                     @endphp
                 
                     <select name="status" id="status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                        <option value="">All Status</option>
+                        <option value="">All Current Status</option>
                         @foreach ($statuses as $key => $data)
                             <option value="{{ $key }}"
                                 data-content="
