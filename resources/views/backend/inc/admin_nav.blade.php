@@ -35,6 +35,11 @@
                             <span class="fw-500 d-none d-md-block">Enquiries</span>
                         </a>
 
+                        <a class="btn btn-soft-warning btn-sm d-flex align-items-center ml-1" href="{{ route('enquiry-scopes.index')}}">
+                            <i class="las la-file-alt fs-20"></i> &nbsp;
+                            <span class="fw-500 d-none d-md-block">Enquiry Scopes</span>
+                        </a>
+
                         <a class="btn btn-soft-info d-flex btn-sm align-items-center ml-1" href="{{ route('followups.index')}}">
                             <i class="las la-calendar fs-20"></i>&nbsp;
                             <span class="fw-500 d-none d-md-block">Follow-ups</span>
