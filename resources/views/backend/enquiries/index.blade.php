@@ -11,6 +11,11 @@
         <div class="card-body">
             <!-- Filter Form -->
             <form method="GET" class="row g-3">
+
+                <div class="col-md-3 mb-1">
+                    <input type="text" class="form-control form-control-sm" value="{{ request('enquiry_code') }}" name="enquiry_code" placeholder="Search by enquiry code" >
+                </div>
+
                 <div class="col-md-3 mb-1">
                     <select name="customer_id" class="form-control  form-control-sm aiz-selectpicker" data-live-search="true">
                         <option value="">All Customers</option>
@@ -104,9 +109,7 @@
                         data-advanced-range="true" autocomplete="off">
                 </div>
 
-                <div class="col-md-3 mb-1">
-                    <input type="text" class="form-control form-control-sm" value="{{ request('enquiry_code') }}" name="enquiry_code" placeholder="Search by enquiry code" >
-                </div>
+                
 
                 <div class="col-md-3 ">
                     <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('last_updated_date') }}"
@@ -116,8 +119,8 @@
 
                 <div class="col-md-2 d-flex gap-2 ">
                     <input type="hidden" value="{{ request('sort_by') }}" name="sort_by" id="sort_by_form" >
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                    <a href="{{ route('enquiries.index') }}" class="btn btn-secondary w-100  ml-1">Reset</a>
+                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                    <a href="{{ route('enquiries.index') }}" class="btn btn-secondary  btn-sm  ml-1">Reset</a>
                 </div>
             </form>
             
