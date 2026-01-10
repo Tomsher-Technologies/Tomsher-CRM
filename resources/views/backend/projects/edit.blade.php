@@ -57,7 +57,7 @@
                     <input type="date"  name="client_deadline" id="client_deadline" class="form-control form-control-sm" value="{{ old('client_deadline',$project->client_deadline) }}">
                 </div>
 
-                <div class="col-md-4 form-group mb-3">
+                <div class="col-md-4 form-group mb-3 {{ auth()->user()->can('view_project_amounts') ? 'd-block' : 'd-none' }}">
                     <label for="project_total_cost">Project Total Cost <span class="text-danger">*</span></label>
                     <input type="number" step="0.01" name="project_total_cost" id="project_total_cost" class="form-control form-control-sm" value="{{old('project_total_cost', $project->project_total_cost) }}">
                     @error('project_total_cost')
@@ -115,8 +115,9 @@
 
             <hr>
     
+            
             {{-- Payments --}}
-            <div id="payments_section">
+            <div id="payments_section" class="{{ auth()->user()->can('view_project_amounts') ? 'd-block' : 'd-none' }}">
                 <h5>Payment Details</h5>
                 @php $paymentIndex = 0; @endphp
                 @foreach ($project->payments as $payment)
@@ -124,13 +125,15 @@
                 @endforeach
             </div>
     
-            <div class="col-md-6 d-flex ">
+            <div class="col-md-6 {{ auth()->user()->can('view_project_amounts') ? 'd-flex' : 'd-none' }}">
                 <button type="button" class="btn btn-warning btn-sm mt-2 mb-1" id="add_payment_btn">Add Payment</button>
                 <div class="mt-2 mb-1  ml-5">
                     <label><strong>Remaining Amount:</strong></label>
                     <div id="remaining-amount" style="font-weight:bold; color: green;font-size: 16px;">0</div>
                 </div>
             </div>
+
+
             <div class="text-end">
                 <button type="submit" class="btn btn-success px-4">
                     <i class="bi bi-save me-1"></i> Update Project

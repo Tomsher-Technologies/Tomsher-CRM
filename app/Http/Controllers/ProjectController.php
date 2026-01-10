@@ -247,7 +247,8 @@ class ProjectController extends Controller
         }
 
         flash('Project updated successfully.')->success();
-        return redirect()->route('projects.index');
+        $route = $request->session()->get('projects_last_url') ?? route('projects.index');
+        return redirect($route);
     }
 
     public function getEnquiries($customerId)
