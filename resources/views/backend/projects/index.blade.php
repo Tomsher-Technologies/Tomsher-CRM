@@ -119,7 +119,9 @@
                                         <span class="badge  badge-inline badge-success">Completed</span>
                                     @else
                                         <span class="badge  badge-inline badge-danger">Not Completed</span><br>
-                                        Pending : <span class="text-danger fw-600">AED {{ $pro->pending_amount }}</span>
+                                        @can('view_project_amounts')
+                                            Pending : <span class="text-danger fw-600">AED {{ $pro->pending_amount }}</span>
+                                        @endcan
                                     @endif
                                     
                                 </td>

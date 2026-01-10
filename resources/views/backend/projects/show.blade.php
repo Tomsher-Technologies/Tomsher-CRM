@@ -23,15 +23,19 @@
             <div class="col-md-6 mt-3">
                 <strong>Client Deadline:</strong> {{ $project->client_deadline ? date('d M, Y', strtotime($project->client_deadline)) : 'N/A' }}
             </div>
-            <div class="col-md-6 mt-3">
-                <strong>Project Total Cost: AED {{ number_format($project->project_total_cost, 2) }}</strong>
-            </div>
-            <div class="col-md-6 mt-3">
-                <strong>Paid Amount:</strong><span class="text-success fw-600"> AED {{ number_format($project->paid_amount, 2) }}</span>
-            </div>
-            <div class="col-md-6 mt-3">
-                <strong>Pending Amount:</strong><span class="text-danger fw-600"> AED {{ number_format($project->pending_amount, 2) }}</span>
-            </div>
+
+            @can('view_project_amounts')
+                <div class="col-md-6 mt-3">
+                    <strong>Project Total Cost: AED {{ number_format($project->project_total_cost, 2) }}</strong>
+                </div>
+                <div class="col-md-6 mt-3">
+                    <strong>Paid Amount:</strong><span class="text-success fw-600"> AED {{ number_format($project->paid_amount, 2) }}</span>
+                </div>
+                <div class="col-md-6 mt-3">
+                    <strong>Pending Amount:</strong><span class="text-danger fw-600"> AED {{ number_format($project->pending_amount, 2) }}</span>
+                </div>
+            @endcan
+            
             <div class="col-md-6 mt-3">
                 <strong>Status:</strong> 
                 <span class="badge  badge-inline {{$project->status}}">
@@ -81,46 +85,48 @@
 
         <hr>
 
-        <!-- Payment Details -->
-        <h5 class="mb-3">💳 Payment Details</h5>
-        @if($project->payments->count() > 0)
-            <div class="table-responsive">
-                <table class="table table-bordered">
-                    <thead class="thead-light">
-                        <tr>
-                            <th>Payment Title</th>
-                            <th>Amount</th>
-                            <th>Percentage</th>
-                            <th>Method</th>
-                            <th>Status</th>
-                            <th>Expected Date</th>
-                            <th>Received Date</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($project->payments as $payment)
+        @can('view_project_amounts')
+            <!-- Payment Details -->
+            <h5 class="mb-3">💳 Payment Details</h5>
+            @if($project->payments->count() > 0)
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="thead-light">
                             <tr>
-                                <td>{{ $payment->payment_title }}</td>
-                                <td>AED {{ number_format($payment->amount, 2) }}</td>
-                                <td>{{ $payment->percentage }}%</td>
-                                <td>{{ ucfirst(str_replace('_', ' ', $payment->method)) }}</td>
-                                <td>
-                                    @if($payment->status == 'received')
-                                        <span class="badge bg-success badge-inline" style="color:#fff">Received</span>
-                                    @else
-                                        <span class="badge bg-warning text-dark badge-inline" style="color:#fff">Pending</span>
-                                    @endif
-                                </td>
-                                <td>{{ $payment->expected_date ? date('d, M Y', strtotime($payment->expected_date)) : 'N/A' }}</td>
-                                <td>{{ $payment->received_date ? date('d, M Y', strtotime($payment->received_date)) : 'N/A' }}</td>
+                                <th>Payment Title</th>
+                                <th>Amount</th>
+                                <th>Percentage</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Expected Date</th>
+                                <th>Received Date</th>
                             </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        @else
-            <div class="alert alert-info">No Payment Details Found.</div>
-        @endif
+                        </thead>
+                        <tbody>
+                            @foreach($project->payments as $payment)
+                                <tr>
+                                    <td>{{ $payment->payment_title }}</td>
+                                    <td>AED {{ number_format($payment->amount, 2) }}</td>
+                                    <td>{{ $payment->percentage }}%</td>
+                                    <td>{{ ucfirst(str_replace('_', ' ', $payment->method)) }}</td>
+                                    <td>
+                                        @if($payment->status == 'received')
+                                            <span class="badge bg-success badge-inline" style="color:#fff">Received</span>
+                                        @else
+                                            <span class="badge bg-warning text-dark badge-inline" style="color:#fff">Pending</span>
+                                        @endif
+                                    </td>
+                                    <td>{{ $payment->expected_date ? date('d, M Y', strtotime($payment->expected_date)) : 'N/A' }}</td>
+                                    <td>{{ $payment->received_date ? date('d, M Y', strtotime($payment->received_date)) : 'N/A' }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @else
+                <div class="alert alert-info">No Payment Details Found.</div>
+            @endif
+        @endcan
 
         <div class="text-end mt-4">
             <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('enquiries.index') }}" class="btn btn-primary">Back to Projects</a>

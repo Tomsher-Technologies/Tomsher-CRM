@@ -222,7 +222,8 @@ class CustomerController extends Controller
         });
 
         flash('Customer updated successfully.')->success();
-        return redirect()->route('customers.index');
+        $route = $request->session()->get('customers_last_url') ?? route('customers.index');
+        return redirect($route);
     }
 
     public function updateStatus(Request $request)

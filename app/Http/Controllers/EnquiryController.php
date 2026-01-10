@@ -80,11 +80,42 @@ class EnquiryController extends Controller
             $query->whereDate('enquiry_date', '>=', date('Y-m-d', strtotime(explode(" to ", $date)[0])))->whereDate('enquiry_date', '<=', date('Y-m-d', strtotime(explode(" to ", $date)[1])));
         }
 
+        $updated_date = $request->last_updated_date ?? '';
+        if ($updated_date != null) {
+            $query->whereDate('updated_at', '>=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[0])))->whereDate('updated_at', '<=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[1])));
+        }
+
         if (!auth()->user()->can('view_all_users_enquiries')) {
             $query->where('owner_id', auth()->user()->id);
         } 
+
+        $sortBy = $request->get('sort_by');
+
+        switch ($sortBy) {
+            case 'updated_asc':
+                $query->orderBy('updated_at', 'asc');
+                break;
+
+            case 'updated_desc':
+                $query->orderBy('updated_at', 'desc');
+                break;
+
+            case 'enquiry_asc':
+                $query->orderBy('enquiry_date', 'asc');
+                break;
+
+            case 'enquiry_desc':
+                $query->orderBy('enquiry_date', 'desc');
+                break;
+
+            default:
+                $query->orderBy('created_at', 'desc');
+                break;
+        }
         
-        $enquiries = $query->orderBY('created_at','desc')->paginate(30);
+        $enquiries = $query->paginate(30);
+
+
         return view('backend.enquiries.index', compact('enquiries','customers', 'sources', 'projectTypes','users'));
     }
 
@@ -297,7 +328,8 @@ class EnquiryController extends Controller
         }
         $enquiry->update([
             'status' => $request->status,
-            'updated_by' => auth()->id()
+            'updated_by' => auth()->id(),
+            'updated_at' => date('Y-m-d H:i:s')
         ]);
 
         if($request->status == 'project_approved'){

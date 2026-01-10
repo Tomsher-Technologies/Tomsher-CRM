@@ -82,13 +82,31 @@
 
 -- ALTER TABLE `enquiry_scopes_of_work` ADD `title` VARCHAR(255) NULL DEFAULT NULL AFTER `enquiry_id`;
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_enquiry_scope_work', 'Manage Enquiry Scope Of Work', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_enquiry_scope_work', 'Manage Enquiry Scope Of Work', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '72', 'view_enquiry_scope_work', 'View Enquiry Scope Of Work', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '72', 'view_enquiry_scope_work', 'View Enquiry Scope Of Work', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '72', 'edit_enquiry_scope_work', 'Edit Enquiry Scope Of Work', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '72', 'edit_enquiry_scope_work', 'Edit Enquiry Scope Of Work', 'web', '1', NULL, NULL);
 
-ALTER TABLE `enquiry_scopes_of_work` ADD `sales_comment` TEXT NULL DEFAULT NULL AFTER `scope_content`;
-ALTER TABLE `enquiry_scopes_of_work` ADD `scope_comment` TEXT NULL DEFAULT NULL AFTER `sales_comment`;
+-- ALTER TABLE `enquiry_scopes_of_work` ADD `sales_comment` TEXT NULL DEFAULT NULL AFTER `scope_content`;
+-- ALTER TABLE `enquiry_scopes_of_work` ADD `scope_comment` TEXT NULL DEFAULT NULL AFTER `sales_comment`;
 
-ALTER TABLE `enquiry_scope_comments` ADD `is_sales_team` TINYINT(1) NOT NULL DEFAULT '0' AFTER `comment`;
+-- ALTER TABLE `enquiry_scope_comments` ADD `is_sales_team` TINYINT(1) NOT NULL DEFAULT '0' AFTER `comment`;
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '55', 'change_customer_status', 'Change Customer Active Status', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '60', 'view_project_amounts', 'View Project Amounts', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_dashboard', 'Manage Dashboard', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_total_counts', 'View Total Counts', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_current_status', 'View Enquiries by Current Status', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_source', 'View Enquiries by Source', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_total', 'View Enquiries-Total, Pending & Contacted', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_project_type', 'View Enquiries by Project Type', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_milestone', 'View Enquiries By Milestone', 'web', '1', NULL, NULL);
