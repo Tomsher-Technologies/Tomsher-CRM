@@ -66,7 +66,7 @@
             <tbody>
                 @can('view_customers')
                     @foreach($customers as $key => $cust)
-                        <tr>
+                        <tr @if($cust->is_active != 1) style="background:#f7d3d369;" @endif>
                             <td class="text-center">{{ ($key+1) + ($customers->currentPage() - 1)*$customers->perPage() }}</td>
                             <td>{{ $cust->customer_code }}</td>
                             <td style="word-break: break-all;">{{ $cust->company_name }}</td>
@@ -165,7 +165,7 @@
                 @endcan
             </tbody>
         </table>
-        <div class="aiz-pagination">
+        <div class="aiz-pagination mt-2">
             @can('view_customers')
                 {{ $customers->appends(request()->input())->links('pagination::bootstrap-5') }}
             @endcan

@@ -93,9 +93,9 @@
 
 -- ALTER TABLE `enquiry_scope_comments` ADD `is_sales_team` TINYINT(1) NOT NULL DEFAULT '0' AFTER `comment`;
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '55', 'change_customer_status', 'Change Customer Active Status', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '55', 'change_customer_status', 'Change Customer Active Status', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '60', 'view_project_amounts', 'View Project Amounts', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '60', 'view_project_amounts', 'View Project Amounts', 'web', '1', NULL, NULL);
 
 INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_dashboard', 'Manage Dashboard', 'web', '1', NULL, NULL);
 
