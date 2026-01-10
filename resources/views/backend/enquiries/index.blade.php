@@ -108,12 +108,65 @@
                     <input type="text" class="form-control form-control-sm" value="{{ request('enquiry_code') }}" name="enquiry_code" placeholder="Search by enquiry code" >
                 </div>
 
-                <div class="col-md-2 d-flex gap-2 mb-1">
+                <div class="col-md-3 ">
+                    <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('last_updated_date') }}"
+                        name="last_updated_date" placeholder="Filter by Updated date" data-format="DD-MM-Y" data-separator=" to "
+                        data-advanced-range="true" autocomplete="off">
+                </div>
+
+                <div class="col-md-2 d-flex gap-2 ">
+                    <input type="hidden" value="{{ request('sort_by') }}" name="sort_by" id="sort_by_form" >
                     <button type="submit" class="btn btn-primary w-100">Filter</button>
                     <a href="{{ route('enquiries.index') }}" class="btn btn-secondary w-100  ml-1">Reset</a>
                 </div>
             </form>
             
+            <div class="row" style="text-align: -webkit-right;">
+                <div class="col-md-10 d-flex flex-wrap mt-4">
+                    <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
+                        <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
+                    </div>
+                    <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
+                        <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
+                    </div>
+                    <div class="d-flex align-items-center me-4 mb-1 ml-1">
+                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
+                        <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
+                    </div>
+                </div>
+                <div class="col-md-2 m-auto">
+                    <form action="{{ route('enquiries.index') }}" method="GET">
+                        @foreach (request()->except(['page']) as $k => $v)
+                            @if (is_array($v))
+                                @foreach ($v as $vv)
+                                    <input type="hidden" name="{{ $k }}[]" value="{{ $vv }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                            @endif
+                        @endforeach
+
+                        <select name="sort_by" id="sort_by" class="form-control form-control-sm "
+                            data-live-search="true">
+                            <option value="">Sort By</option>
+                            <option value="updated_asc" {{ request('sort_by') == "updated_asc" ? 'selected' : '' }}>
+                                Updated Date ASC
+                            </option>
+                            <option value="updated_desc" {{ request('sort_by') == "updated_desc" ? 'selected' : '' }}>
+                                Updated Date DESC
+                            </option>
+                            <option value="enquiry_asc" {{ request('sort_by') == "enquiry_asc" ? 'selected' : '' }}>
+                                Enquiry Date ASC
+                            </option>
+                            <option value="enquiry_desc" {{ request('sort_by') == "enquiry_desc" ? 'selected' : '' }}>
+                                Enquiry Date DESC
+                            </option>
+                        </select>
+                    </form>
+                </div>
+            </div>
             <table class="table aiz-table table-bordered mb-0">
                 <thead>
                     <tr>
@@ -126,6 +179,7 @@
                         <th class="text-center">Current Status</th>
                         <th class="text-center">Enquiry Date</th>
                         <th class="text-center">Enquiry Owner</th>
+                        <th class="text-center">Updated Date</th>
                         <th  style="width:15%;" class="text-center">Actions</th>
                     </tr>
                 </thead>
@@ -220,6 +274,11 @@
                                 </td>
 
                                 <td class="text-center">{{ $enquiry->owner->name ?? '' }}</td>
+
+                                <td class="text-center">
+                                    {{ date('d, M Y', strtotime($enquiry->updated_at)) }}
+                                </td>
+
                                 <td class="text-center">
                                     <a href="{{ route('enquiries.show', $enquiry) }}"
                                         class="btn btn-soft-warning btn-sm btn-icon btn-circle m-auto" title="View enquiry details">
@@ -501,7 +560,12 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-   $(document).ready(function () {
+    $(document).ready(function () {
+        document.getElementById('sort_by').addEventListener('change', function () {
+            $('#sort_by_form').val(this.value);
+            this.form.submit();
+        });
+
         // Trigger modal and prefill status
         $(document).on('click', '.change-status-btn', function () {
             const enquiryId = $(this).data('id');

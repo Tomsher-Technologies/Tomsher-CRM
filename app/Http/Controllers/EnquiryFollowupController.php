@@ -296,7 +296,8 @@ class EnquiryFollowupController extends Controller
         if($request->status == 'rescheduled'){
             return redirect()->route('followups.create',['enquiry_id' => $request->enquiry_id]);
         }else{
-            return redirect()->route('followups.index');
+            $route = $request->session()->get('followups_last_url') ?? route('followups.index');
+            return redirect($route);
         }
     }
 

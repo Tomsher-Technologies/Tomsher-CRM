@@ -128,15 +128,26 @@
                             </td>
 
                             <td class="text-center">
-                                @can('edit_customer')
+                                @can('change_customer_status')
                                     <label class="aiz-switch aiz-switch-success mb-0">
-                                        <input type="checkbox" onchange="update_status(this)" value="{{ $cust->id }}"
-                                            <?php if ($cust->is_active == 1) {
-                                                echo 'checked';
-                                            } ?>>
+                                        <input type="checkbox"
+                                            onchange="update_status(this)"
+                                            value="{{ $cust->id }}"
+                                            {{ $cust->is_active ? 'checked' : '' }}>
                                         <span></span>
                                     </label>
+                                @else
+                                    @if ($cust->is_active)
+                                        <span class="badge badge-success px-4 py-1" style="line-height: 1.2;">
+                                            Active
+                                        </span>
+                                    @else
+                                        <span class="badge badge-danger px-4 py-1" style="line-height: 1.2;">
+                                            Inactive
+                                        </span>
+                                    @endif
                                 @endcan
+
                             </td>
                             <td class="text-center">
                                 @can('edit_customer')
