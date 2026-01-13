@@ -97,18 +97,18 @@
 
 -- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '60', 'view_project_amounts', 'View Project Amounts', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_dashboard', 'Manage Dashboard', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_dashboard', 'Manage Dashboard', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_total_counts', 'View Total Counts', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_total_counts', 'View Total Counts', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_current_status', 'View Enquiries by Current Status', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_current_status', 'View Enquiries by Current Status', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_source', 'View Enquiries by Source', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_source', 'View Enquiries by Source', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_total', 'View Enquiries-Total, Pending & Contacted', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_total', 'View Enquiries-Total, Pending & Contacted', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_project_type', 'View Enquiries by Project Type', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_project_type', 'View Enquiries by Project Type', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_milestone', 'View Enquiries By Milestone', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_milestone', 'View Enquiries By Milestone', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_all_users_filter', 'View All User Filter', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_all_users_filter', 'View All User Filter', 'web', '1', NULL, NULL);
