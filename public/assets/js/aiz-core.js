@@ -982,6 +982,14 @@ togglePassword.on('click', function (e) {
                         moment().subtract(1, "month").startOf("month"),
                         moment().subtract(1, "month").endOf("month"),
                     ],
+                    "This Year": [
+                        moment().startOf("year"),
+                        moment().endOf("year"),
+                    ],
+                    "Last Year": [
+                        moment().subtract(1, "year").startOf("year"),
+                        moment().subtract(1, "year").endOf("year"),
+                    ],
                 };
 
                 var single = $this.data("single");
