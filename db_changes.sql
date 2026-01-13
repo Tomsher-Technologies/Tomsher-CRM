@@ -110,3 +110,5 @@ INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is
 INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_project_type', 'View Enquiries by Project Type', 'web', '1', NULL, NULL);
 
 INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_milestone', 'View Enquiries By Milestone', 'web', '1', NULL, NULL);
+
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_all_users_filter', 'View All User Filter', 'web', '1', NULL, NULL);

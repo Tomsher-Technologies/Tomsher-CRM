@@ -117,6 +117,25 @@
                         data-advanced-range="true" autocomplete="off">
                 </div>
 
+
+                <div class="col-md-3">
+                    <select name="milestone_status" id="milestone_status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
+                        <option value="">All Milestone Status</option>
+                        @foreach ($statuses as $key => $data)
+                            <option value="{{ $key }}"
+                                data-content="
+                                    <div style='display: flex; align-items: center;'>
+                                        <div style='width: 16px; height: 16px; background: {{ $data['bg'] }}; border-radius: 4px; margin-right: 8px;'></div>
+                                        <span style='color: {{ $data['filter_color'] }}; font-weight: 600;'>{{ $data['label'] }}</span>
+                                    </div>
+                                "
+                                {{ request('milestone_status') == $key ? 'selected' : '' }}>
+                                {{ $data['label'] }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
                 <div class="col-md-2 d-flex gap-2 ">
                     <input type="hidden" value="{{ request('sort_by') }}" name="sort_by" id="sort_by_form" >
                     <button type="submit" class="btn btn-primary btn-sm">Filter</button>

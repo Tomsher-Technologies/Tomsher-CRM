@@ -17,6 +17,7 @@ use App\Models\EnquiryScopeHistory;
 use App\Models\EnquiryScopeComment;
 use App\Models\SalespersonAssignment;
 use Illuminate\Http\Request;
+use Carbon\Carbon;
 
 class EnquiryController extends Controller
 {
@@ -72,6 +73,38 @@ class EnquiryController extends Controller
             $query->where('status', $request->status);
         }
     
+        if ($request->filled('milestone_status')) {
+            $milestoneStatus = $request->milestone_status;
+
+            $query->whereHas('statusHistories', function ($q) use ($milestoneStatus) {
+                $q->where('status', $milestoneStatus);
+            });
+        }
+
+        $updated_date = $request->last_updated_date ?? '';
+
+        if ($request->filled('milestone_status')) {
+            $milestoneStatus = $request->milestone_status;
+
+            $query->whereHas('statusHistories', function ($q) use ($milestoneStatus, $updated_date) {
+                // Filter by milestone status
+                $q->where('status', $milestoneStatus);
+
+                // Apply date range if provided
+                if ($updated_date != null) {
+                    $q->whereBetween('status_date', [
+                        Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[0])->startOfDay(),
+                        Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[1])->endOfDay(),
+                    ]);
+                }
+            });
+        }else{
+            if ($updated_date != null) {
+                $query->whereDate('updated_at', '>=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[0])))->whereDate('updated_at', '<=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[1])));
+            }
+        }
+
+
         if ($request->filled('added_by')) {
             $query->where('owner_id', $request->added_by);
         }
@@ -80,10 +113,7 @@ class EnquiryController extends Controller
             $query->whereDate('enquiry_date', '>=', date('Y-m-d', strtotime(explode(" to ", $date)[0])))->whereDate('enquiry_date', '<=', date('Y-m-d', strtotime(explode(" to ", $date)[1])));
         }
 
-        $updated_date = $request->last_updated_date ?? '';
-        if ($updated_date != null) {
-            $query->whereDate('updated_at', '>=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[0])))->whereDate('updated_at', '<=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[1])));
-        }
+        
 
         if (!auth()->user()->can('view_all_users_enquiries')) {
             $query->where('owner_id', auth()->user()->id);
