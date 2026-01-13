@@ -53,6 +53,10 @@ class AdminController extends Controller
                         ->join('enquiry_statuses as es', 'es.status_key', '=', 'enquiries.status') // Join with 'enquiries' table
                         ->when($user_id, function ($q) use ($user_id) {
                             $q->where('enquiries.owner_id', $user_id);
+                        }, function ($q) {
+                            if (!auth()->user()->can('view_all_users_filter')) {
+                                $q->where('enquiries.owner_id', auth()->id());
+                            }
                         })
                         ->groupBy('enquiries.status') // Group by 'enquiries.status'
                         ->orderBy('es.sort_order', 'asc') // Order by sort_order
@@ -61,8 +65,13 @@ class AdminController extends Controller
 
         $enquiriesBySource = (clone $query)
                             ->select('enquiry_source_id', \DB::raw('count(*) as total'))
+                            
                             ->when($user_id, function ($q) use ($user_id) {
                                 $q->where('owner_id', $user_id);
+                            }, function ($q) {
+                                if (!auth()->user()->can('view_all_users_filter')) {
+                                    $q->where('owner_id', auth()->id());
+                                }
                             })
                             ->groupBy('enquiry_source_id')
                             ->pluck('total', 'enquiry_source_id')
@@ -79,11 +88,17 @@ class AdminController extends Controller
                             Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay(),
                         ]);
                     })
+                    
                     ->when($user_id, function ($q) use ($user_id) {
-                        // Filter by owner of enquiry
                         $q->whereHas('enquiry', function ($q2) use ($user_id) {
                             $q2->where('owner_id', $user_id);
                         });
+                    }, function ($q) {
+                        if (!auth()->user()->can('view_all_users_filter')) {
+                            $q->whereHas('enquiry', function ($q2) {
+                                $q2->where('owner_id', auth()->id());
+                            });
+                        }
                     })
                     ->groupBy('enquiry_status_histories.status')
                     ->orderBy('es.sort_order', 'asc'); // or custom ordering if needed
@@ -93,8 +108,12 @@ class AdminController extends Controller
         // Enquiry Sources
         $enquirySources = EnquirySource::all();
         $totalEnquiries = (clone $query)->when($user_id, function ($q) use ($user_id) {
-                            $q->where('enquiries.owner_id', $user_id);
-                        })->count();
+                                        $q->where('owner_id', $user_id);
+                                    }, function ($q) {
+                                        if (!auth()->user()->can('view_all_users_filter')) {
+                                            $q->where('owner_id', auth()->id());
+                                        }
+                                    })->count();
 
         $customerQuery = Customer::query();
 
@@ -107,7 +126,12 @@ class AdminController extends Controller
 
         $totalCustomers = $customerQuery->when($user_id, function ($q) use ($user_id) {
                                 $q->where('sales_person', $user_id);
-                            })->count();
+                            }, function ($q) {
+                                if (!auth()->user()->can('view_all_users_filter')) {
+                                    $q->where('sales_person', auth()->id());
+                                }
+                            })
+                            ->count();
     
         $queryProjectType = Enquiry::query()
                         ->leftJoin('enquiry_project_types', 'enquiries.id', '=', 'enquiry_project_types.enquiry_id')
@@ -115,6 +139,10 @@ class AdminController extends Controller
                         ->selectRaw('IFNULL(project_types.name, "No Project Type") as project_type, COUNT(*) as total')
                         ->when($user_id, function ($q) use ($user_id) {
                             $q->where('enquiries.owner_id', $user_id);
+                        }, function ($q) {
+                            if (!auth()->user()->can('view_all_users_filter')) {
+                                $q->where('enquiries.owner_id', auth()->id());
+                            }
                         })
                         ->groupBy('project_type');
 
@@ -140,9 +168,15 @@ class AdminController extends Controller
         }
 
         $totalProjects = $projectsQuery->when($user_id, function ($q) use ($user_id) {
-                                            $q->whereHas('enquiry', function ($sub) use ($user_id) {
-                                                $sub->where('owner_id', $user_id);
+                                            $q->whereHas('enquiry', function ($q2) use ($user_id) {
+                                                $q2->where('owner_id', $user_id);
                                             });
+                                        }, function ($q) {
+                                            if (!auth()->user()->can('view_all_users_filter')) {
+                                                $q->whereHas('enquiry', function ($q2) {
+                                                    $q2->where('owner_id', auth()->id());
+                                                });
+                                            }
                                         })->count();
 
 
@@ -167,6 +201,10 @@ class AdminController extends Controller
                         ->whereBetween('enquiry_date', [$start, $end])
                         ->when($user_id, function ($q) use ($user_id) {
                             $q->where('enquiries.owner_id', $user_id);
+                        }, function ($q) {
+                            if (!auth()->user()->can('view_all_users_filter')) {
+                                $q->where('enquiries.owner_id', auth()->id());
+                            }
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -197,6 +235,10 @@ class AdminController extends Controller
                         ->whereMonth('enquiry_date', $selectedMonth)
                         ->when($user_id, function ($q) use ($user_id) {
                             $q->where('enquiries.owner_id', $user_id);
+                        }, function ($q) {
+                            if (!auth()->user()->can('view_all_users_filter')) {
+                                $q->where('enquiries.owner_id', auth()->id());
+                            }
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -231,6 +273,10 @@ class AdminController extends Controller
                         ->whereYear('enquiry_date', $selectedYear)
                         ->when($user_id, function ($q) use ($user_id) {
                             $q->where('enquiries.owner_id', $user_id);
+                        }, function ($q) {
+                            if (!auth()->user()->can('view_all_users_filter')) {
+                                $q->where('enquiries.owner_id', auth()->id());
+                            }
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -260,6 +306,10 @@ class AdminController extends Controller
                         ->whereMonth('enquiry_date', $selectedMonth)
                         ->when($user_id, function ($q) use ($user_id) {
                             $q->where('enquiries.owner_id', $user_id);
+                        }, function ($q) {
+                            if (!auth()->user()->can('view_all_users_filter')) {
+                                $q->where('enquiries.owner_id', auth()->id());
+                            }
                         })
                         ->groupBy('label')
                         ->orderBy('label')
