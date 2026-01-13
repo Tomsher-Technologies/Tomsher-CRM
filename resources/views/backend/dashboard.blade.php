@@ -314,14 +314,41 @@
 
     <script type="text/javascript">
 
-        // Function to generate unique colors dynamically using HSL
+        const baseColors = [
+                    '#FF6384', // Pink
+                    '#36A2EB', // Blue
+                    '#FFCE56', // Yellow
+                    '#9966FF', // Purple
+                    '#E74C3C', // Red
+                    '#2ECC71', // Green
+                    '#34495E', // Dark Blue Grey
+                    '#9B59B6', // Violet
+                    '#7F8C8D' ,// Grey
+                    '#E67E22', // Dark Orange
+                    '#16A085', // Dark Teal
+                    '#8E44AD', // Deep Purple
+                    '#27AE60', // Deep Green
+                    '#D35400', // Burnt Orange
+                    '#C0392B', // Dark Red
+                    // '#4BC0C0', // Teal
+                    // '#F1C40F', // Gold
+                    // '#1ABC9C', // Aqua
+                    // '#FF9F40', // Orange
+                ];
+
+
         function generateUniqueColors(total) {
             const colors = [];
-            const hueStep = 360 / total; // Spread hues evenly
+
             for (let i = 0; i < total; i++) {
-                const hue = i * hueStep;
-                colors.push(`hsl(${hue}, 70%, 50%)`); // HSL format (Hue, Saturation, Lightness)
+                if (i < baseColors.length) {
+                    colors.push(baseColors[i]);
+                } else {
+                    const hue = (i * 137.508) % 360;
+                    colors.push(`hsl(${hue}, 70%, 50%)`);
+                }
             }
+
             return colors;
         }
 
