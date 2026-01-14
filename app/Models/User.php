@@ -23,6 +23,8 @@ class User extends Authenticatable
         'name',
         'email',
         'phone',
+        'followup_mail_status',
+        'followup_cc',
         'password',
     ];
 

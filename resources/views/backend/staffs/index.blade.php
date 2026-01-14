@@ -41,9 +41,11 @@
                     <th  class="text-center" width="10%">#</th>
                     <th>{{trans('messages.name')}}</th>
                     <th >{{trans('messages.email')}}</th>
+                    
                     <th >{{trans('messages.phone')}}</th>
                     <th>{{trans('messages.role')}}</th>
-                    <th class="text-center">{{trans('messages.status')}}</th>
+                    <th class="text-center">Follow-up Mail Status</th>
+                    <th class="text-center">Active Status</th>
                     <th class="text-center">{{trans('messages.options')}}</th>
                 </tr>
             </thead>
@@ -54,10 +56,23 @@
                             <td class="text-center">{{ ($key+1) + ($users->currentPage() - 1)*$users->perPage() }}</td>
                             <td>{{$staff->name}}</td>
                             <td>{{$staff->email}}</td>
+                            
                             <td>{{$staff->phone}}</td>
                             <td>
                                 {{ $staff->roles->pluck('name')->join(', ') }}
                             </td>
+                            <td class="text-center">
+                                @can('edit_staff')
+                                    <label class="aiz-switch aiz-switch-success mb-0">
+                                        <input type="checkbox" onchange="update_mail_status(this)" value="{{ $staff->id }}"
+                                            <?php if ($staff->followup_mail_status == 1) {
+                                                echo 'checked';
+                                            } ?>>
+                                        <span></span>
+                                    </label>
+                                @endcan  
+                            </td>
+
                             <td class="text-center">
                                 @can('edit_staff')
                                     <label class="aiz-switch aiz-switch-success mb-0">
@@ -101,32 +116,82 @@
 
 
 @section('script')
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script type="text/javascript">
        
         function update_status(el) {
-            if (el.checked) {
-                var status = 0;
-            } else {
-                var status = 1;
-            }
-            $.post('{{ route('staff.status') }}', {
-                _token: '{{ csrf_token() }}',
-                id: el.value,
-                status: status
-            }, function(data) {
-                if (data == 1) {
-                    AIZ.plugins.notify('success', 'Staff status updated successfully');
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 3000);
+            // Determine the new status based on checkbox state
+            var status = el.checked ? 0 : 1;
+            var actionText = !status ? "activate" : "deactivate";
 
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to " + actionText + " this staff?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('{{ route('staff.status') }}', {
+                        _token: '{{ csrf_token() }}',
+                        id: el.value,
+                        status: status
+                    }, function(data) {
+                        if (data == 1) {
+                            AIZ.plugins.notify('success', 'Staff status updated successfully');
+                        } else {
+                            AIZ.plugins.notify('danger', 'Something went wrong');
+                        }
+                        // Reload after 2 seconds
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    });
                 } else {
-                    AIZ.plugins.notify('danger', 'Something went wrong');
-                    setTimeout(function() {
-                        window.location.reload();
-                    }, 3000);
+                    // Revert checkbox if canceled
+                    el.checked = !el.checked;
                 }
             });
         }
+
+
+        function update_mail_status(el) {
+            var status = el.checked ? 1 : 0;
+            var message = status ? "enable" : "disable";
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to " + message + " follow-up mail for this staff?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('{{ route('staff.mail-status') }}', {
+                        _token: '{{ csrf_token() }}',
+                        id: el.value,
+                        status: status
+                    }, function(data) {
+                        if (data == 1) {
+                            AIZ.plugins.notify('success', 'Staff follow-up mail status updated successfully');
+                        } else {
+                            AIZ.plugins.notify('danger', 'Something went wrong');
+                        }
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    });
+                } else {
+                    el.checked = !el.checked;
+                }
+            });
+        }
+
     </script>
 @endsection

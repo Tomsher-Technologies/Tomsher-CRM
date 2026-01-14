@@ -71,6 +71,40 @@
                             @enderror
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <h6>Follow-up Mail Setup
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="followup_mail_status">Daily Follow-up Mail <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <select name="followup_mail_status"  class="form-control form-control-sm">
+                                <option value="1" @if(old('followup_mail_status') == 1) selected @endif>Enable</option>
+                                <option value="0" @if(old('followup_mail_status') == 0) selected @endif>Disable</option>
+                            </select>
+                            @error('followup_mail_status')
+                                <div class="alert alert-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                   <div class="form-group row">
+                        <label class="col-sm-3 col-from-label">CC Emails</label>
+                        <div class="col-sm-9">
+                            <div id="cc-emails-container">
+                                <div class="cc-email-row mb-1 d-flex align-items-center">
+                                    <input type="email" name="cc_emails[]" class="form-control form-control-sm mr-2" placeholder="Enter CC email">
+                                    <button type="button" class="btn btn-sm btn-success add-cc">+</button>
+                                </div>
+                            </div>
+                            @error('cc_emails.*')
+                                <div class="alert alert-danger mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+
                     <div class="form-group mb-0 text-right">
                         <button type="submit" class="btn btn-primary">{{trans('messages.Save')}}</button>
                         <a href="{{ route('staffs.index') }}" class="btn btn-cancel">Cancel</a>
@@ -82,4 +116,26 @@
     </div>
 </div>
 
+@endsection
+
+@section('script')
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const container = document.getElementById('cc-emails-container');
+
+        container.addEventListener('click', function(e) {
+            if (e.target.classList.contains('add-cc')) {
+                const newRow = document.createElement('div');
+                newRow.classList.add('cc-email-row', 'mb-1', 'd-flex', 'align-items-center');
+                newRow.innerHTML = `
+                    <input type="email" name="cc_emails[]" class="form-control form-control-sm mr-2" placeholder="Enter CC email">
+                    <button type="button" class="btn btn-sm btn-danger remove-cc">-</button>
+                `;
+                container.appendChild(newRow);
+            } else if (e.target.classList.contains('remove-cc')) {
+                e.target.closest('.cc-email-row').remove();
+            }
+        });
+    });
+</script>
 @endsection
