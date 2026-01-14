@@ -323,7 +323,7 @@
                     '#2ECC71', // Green
                     '#34495E', // Dark Blue Grey
                     '#9B59B6', // Violet
-                    '#7F8C8D' ,// Grey
+                    '#7F8C8D',// Grey
                     '#E67E22', // Dark Orange
                     '#16A085', // Dark Teal
                     '#8E44AD', // Deep Purple

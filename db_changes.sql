@@ -112,3 +112,5 @@
 -- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_enquiries_by_milestone', 'View Enquiries By Milestone', 'web', '1', NULL, NULL);
 
 -- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_all_users_filter', 'View All User Filter', 'web', '1', NULL, NULL);
+
+ALTER TABLE `users` ADD `followup_mail_status` TINYINT(1) NOT NULL DEFAULT '0' AFTER `banned`, ADD `followup_cc` JSON NULL DEFAULT NULL AFTER `followup_mail_status`;
