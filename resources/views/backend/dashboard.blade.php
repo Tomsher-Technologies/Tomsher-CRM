@@ -2,115 +2,125 @@
 
 @section('content')
     
-    {{-- @if (Auth::user()->user_type == 'admin' || (Auth::user()->user_type == 'staff' && Auth::user()->hasPermissionTo('some-permission'))) --}}
-        @php
-            $months = [
-                '1' => 'January',
-                '2' => 'February',
-                '3' => 'March',
-                '4' => 'April',
-                '5' => 'May',
-                '6' => 'June',
-                '7' => 'July',
-                '8' => 'August',
-                '9' => 'September',
-                '10' => 'October',
-                '11' => 'November',
-                '12' => 'December'
-            ];
+    @php
+        $months = [
+            '1' => 'January',
+            '2' => 'February',
+            '3' => 'March',
+            '4' => 'April',
+            '5' => 'May',
+            '6' => 'June',
+            '7' => 'July',
+            '8' => 'August',
+            '9' => 'September',
+            '10' => 'October',
+            '11' => 'November',
+            '12' => 'December'
+        ];
 
-            $years = range(now()->year - 10, now()->year); // Display the last 5 years
-            $statusDetails = getEnquiryStatuses();
-        @endphp
-        <div class="row d-flex align-items-stretch">
-            <div class="col-md-12 d-flex">
-                <div class="card w-100">
-                    <div class="card-header row">
-                        <h5 class="col-sm-4 mt-2">Dashboard</h5>
-                        <div class="col-sm-8">
-                            @canany(['view_total_counts', 'view_enquiries_by_current_status','view_enquiries_by_source','view_enquiries_by_project_type','view_enquiries_by_milestone'])
-                                <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-12 justify-content-end align-items-end">
-                                    @can('view_all_users_filter')
-                                        <div class="col-md-5">
-                                            <select name="user_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                                                <option value="">All Users</option>
-                                                @foreach ($users as $user)
-                                                    <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
-                                                        {{ $user->name }}
-                                                    </option>
-                                                @endforeach
-                                            </select>
-                                        </div>
-                                    @else
-                                        <div class="col-md-5"> </div>
-                                    @endcan
-                                    
-                                    <div class="col-md-4">
-                                        <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('date_range') }}" name="date_range" placeholder="Filter by date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
+        $years = range(now()->year - 10, now()->year); // Display the last 5 years
+        $statusDetails = getEnquiryStatuses();
+    @endphp
+    <div class="row d-flex align-items-stretch">
+        <div class="col-md-12 d-flex">
+            <div class="card w-100">
+                <div class="card-header row">
+                    <h5 class="col-sm-3 mt-2">Dashboard</h5>
+                    <div class="col-sm-9">
+                        @canany(['view_total_counts', 'view_enquiries_by_current_status','view_enquiries_by_source','view_enquiries_by_project_type','view_enquiries_by_milestone'])
+                            <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-12 justify-content-end align-items-end">
+                                @can('view_all_users_filter')
+                                    <div class="col-md-3">
+                                        <select name="user_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
+                                            <option value="">All Users</option>
+                                            @foreach ($users as $user)
+                                                <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                                    {{ $user->name }}
+                                                </option>
+                                            @endforeach
+                                        </select>
                                     </div>
+                                @else
+                                    <div class="col-md-3"> </div>
+                                @endcan
                                 
-                                    <div class="col-md-3 text-end d-flex m-auto">
-                                        <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-                                        <a href="{{ route('admin.dashboard') }}" class="btn btn-danger ml-1 btn-sm" >Cancel</a>
-                                    </div>
-                                </form>
-                            @endcanany
-                        </div>
+                                <div class="col-md-3">
+                                    <select name="source_mode" id="source_mode" class="form-control form-control-sm">
+                                        <option value="">All Source Modes</option>
+                                        <option value="inhouse" {{ request('source_mode') == "inhouse" ? 'selected' : '' }}>
+                                            Inhouse Lead
+                                        </option>
+                                        <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
+                                            Self Lead
+                                        </option>
+                                    </select>
+                                </div>
+
+                                <div class="col-md-4">
+                                    <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('date_range') }}" name="date_range" placeholder="Filter by date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
+                                </div>
+                            
+                                <div class="col-md-2 text-end d-flex m-auto">
+                                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-danger ml-1 btn-sm" >Cancel</a>
+                                </div>
+                            </form>
+                        @endcanany
                     </div>
-                    <div class="col-lg-12 card-body">
-                        
-                        @can('view_total_counts')
-                            <div class="row gutters-10">
-                                {{-- Total Customers Block --}}
-                                <div class="col-md-2">
-                                    <div class="card shadow" style="background: linear-gradient(to right, #008080, #00bfae); color: #fff; border-radius: 12px;">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title">Total Customers</h6>
-                                            <h5>{{ $totalCustomers }}</h5>
-                                        </div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
-                                            <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
-                                                d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                                            </path>
-                                        </svg>
+                </div>
+                <div class="col-lg-12 card-body">
+                    
+                    @can('view_total_counts')
+                        <div class="row gutters-10">
+                            {{-- Total Customers Block --}}
+                            <div class="col-md-2">
+                                <div class="card shadow" style="background: linear-gradient(to right, #008080, #00bfae); color: #fff; border-radius: 12px;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Total Customers</h6>
+                                        <h5>{{ $totalCustomers }}</h5>
                                     </div>
-                                </div>
-                                {{-- Total Enquiries Block --}}
-                                <div class="col-md-2">
-                                    <div class="card shadow" style="background: linear-gradient(to right, #8348bd, #b659c2); color: #fff; border-radius: 12px;">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title">Total Enquiries</h6>
-                                            <h5>{{ $totalEnquiries }}</h5>
-                                        </div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
-                                            <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
-                                                d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                                            </path>
-                                        </svg>
-                                    </div>
-                                </div>
-                                {{-- Total Projects Block --}}
-                                <div class="col-md-2">
-                                    <div class="card shadow" style="background: linear-gradient(to right, #c54a56e7, #e37391); color: #fff; border-radius: 12px;">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title">Total Projects</h6>
-                                            <h5>{{ $totalProjects }}</h5>
-                                        </div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
-                                            <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
-                                                d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                                            </path>
-                                        </svg>
-                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
+                                        <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
+                                            d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
+                                        </path>
+                                    </svg>
                                 </div>
                             </div>
-                        @endcan
-                    </div>
+                            {{-- Total Enquiries Block --}}
+                            <div class="col-md-2">
+                                <div class="card shadow" style="background: linear-gradient(to right, #8348bd, #b659c2); color: #fff; border-radius: 12px;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Total Enquiries</h6>
+                                        <h5>{{ $totalEnquiries }}</h5>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
+                                        <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
+                                            d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                            </div>
+                            {{-- Total Projects Block --}}
+                            <div class="col-md-2">
+                                <div class="card shadow" style="background: linear-gradient(to right, #c54a56e7, #e37391); color: #fff; border-radius: 12px;">
+                                    <div class="card-body text-center">
+                                        <h6 class="card-title">Total Projects</h6>
+                                        <h5>{{ $totalProjects }}</h5>
+                                    </div>
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
+                                        <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
+                                            d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
+                                        </path>
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
+                    @endcan
                 </div>
             </div>
         </div>
-    {{-- @endif --}}
-
+    </div>
+    
     @can('view_enquiries_by_current_status')
         <div class="row d-flex align-items-stretch">
             <div class="col-md-12 d-flex">
@@ -211,7 +221,6 @@
         </div>
     @endcan
 
-    
     @php
         if ($selectedMonth || $selectedYear) {
             if ($selectedMonth && $selectedYear) {
@@ -264,12 +273,23 @@
             <div class="col-md-12 d-flex">
                 <div class="card w-100">
                     <div class="card-header mt-1">
-                        <h6 class="">
+                        <h6 class="col-md-4">
                             Enquiries - Total, Pending & Contacted <small class="text-muted">({{$enquiriesBarTitle}})</small>
                         </h6>
 
-                        <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-6">
-                            <div class="col-md-4">
+                        <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-8">
+                            <div class="col-md-3">
+                                <select name="source_mode" id="source_mode" class="form-control form-control-sm">
+                                    <option value="">All Source Modes</option>
+                                    <option value="inhouse" {{ request('source_mode') == "inhouse" ? 'selected' : '' }}>
+                                        Inhouse Lead
+                                    </option>
+                                    <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
+                                        Self Lead
+                                    </option>
+                                </select>
+                            </div>
+                            <div class="col-md-3">
                                 <select name="month" class="form-control form-control-sm">
                                     <option value="">All Months</option>
                                     @foreach($months as $key => $month)
@@ -279,7 +299,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <select name="year" class="form-control form-control-sm">
                                     <option value="">All Years</option>
                                     @foreach($years as $year)
@@ -289,7 +309,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-4 text-end d-flex">
+                            <div class="col-md-3 text-end d-flex">
                                 <button type="submit" class="btn btn-primary btn-sm">Filter</button>
                                 
                                 <button class="btn btn-danger ml-1 btn-sm">

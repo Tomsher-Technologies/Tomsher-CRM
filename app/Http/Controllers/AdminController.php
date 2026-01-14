@@ -78,6 +78,7 @@ class AdminController extends Controller
 
         $date_range = $request->input('date_range');
         $user_id = $request->input('user_id');
+        $source_mode = $request->input('source_mode') ?? NULL;
 
         if (!empty($date_range) && str_contains($date_range, ' to ')) {
             [$from_date, $to_date] = array_map('trim', explode(' to ', $date_range));
@@ -93,6 +94,9 @@ class AdminController extends Controller
                 Carbon::createFromFormat('d-m-Y', $from_date)->startOfDay(),
                 Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay(),
             ]);
+        }
+        if($source_mode != NULL){
+            $query->where('source_mode', $source_mode);
         }
 
         $statusCounts = (clone $query)
@@ -135,7 +139,11 @@ class AdminController extends Controller
                             Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay(),
                         ]);
                     })
-                    
+                    ->when($source_mode, function ($q) use ($source_mode) {
+                        $q->whereHas('enquiry', function ($q2) use ($source_mode) {
+                            $q2->where('source_mode', $source_mode);
+                        });
+                    })
                     ->when($user_id, function ($q) use ($user_id) {
                         $q->whereHas('enquiry', function ($q2) use ($user_id) {
                             $q2->where('owner_id', $user_id);
@@ -191,6 +199,9 @@ class AdminController extends Controller
                                 $q->where('enquiries.owner_id', auth()->id());
                             }
                         })
+                        ->when($source_mode, function ($q) use ($source_mode) {
+                            $q->where('enquiries.source_mode', $source_mode);
+                        })
                         ->groupBy('project_type');
 
         if (!empty($from_date) && !empty($to_date)) {
@@ -224,7 +235,13 @@ class AdminController extends Controller
                                                     $q2->where('owner_id', auth()->id());
                                                 });
                                             }
-                                        })->count();
+                                        })
+                                        ->when($source_mode, function ($q) use ($source_mode) {
+                                            $q->whereHas('enquiry', function ($q2) use ($source_mode) {
+                                                $q2->where('source_mode', $source_mode);
+                                            });
+                                        })
+                                        ->count();
 
 
         // Enquiries - Total, Pending & Contacted 
@@ -252,6 +269,9 @@ class AdminController extends Controller
                             if (!auth()->user()->can('view_all_users_filter')) {
                                 $q->where('enquiries.owner_id', auth()->id());
                             }
+                        })
+                        ->when($source_mode, function ($q) use ($source_mode) {
+                            $q->where('source_mode', $source_mode);
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -286,6 +306,9 @@ class AdminController extends Controller
                             if (!auth()->user()->can('view_all_users_filter')) {
                                 $q->where('enquiries.owner_id', auth()->id());
                             }
+                        })
+                        ->when($source_mode, function ($q) use ($source_mode) {
+                            $q->where('source_mode', $source_mode);
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -325,6 +348,9 @@ class AdminController extends Controller
                                 $q->where('enquiries.owner_id', auth()->id());
                             }
                         })
+                        ->when($source_mode, function ($q) use ($source_mode) {
+                            $q->where('source_mode', $source_mode);
+                        })
                         ->groupBy('label')
                         ->orderBy('label')
                         ->get();
@@ -357,6 +383,9 @@ class AdminController extends Controller
                             if (!auth()->user()->can('view_all_users_filter')) {
                                 $q->where('enquiries.owner_id', auth()->id());
                             }
+                        })
+                        ->when($source_mode, function ($q) use ($source_mode) {
+                            $q->where('source_mode', $source_mode);
                         })
                         ->groupBy('label')
                         ->orderBy('label')
