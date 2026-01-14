@@ -25,6 +25,7 @@ Route::group(['middleware' => ['guest']], function () {
 Route::get('logout', [AuthController::class, 'logout'])->name('admin.logout');
 
 Route::group(['middleware' => ['auth']], function () {
+    Route::get('/dailymail', [AdminController::class, 'dailyFollowupMail'])->name('dailymail');
 
     Route::get('/', [AdminController::class, 'admin_dashboard'])->name('admin.dashboard');
     Route::get('/cache-cache', [AdminController::class, 'clearCache'])->name('cache.clear');
@@ -36,6 +37,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('staffs', StaffController::class);
     Route::get('/staffs/destroy/{id}', [StaffController::class, 'destroy'])->name('staffs.destroy');
     Route::post('/staff/status', [StaffController::class, 'updateStatus'])->name('staff.status');
+    Route::post('/staff/mail-status', [StaffController::class, 'updateFollowupMailStatus'])->name('staff.mail-status');
 
     // Manage Imdustries
     Route::get('/industries', [IndustryController::class, 'index'])->name('industries.index');

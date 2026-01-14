@@ -10,6 +10,9 @@ use App\Models\EnquirySource;
 use App\Models\ProjectType;
 use App\Models\Project;
 use App\Models\EnquiryStatusHistory;
+use App\Models\EnquiryFollowup;
+use App\Mail\DailyFollowupMail;
+use Illuminate\Support\Facades\Mail;
 use Artisan;
 use Cache;
 use Carbon\Carbon;
@@ -17,6 +20,50 @@ use DB;
 
 class AdminController extends Controller
 {
+    public function dailyFollowupMail(){
+        $today = Carbon::today();
+        $staffs = User::where('followup_mail_status', 1)->get();
+
+        foreach ($staffs as $staff) {
+            $items = EnquiryFollowup::where('status', 'pending')
+                ->whereHas('enquiry', function ($q) use ($staff) {
+                    $q->where('owner_id', $staff->id);
+                })
+                ->where(function ($q) use ($today) {
+                    $q->whereDate('followup_time', '<=', $today)
+                    ->orWhereDate('followup_from', '<=', $today);
+                })
+                ->with('enquiry')
+                ->get();
+
+            if (!$items->isEmpty()) {
+                $grouped = $items->groupBy(function ($followup) use ($today) {
+
+                    $date = $followup->followup_type === 'meeting'
+                        ? Carbon::parse($followup->followup_from)
+                        : Carbon::parse($followup->followup_time);
+
+                    return $date->isToday() ? 'today' : 'past';
+                });
+
+                $todayFollowups = $grouped->get('today', collect());
+                $pastFollowups  = $grouped->get('past', collect());
+            }else{
+                $todayFollowups = collect();
+                $pastFollowups  = collect();
+            }
+
+            $ccEmails = $staff->followup_cc ? json_decode($staff->followup_cc) : [];
+            Mail::to($staff->email)
+                ->cc($ccEmails)
+                ->queue(new DailyFollowupMail(
+                    $staff,
+                    $todayFollowups,
+                    $pastFollowups
+                ));
+            
+        }
+    }
     public function admin_dashboard(Request $request)
     {
         $filter = $chartType = $from_date = $to_date ='';

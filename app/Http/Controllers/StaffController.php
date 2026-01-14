@@ -71,7 +71,8 @@ class StaffController extends Controller
             'email' => 'required|email|unique:users,email',
             'mobile' => 'nullable|string|max:20',
             'password' => 'required|min:6|confirmed',
-            'role' => 'required'
+            'role' => 'required',
+            'cc_emails.*' => 'nullable|email',
         ]);
 
         if(User::where('email', $request->email)->first() == null){
@@ -81,6 +82,12 @@ class StaffController extends Controller
             $user->phone = $request->mobile;
             $user->user_type = "staff";
             $user->password = Hash::make($request->password);
+            $user->followup_mail_status = $request->followup_mail_status;
+
+            if(!empty($request->cc_emails)) {
+                $user->followup_cc = json_encode(array_values(array_filter($request->cc_emails)));
+            }
+
             if($user->save()){
                 $user->assignRole($request->role);
                 flash(trans('messages.staff_create_msg'))->success();
@@ -121,7 +128,8 @@ class StaffController extends Controller
             'email' => 'required|email|unique:users,email,'.$user->id,
             'mobile' => 'nullable|string|max:20',
             'password' => 'nullable|min:6|confirmed',
-            'role_id' => 'required'
+            'role_id' => 'required',
+            'cc_emails.*' => 'nullable|email',
         ]);
 
         $user->name = $request->name;
@@ -130,6 +138,9 @@ class StaffController extends Controller
         if(strlen($request->password) > 0){
             $user->password = Hash::make($request->password);
         }
+
+        $user->followup_mail_status = $request->followup_mail_status;
+        $user->followup_cc = json_encode(array_filter($request->cc_emails ?? []));
         if($user->save()){
 
             $user->syncRoles([$request->role_id]);
@@ -160,6 +171,16 @@ class StaffController extends Controller
         $user = User::findOrFail($request->id);
         
         $user->banned = $request->status;
+        $user->save();
+       
+        return 1;
+    }
+
+    public function updateFollowupMailStatus(Request $request)
+    {
+        $user = User::findOrFail($request->id);
+        
+        $user->followup_mail_status = $request->status;
         $user->save();
        
         return 1;

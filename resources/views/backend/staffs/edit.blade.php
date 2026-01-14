@@ -78,6 +78,47 @@
                             @enderror
                         </div>
                     </div>
+
+                    <div class="form-group">
+                        <h6>Follow-up Mail Setup
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label" for="followup_mail_status">Daily Follow-up Mail <span class="text-danger">*</span></label>
+                        <div class="col-sm-9">
+                            <select name="followup_mail_status"  class="form-control form-control-sm">
+                                <option value="1" @if(old('followup_mail_status', $staff->followup_mail_status) == 1) selected @endif>Enable</option>
+                                <option value="0" @if(old('followup_mail_status', $staff->followup_mail_status) == 0) selected @endif>Disable</option>
+                            </select>
+                            @error('followup_mail_status')
+                                <div class="alert alert-danger">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
+                    <div class="form-group row">
+                        <label class="col-sm-3 col-from-label">CC Emails</label>
+                        <div class="col-sm-9">
+                            <div id="cc-emails-wrapper">
+                                @php
+                                    $cc_emails = old('cc_emails', (isset($staff) && $staff->followup_cc != NULL) ? json_decode($staff->followup_cc, true) : []);
+                                @endphp
+                                @foreach($cc_emails as $email)
+                                    <div class="input-group mb-1 cc-email-row">
+                                        <input type="email" name="cc_emails[]" class="form-control form-control-sm" placeholder="CC Email" value="{{ $email }}">
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-danger remove-cc-email">&times;</button>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                            <button type="button" class="btn btn-success btn-sm mt-1" id="add-cc-email">Add New</button>
+                            @error('cc_emails.*')
+                                <div class="alert alert-danger mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+
                     <div class="form-group mb-0 text-right">
                         <button type="submit" class="btn btn-primary">{{trans('messages.Save')}}</button>
                         <a href="{{ route('staffs.index') }}" class="btn btn-cancel">{{trans('messages.cancel')}}</a>
@@ -88,4 +129,32 @@
     </div>
 </div>
 
+@endsection
+
+@section('script')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const wrapper = document.getElementById('cc-emails-wrapper');
+        const addBtn = document.getElementById('add-cc-email');
+
+        addBtn.addEventListener('click', function() {
+            const newRow = document.createElement('div');
+            newRow.classList.add('input-group', 'mb-1', 'cc-email-row');
+            newRow.innerHTML = `
+                <input type="email" name="cc_emails[]" class="form-control form-control-sm" placeholder="CC Email">
+                <div class="input-group-append">
+                    <button type="button" class="btn btn-danger remove-cc-email">&times;</button>
+                </div>
+            `;
+            wrapper.appendChild(newRow);
+        });
+
+        // Remove row
+        wrapper.addEventListener('click', function(e) {
+            if(e.target.classList.contains('remove-cc-email')) {
+                e.target.closest('.cc-email-row').remove();
+            }
+        });
+    });
+</script>
 @endsection
