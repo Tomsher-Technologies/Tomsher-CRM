@@ -13,7 +13,7 @@
             <form method="GET" class="row g-3">
 
                 <div class="col-md-3 mb-1">
-                    <input type="text" class="form-control form-control-sm" value="{{ request('enquiry_code') }}" name="enquiry_code" placeholder="Search by enquiry code" >
+                    <input type="text" class="form-control form-control-sm" value="{{ request('keyword') }}" name="keyword" placeholder="Search by enquiry code or title" >
                 </div>
 
                 <div class="col-md-3 mb-1">
@@ -233,7 +233,9 @@
                                         <a href="javascript:void(0)" class="show-popup" data-id="{{ $enquiry->id }}">
                                             <i class="las la-info-circle fs-16 text-primary" style="cursor: pointer;"></i>
                                         </a>
+                                        
                                     </div>
+                                    <span style="color:blue;">{{ $enquiry->project_title ?? '' }}</span>
                                     @if($enquiry->projectTypes->count())
                                         <ul style="font-size: 10px;" class="pl-3 mb-0 mt-1 text-muted">
                                             @foreach($enquiry->projectTypes as $type)

@@ -29,20 +29,26 @@
                     <div class="col-sm-9">
                         @canany(['view_total_counts', 'view_enquiries_by_current_status','view_enquiries_by_source','view_enquiries_by_project_type','view_enquiries_by_milestone'])
                             <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-12 justify-content-end align-items-end">
-                                @can('view_all_users_filter')
-                                    <div class="col-md-3">
-                                        <select name="user_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                                            <option value="">All Users</option>
+                                <div class="col-md-3">
+                                    <select name="user_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
+                                        <option value="">All Users</option>
+
+                                        @can('view_all_users_filter')
                                             @foreach ($users as $user)
-                                                <option value="{{ $user->id }}" {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                                <option value="{{ $user->id }}"
+                                                    {{ request('user_id') == $user->id ? 'selected' : '' }}>
                                                     {{ $user->name }}
                                                 </option>
                                             @endforeach
-                                        </select>
-                                    </div>
-                                @else
-                                    <div class="col-md-3"> </div>
-                                @endcan
+                                        @else
+                                            <option value="{{ auth()->id() }}"
+                                                {{ request('user_id') == auth()->id() ? 'selected' : '' }}>
+                                                {{ auth()->user()->name }}
+                                            </option>
+                                        @endcan
+
+                                    </select>
+                                </div>
                                 
                                 <div class="col-md-3">
                                     <select name="source_mode" id="source_mode" class="form-control form-control-sm">
@@ -57,7 +63,7 @@
                                 </div>
 
                                 <div class="col-md-4">
-                                    <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('date_range') }}" name="date_range" placeholder="Filter by date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
+                                    <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('date_range') ?? now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y') }}" name="date_range" placeholder="Filter by date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
                                 </div>
                             
                                 <div class="col-md-2 text-end d-flex m-auto">
@@ -73,45 +79,45 @@
                     @can('view_total_counts')
                         <div class="row gutters-10">
                             {{-- Total Customers Block --}}
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <div class="card shadow" style="background: linear-gradient(to right, #008080, #00bfae); color: #fff; border-radius: 12px;">
                                     <div class="card-body text-center">
                                         <h6 class="card-title">Total Customers</h6>
                                         <h5>{{ $totalCustomers }}</h5>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
+                                    {{-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
                                         <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
                                             d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
                                         </path>
-                                    </svg>
+                                    </svg> --}}
                                 </div>
                             </div>
                             {{-- Total Enquiries Block --}}
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <div class="card shadow" style="background: linear-gradient(to right, #8348bd, #b659c2); color: #fff; border-radius: 12px;">
                                     <div class="card-body text-center">
                                         <h6 class="card-title">Total Enquiries</h6>
                                         <h5>{{ $totalEnquiries }}</h5>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
+                                    {{-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
                                         <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
                                             d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
                                         </path>
-                                    </svg>
+                                    </svg> --}}
                                 </div>
                             </div>
                             {{-- Total Projects Block --}}
-                            <div class="col-md-2">
+                            <div class="col-md-4">
                                 <div class="card shadow" style="background: linear-gradient(to right, #c54a56e7, #e37391); color: #fff; border-radius: 12px;">
                                     <div class="card-body text-center">
                                         <h6 class="card-title">Total Projects</h6>
                                         <h5>{{ $totalProjects }}</h5>
                                     </div>
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
+                                    {{-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
                                         <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
                                             d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
                                         </path>
-                                    </svg>
+                                    </svg> --}}
                                 </div>
                             </div>
                         </div>
@@ -135,7 +141,7 @@
                             {{-- Status Wise Blocks --}}
                             @foreach($statusDetails as $key => $status)
                                 <div class="col-md-2">
-                                    <div class="card shadow" style="background-color: {{ $status['bg'] }}; color: {{ $status['list_color'] }}; border-radius: 12px;">
+                                    <div class="card shadow status-card" style="background-color: {{ $status['bg'] }}; color: {{ $status['list_color'] }}; border-radius: 12px;">
                                         <div class="card-body text-center">
                                             <h6 class="card-title">{{ $status['label'] }}</h6>
                                             <h5>{{ $statusCounts[$key] ?? 0 }}</h5>
@@ -176,29 +182,11 @@
                 <div class="card w-100">
                     <div class="card-header">
                         <h6>
-                            Enquiries by Source
+                            Enquiries by Source Mode
                         </h6>
                     </div>
                     <div class="card-body">
-                        <table class="table table-bordered mt-2 aiz-table">
-                            <thead>
-                                <tr>
-                                    <th>Enquiry Source</th>
-                                    <th class="text-center">Enquiries</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @foreach($enquiriesBySource as $sourceId => $count)
-                                    @php
-                                        $source = $enquirySources->firstWhere('id', $sourceId);
-                                    @endphp
-                                    <tr>
-                                        <td>{{ $source ? $source->name : 'Unknown' }}</td>
-                                        <td class="text-center">{{ $count }}</td>
-                                    </tr>
-                                @endforeach
-                            </tbody>
-                        </table>
+                        <canvas id="enquirySourceModePieChart" style="max-height: 350px;"></canvas>
                     </div>
                 </div>
             </div>
@@ -278,41 +266,61 @@
                         </h6>
 
                         <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-8">
-                            <div class="col-md-3">
-                                <select name="source_mode" id="source_mode" class="form-control form-control-sm">
+                            <div class="col-md-3 p-1">
+                                <select name="user_id_graph" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
+                                    <option value="">All Users</option>
+
+                                    @can('view_all_users_filter')
+                                        @foreach ($users as $user)
+                                            <option value="{{ $user->id }}"
+                                                {{ request('user_id_graph') == $user->id ? 'selected' : '' }}>
+                                                {{ $user->name }}
+                                            </option>
+                                        @endforeach
+                                    @else
+                                        <option value="{{ auth()->id() }}"
+                                            {{ request('user_id_graph') == auth()->id() ? 'selected' : '' }}>
+                                            {{ auth()->user()->name }}
+                                        </option>
+                                    @endcan
+
+                                </select>
+                            </div>
+                            <div class="col-md-3 p-1">
+                                <select name="source_mode_graph" id="source_mode_graph" class="form-control form-control-sm">
                                     <option value="">All Source Modes</option>
-                                    <option value="inhouse" {{ request('source_mode') == "inhouse" ? 'selected' : '' }}>
+                                    <option value="inhouse" {{ request('source_mode_graph') == "inhouse" ? 'selected' : '' }}>
                                         Inhouse Lead
                                     </option>
-                                    <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
+                                    <option value="self" {{ request('source_mode_graph') == "self" ? 'selected' : '' }}>
                                         Self Lead
                                     </option>
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2 p-1">
                                 <select name="month" class="form-control form-control-sm">
                                     <option value="">All Months</option>
                                     @foreach($months as $key => $month)
-                                        <option value="{{ $key }}" {{ request('month') == $key ? 'selected' : '' }}>
+                                        <option value="{{ $key }}" {{ (request()->has('month') ? request('month') == $key : $key == now()->month) ? 'selected' : '' }}>
                                             {{ $month }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3">
+                            <div class="col-md-2 p-1">
                                 <select name="year" class="form-control form-control-sm">
                                     <option value="">All Years</option>
                                     @foreach($years as $year)
-                                        <option value="{{ $year }}" {{ request('year') == $year ? 'selected' : '' }}>
+                                        <option value="{{ $year }}" {{ (request()->has('year') ? request('year') == $year : $year == now()->year) ? 'selected' : '' }}>
                                             {{ $year }}
                                         </option>
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-3 text-end d-flex">
-                                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                            <div class="col-md-2 p-1 text-start d-flex">
+                                <button type="submit" class="btn btn-primary btn-xs">Filter</button>
                                 
-                                <button class="btn btn-danger ml-1 btn-sm">
+                                <button class="btn btn-danger ml-1 btn-xs">
                                     <a href="{{ route('admin.dashboard') }}" class="text-white" >Cancel
                                     </a>
                                 </button>
@@ -328,6 +336,18 @@
     @endcan
    
 @endsection
+
+@section('style')
+<style>
+    .status-card {
+        height: 80%; /* fixed height */
+        display: flex;
+        flex-direction: column;
+        justify-content: center; /* center vertically */
+    }
+</style>
+@endsection
+
 @section('script')
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0"></script>
@@ -400,7 +420,7 @@
                             responsive: true,
                             plugins: {
                                 legend: {
-                                    position: 'top',
+                                    position: 'bottom',
                                 },
                                 datalabels: {
                                     color: '#fff',
@@ -426,7 +446,62 @@
                     });
                 }
             }
+
+            const sourceModeData = @json($enquiriesBySourceMode);
+
+            const labelssourceMode = Object.keys(sourceModeData);
+            const datasourceMode = Object.values(sourceModeData);
             
+            const canvasenquirySourceMode = document.getElementById('enquirySourceModePieChart'); 
+            if (canvasenquirySourceMode) { 
+                const ctxMode = canvasenquirySourceMode.getContext('2d');
+                if (ctxMode) {
+                    new Chart(ctxMode, {
+                        type: 'pie',
+                        data: {
+                            labels: labelssourceMode.map(label =>
+                                label.charAt(0).toUpperCase() + label.slice(1)
+                            ),
+                            datasets: [{
+                                data: datasourceMode,
+                                backgroundColor: [
+                                    '#4aadf7',
+                                    '#48e158',
+                                    '#F59E0B'
+                                ],
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                datalabels: {
+                                    color: '#fff',
+                                    font: {
+                                        weight: 'bold',
+                                        size: 14
+                                    },
+                                    formatter: (value, context) => {
+                                        return value; // shows the enquiry count inside the slice
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.label + ': ' + context.raw;
+                                        }
+                                    }
+                                }
+                            },
+                            aspectRatio: 1.5,
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+                }
+            }
         });
 
         var chartData = @json($chartData);  // Getting the data from the controller
@@ -569,7 +644,7 @@
                             },
                             datalabels: {
                                 display: true, // Show labels
-                                color: '#fff', // Text color
+                                color: '#000', // Text color
                                 formatter: (value) => {
                                     return value === 0 ? '' : value; // If value is 0, don't display it
                                 },

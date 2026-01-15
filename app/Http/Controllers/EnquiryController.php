@@ -65,8 +65,13 @@ class EnquiryController extends Controller
             });
         }
 
-        if ($request->filled('enquiry_code')) {
-            $query->where('enquiry_code', $request->enquiry_code);
+        if ($request->filled('keyword')) {
+            $keyword = $request->keyword;
+
+            $query->where(function ($q) use ($keyword) {
+                $q->where('enquiry_code', 'like', '%' . $keyword . '%')
+                ->orWhere('project_title', 'like', '%' . $keyword . '%');
+            });
         }
     
         if ($request->filled('status')) {
@@ -166,11 +171,14 @@ class EnquiryController extends Controller
             'enquiry_date' => 'required|date',
             'enquiry_source_id' => 'required|exists:enquiry_sources,id',
             'project_details' => 'required|string',
+            'project_type_id' =>'required',
             'source_mode' => 'required',
-            'status' => 'nullable|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,ongoing_discussion,preparing_scope',
-            'comments' => 'nullable|string'
+            'status' => 'nullable|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,ongoing_discussion,preparing_scope,pipeline',
+            'comments' => 'nullable|string',
+            'project_title' => 'nullable|string'
+        ],[
+            '*.required' => 'This field is required'
         ]);
-
         $validated['added_by'] = auth()->id();
         $validated['updated_by'] = auth()->id();
         $validated['owner_id'] = $request->user_id ?? auth()->id();
@@ -263,7 +271,11 @@ class EnquiryController extends Controller
             'enquiry_source_id' => 'required|exists:enquiry_sources,id',
             'source_mode' => 'required',
             'project_details' => 'nullable|string',
+            'project_type_id' =>'required',
             'comments' => 'nullable|string',
+            'project_title' => 'nullable|string'
+        ],[
+            '*.required' => 'This field is required'
         ]);
 
         $validated['updated_by'] = auth()->id();
@@ -336,7 +348,7 @@ class EnquiryController extends Controller
     {
         $request->validate([
             'enquiry_id' => 'required|exists:enquiries,id',
-            'status' => 'required|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,signed_payment_pending,ongoing_discussion,preparing_scope',
+            'status' => 'required|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,signed_payment_pending,ongoing_discussion,preparing_scope,pipeline',
             'status_date' => 'required|date',
             'comment' => 'nullable|string',
             // 'submitted_cost' => 'required_if:status,proposal_submitted|nullable|numeric',
