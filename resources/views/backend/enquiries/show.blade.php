@@ -171,6 +171,9 @@
 
                     <div class="text-muted">Enquiry Owner</div>
                     <div class="mb-1">{{ $enquiry->owner->name ?? '-' }}</div>
+
+                    <div class="text-muted">Project Title</div>
+                    <div class="mb-1">{{ $enquiry->project_title ?? '' }}</div>
                 </div>
 
                 <div class="col-md-6">
@@ -202,7 +205,7 @@
             </div>
 
             <hr>
-
+           
             <h6 class="mb-3">Project Details</h6>
             <p>{!! nl2br(e($enquiry->project_details)) !!}</p>
 

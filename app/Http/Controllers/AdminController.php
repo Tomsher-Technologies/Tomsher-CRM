@@ -76,8 +76,10 @@ class AdminController extends Controller
         $selectedMonth = $request->input('month');
         $selectedYear = $request->input('year');
 
-        $date_range = $request->input('date_range');
+        $date_range = $request->filled('date_range') ? $request->date_range : now()->startOfMonth()->format('d-m-Y'). ' to ' .now()->endOfMonth()->format('d-m-Y');
+
         $user_id = $request->input('user_id');
+        $source_mode = $request->input('source_mode') ?? NULL;
 
         if (!empty($date_range) && str_contains($date_range, ' to ')) {
             [$from_date, $to_date] = array_map('trim', explode(' to ', $date_range));
@@ -94,15 +96,16 @@ class AdminController extends Controller
                 Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay(),
             ]);
         }
+        if($source_mode != NULL){
+            $query->where('source_mode', $source_mode);
+        }
 
         $statusCounts = (clone $query)
                         ->select('enquiries.status', \DB::raw('count(*) as total')) // Explicitly use 'enquiries.status'
                         ->join('enquiry_statuses as es', 'es.status_key', '=', 'enquiries.status') // Join with 'enquiries' table
                         ->when($user_id, function ($q) use ($user_id) {
-                            $q->where('enquiries.owner_id', $user_id);
-                        }, function ($q) {
-                            if (!auth()->user()->can('view_all_users_filter')) {
-                                $q->where('enquiries.owner_id', auth()->id());
+                            if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                $q->where('enquiries.owner_id', $user_id);
                             }
                         })
                         ->groupBy('enquiries.status') // Group by 'enquiries.status'
@@ -114,15 +117,31 @@ class AdminController extends Controller
                             ->select('enquiry_source_id', \DB::raw('count(*) as total'))
                             
                             ->when($user_id, function ($q) use ($user_id) {
-                                $q->where('owner_id', $user_id);
-                            }, function ($q) {
-                                if (!auth()->user()->can('view_all_users_filter')) {
-                                    $q->where('owner_id', auth()->id());
+                                if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                    $q->where('owner_id', $user_id);
                                 }
                             })
                             ->groupBy('enquiry_source_id')
                             ->pluck('total', 'enquiry_source_id')
                             ->toArray();
+
+        $allSourceModes = ['inhouse', 'self'];
+        $enquiriesBySourceMode = (clone $query)
+                            ->select('source_mode', \DB::raw('count(*) as total'))
+                            
+                            ->when($user_id, function ($q) use ($user_id) {
+                                if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                    $q->where('owner_id', $user_id);
+                                }
+                            })
+                            ->whereNotNull('source_mode')
+                            ->groupBy('source_mode')
+                            ->pluck('total', 'source_mode')
+                            ->toArray();
+
+        $enquiriesBySourceMode = collect($allSourceModes)
+                                    ->mapWithKeys(fn($mode) => [$mode => $enquiriesBySourceMode[$mode] ?? 0])
+                                    ->toArray();
 
 
         // Enquiries by milestone
@@ -135,15 +154,16 @@ class AdminController extends Controller
                             Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay(),
                         ]);
                     })
+                    ->when($source_mode, function ($q) use ($source_mode) {
+                        $q->whereHas('enquiry', function ($q2) use ($source_mode) {
+                            $q2->where('source_mode', $source_mode);
+                        });
+                    })
                     
                     ->when($user_id, function ($q) use ($user_id) {
-                        $q->whereHas('enquiry', function ($q2) use ($user_id) {
-                            $q2->where('owner_id', $user_id);
-                        });
-                    }, function ($q) {
-                        if (!auth()->user()->can('view_all_users_filter')) {
-                            $q->whereHas('enquiry', function ($q2) {
-                                $q2->where('owner_id', auth()->id());
+                        if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                            $q->whereHas('enquiry', function ($q2) use ($user_id) {
+                                $q2->where('owner_id', $user_id);
                             });
                         }
                     })
@@ -155,10 +175,8 @@ class AdminController extends Controller
         // Enquiry Sources
         $enquirySources = EnquirySource::all();
         $totalEnquiries = (clone $query)->when($user_id, function ($q) use ($user_id) {
-                                        $q->where('owner_id', $user_id);
-                                    }, function ($q) {
-                                        if (!auth()->user()->can('view_all_users_filter')) {
-                                            $q->where('owner_id', auth()->id());
+                                        if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                            $q->where('owner_id', $user_id);
                                         }
                                     })->count();
 
@@ -172,10 +190,8 @@ class AdminController extends Controller
         }
 
         $totalCustomers = $customerQuery->when($user_id, function ($q) use ($user_id) {
-                                $q->where('sales_person', $user_id);
-                            }, function ($q) {
-                                if (!auth()->user()->can('view_all_users_filter')) {
-                                    $q->where('sales_person', auth()->id());
+                                if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                    $q->where('sales_person', $user_id);
                                 }
                             })
                             ->count();
@@ -185,11 +201,12 @@ class AdminController extends Controller
                         ->leftJoin('project_types', 'enquiry_project_types.project_type_id', '=', 'project_types.id')
                         ->selectRaw('IFNULL(project_types.name, "No Project Type") as project_type, COUNT(*) as total')
                         ->when($user_id, function ($q) use ($user_id) {
-                            $q->where('enquiries.owner_id', $user_id);
-                        }, function ($q) {
-                            if (!auth()->user()->can('view_all_users_filter')) {
-                                $q->where('enquiries.owner_id', auth()->id());
+                            if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                $q->where('enquiries.owner_id', $user_id);
                             }
+                        })
+                        ->when($source_mode, function ($q) use ($source_mode) {
+                            $q->where('enquiries.source_mode', $source_mode);
                         })
                         ->groupBy('project_type');
 
@@ -215,16 +232,18 @@ class AdminController extends Controller
         }
 
         $totalProjects = $projectsQuery->when($user_id, function ($q) use ($user_id) {
-                                            $q->whereHas('enquiry', function ($q2) use ($user_id) {
-                                                $q2->where('owner_id', $user_id);
-                                            });
-                                        }, function ($q) {
-                                            if (!auth()->user()->can('view_all_users_filter')) {
-                                                $q->whereHas('enquiry', function ($q2) {
-                                                    $q2->where('owner_id', auth()->id());
+                                            if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                                $q->whereHas('enquiry', function ($q2) use ($user_id) {
+                                                    $q2->where('owner_id', $user_id);
                                                 });
                                             }
-                                        })->count();
+                                        })
+                                        ->when($source_mode, function ($q) use ($source_mode) {
+                                            $q->whereHas('enquiry', function ($q2) use ($source_mode) {
+                                                $q2->where('source_mode', $source_mode);
+                                            });
+                                        })
+                                        ->count();
 
 
         // Enquiries - Total, Pending & Contacted 
@@ -233,6 +252,9 @@ class AdminController extends Controller
             1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr', 5 => 'May', 6 => 'Jun',
             7 => 'Jul', 8 => 'Aug', 9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
         ];
+
+        $user_id_graph = $request->input('user_id_graph');
+        $source_mode_graph = $request->input('source_mode_graph') ?? NULL;
 
       
         if (empty($selectedMonth) && empty($selectedYear)) {
@@ -246,12 +268,13 @@ class AdminController extends Controller
                                             SUM(CASE WHEN status = "new_enquiry" THEN 1 ELSE 0 END) as pending, 
                                             SUM(CASE WHEN status != "new_enquiry" THEN 1 ELSE 0 END) as contacted')
                         ->whereBetween('enquiry_date', [$start, $end])
-                        ->when($user_id, function ($q) use ($user_id) {
-                            $q->where('enquiries.owner_id', $user_id);
-                        }, function ($q) {
-                            if (!auth()->user()->can('view_all_users_filter')) {
-                                $q->where('enquiries.owner_id', auth()->id());
+                        ->when($user_id_graph, function ($q) use ($user_id_graph) {
+                            if (auth()->user()->can('view_all_users_filter') || $user_id_graph == auth()->id()) {
+                                $q->where('enquiries.owner_id', $user_id_graph);
                             }
+                        })
+                        ->when($source_mode_graph, function ($q) use ($source_mode_graph) {
+                            $q->where('source_mode', $source_mode_graph);
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -280,12 +303,13 @@ class AdminController extends Controller
                                             SUM(CASE WHEN status = "new_enquiry" THEN 1 ELSE 0 END) as pending, 
                                             SUM(CASE WHEN status != "new_enquiry" THEN 1 ELSE 0 END) as contacted')
                         ->whereMonth('enquiry_date', $selectedMonth)
-                        ->when($user_id, function ($q) use ($user_id) {
-                            $q->where('enquiries.owner_id', $user_id);
-                        }, function ($q) {
-                            if (!auth()->user()->can('view_all_users_filter')) {
-                                $q->where('enquiries.owner_id', auth()->id());
+                        ->when($user_id_graph, function ($q) use ($user_id_graph) {
+                            if (auth()->user()->can('view_all_users_filter') || $user_id_graph == auth()->id()) {
+                                $q->where('enquiries.owner_id', $user_id_graph);
                             }
+                        })
+                        ->when($source_mode_graph, function ($q) use ($source_mode_graph) {
+                            $q->where('source_mode', $source_mode_graph);
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -318,12 +342,13 @@ class AdminController extends Controller
                                             SUM(CASE WHEN status = "new_enquiry" THEN 1 ELSE 0 END) as pending, 
                                             SUM(CASE WHEN status != "new_enquiry" THEN 1 ELSE 0 END) as contacted')
                         ->whereYear('enquiry_date', $selectedYear)
-                        ->when($user_id, function ($q) use ($user_id) {
-                            $q->where('enquiries.owner_id', $user_id);
-                        }, function ($q) {
-                            if (!auth()->user()->can('view_all_users_filter')) {
-                                $q->where('enquiries.owner_id', auth()->id());
+                        ->when($user_id_graph, function ($q) use ($user_id_graph) {
+                            if (auth()->user()->can('view_all_users_filter') || $user_id_graph == auth()->id()) {
+                                $q->where('enquiries.owner_id', $user_id_graph);
                             }
+                        })
+                        ->when($source_mode_graph, function ($q) use ($source_mode_graph) {
+                            $q->where('source_mode', $source_mode_graph);
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -351,12 +376,13 @@ class AdminController extends Controller
                                             SUM(CASE WHEN status != "new_enquiry" THEN 1 ELSE 0 END) as contacted')
                         ->whereYear('enquiry_date', $selectedYear)
                         ->whereMonth('enquiry_date', $selectedMonth)
-                        ->when($user_id, function ($q) use ($user_id) {
-                            $q->where('enquiries.owner_id', $user_id);
-                        }, function ($q) {
-                            if (!auth()->user()->can('view_all_users_filter')) {
-                                $q->where('enquiries.owner_id', auth()->id());
+                        ->when($user_id_graph, function ($q) use ($user_id_graph) {
+                            if (auth()->user()->can('view_all_users_filter') || $user_id_graph == auth()->id()) {
+                                $q->where('enquiries.owner_id', $user_id_graph);
                             }
+                        })
+                        ->when($source_mode_graph, function ($q) use ($source_mode_graph) {
+                            $q->where('source_mode', $source_mode_graph);
                         })
                         ->groupBy('label')
                         ->orderBy('label')
@@ -379,7 +405,7 @@ class AdminController extends Controller
             $chartType = 'daywise';
         }
 
-        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','totalCustomers','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone'));
+        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','totalCustomers','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
     }
 
     function clearCache(Request $request)

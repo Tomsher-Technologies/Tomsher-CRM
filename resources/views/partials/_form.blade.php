@@ -61,7 +61,7 @@
         </div>
 
         <div class="col-md-6 mb-1">
-            <label for="project_type_id" class="form-label">Project Category</label>
+            <label for="project_type_id" class="form-label">Project Category <span class="text-danger">*</span></label>
             <select name="project_type_id[]" id="project_type_id" multiple class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                 {{-- <option value="">-- Select Type --</option> --}}
                 @foreach ($projectTypes as $type)
@@ -71,6 +71,17 @@
                     </option>
                 @endforeach
             </select>
+            @error('project_type_id')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
+        </div>
+
+        <div class="col-md-6 mb-1">
+            <label for="project_title" class="form-label">Project Title</label>
+            <input type="text" name="project_title" id="project_title" class="form-control form-control-sm"  value="{{ old('project_title', $enquiry->project_title ?? '') }}">
+            @error('project_title')
+                <span class="text-danger">{{ $message }}</span>
+            @enderror
         </div>
 
         <div class="mb-1 col-md-12">

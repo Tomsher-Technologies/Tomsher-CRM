@@ -8,6 +8,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
+use Carbon\Carbon;
 
 class DailyFollowupMail extends Mailable implements ShouldQueue
 {
@@ -26,7 +27,10 @@ class DailyFollowupMail extends Mailable implements ShouldQueue
 
     public function build()
     {
-        return $this->subject('Daily Follow-up Reminder')
+        $today = Carbon::today()->format('d M Y');
+        $staffName = $this->staff->name ?? 'Staff';
+        
+        return $this->subject("Daily Follow-up Reminder for {$staffName} - {$today}")
                     ->view('emails.daily_followups');
     }
 }
