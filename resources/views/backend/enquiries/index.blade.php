@@ -13,7 +13,7 @@
             <form method="GET" class="row g-3">
 
                 <div class="col-md-3 mb-1">
-                    <input type="text" class="form-control form-control-sm" value="{{ request('enquiry_code') }}" name="enquiry_code" placeholder="Search by enquiry code" >
+                    <input type="text" class="form-control form-control-sm" value="{{ request('keyword') }}" name="keyword" placeholder="Search by enquiry code or title" >
                 </div>
 
                 <div class="col-md-3 mb-1">
@@ -233,7 +233,9 @@
                                         <a href="javascript:void(0)" class="show-popup" data-id="{{ $enquiry->id }}">
                                             <i class="las la-info-circle fs-16 text-primary" style="cursor: pointer;"></i>
                                         </a>
+                                        
                                     </div>
+                                    <span style="color:blue;">{{ $enquiry->project_title ?? '' }}</span>
                                     @if($enquiry->projectTypes->count())
                                         <ul style="font-size: 10px;" class="pl-3 mb-0 mt-1 text-muted">
                                             @foreach($enquiry->projectTypes as $type)
@@ -474,108 +476,107 @@
 @endsection
 
 @section('style')
-<style>
+    <style>
 
-    .proposal-select-card {
-        border: 2px solid #ccc;
-        transition: 0.2s;
-    }
-    .proposal-select-card.selected {
-        border-color: #007bff;
-        background-color: #e9f3ff;
-    }
+        .proposal-select-card {
+            border: 2px solid #ccc;
+            transition: 0.2s;
+        }
+        .proposal-select-card.selected {
+            border-color: #007bff;
+            background-color: #e9f3ff;
+        }
 
-    /* Icon-only Change Status button */
-    .btn-change-status-icon {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        background: #94afff;
-        color: #000000;
-        border-radius: 50%;
-        /* width: calc(2.02rem + 2px);
-        height: calc(2.02rem + 2px); */
-        transition: all 0.3s ease;
-        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
-    }
-    
-    .btn i {
-        font-size: 14px;
-    }
+        /* Icon-only Change Status button */
+        .btn-change-status-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            background: #94afff;
+            color: #000000;
+            border-radius: 50%;
+            /* width: calc(2.02rem + 2px);
+            height: calc(2.02rem + 2px); */
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn i {
+            font-size: 14px;
+        }
 
-    .btn-change-status-icon i {
-        font-size: 13px;
-    }
-    
-    .btn-change-status-icon:hover {
-        background: #0542b3;
-        color: #fff;
-        /* transform: scale(1.1); */
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
-    }
+        .btn-change-status-icon i {
+            font-size: 13px;
+        }
+        
+        .btn-change-status-icon:hover {
+            background: #0542b3;
+            color: #fff;
+            /* transform: scale(1.1); */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+        }
 
-    .popup-card {
-        display: none;
-        position: absolute;
-        top: 40px;
-        right: 0;
-        width: 280px;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
-        z-index: 9999;
-        overflow: hidden;
-        animation: fadeIn 0.3s ease;
-        font-family: 'Segoe UI', sans-serif;
-    }
+        .popup-card {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 280px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease;
+            font-family: 'Segoe UI', sans-serif;
+        }
 
-    .popup-card-header {
-        background: linear-gradient(135deg, #0058a2, #43a1ef);
-        color: #fff;
-        padding: 5px 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        font-weight: 600;
-        font-size: 14px;
-    }
+        .popup-card-header {
+            background: linear-gradient(135deg, #0058a2, #43a1ef);
+            color: #fff;
+            padding: 5px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+        }
 
-    .popup-card-header i.close-popup {
-        cursor: pointer;
-        font-size: 16px;
-        color: #fff;
-        transition: 0.3s;
-    }
+        .popup-card-header i.close-popup {
+            cursor: pointer;
+            font-size: 16px;
+            color: #fff;
+            transition: 0.3s;
+        }
 
-    .popup-card-header i.close-popup:hover {
-        color: #ffc107;
-    }
+        .popup-card-header i.close-popup:hover {
+            color: #ffc107;
+        }
 
-    .popup-card-body {
-        padding: 15px 16px;
-        font-size: 12px;
-        color: #444;
-    }
+        .popup-card-body {
+            padding: 15px 16px;
+            font-size: 12px;
+            color: #444;
+        }
 
-    .popup-card-body div {
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
+        .popup-card-body div {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
 
-    .popup-card-body i {
-        color: #007bff;
-        font-size: 16px;
-    }
+        .popup-card-body i {
+            color: #007bff;
+            font-size: 16px;
+        }
 
-    /* Animation */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-</style>
-    
+        /* Animation */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 @endsection
 
 @section('script')

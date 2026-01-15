@@ -113,4 +113,20 @@
 
 -- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '77', 'view_all_users_filter', 'View All User Filter', 'web', '1', NULL, NULL);
 
-ALTER TABLE `users` ADD `followup_mail_status` TINYINT(1) NOT NULL DEFAULT '0' AFTER `banned`, ADD `followup_cc` JSON NULL DEFAULT NULL AFTER `followup_mail_status`;
+-- ALTER TABLE `users` ADD `followup_mail_status` TINYINT(1) NOT NULL DEFAULT '0' AFTER `banned`, ADD `followup_cc` JSON NULL DEFAULT NULL AFTER `followup_mail_status`;
+
+ALTER TABLE `enquiries` ADD `project_title` VARCHAR(255) NULL DEFAULT NULL AFTER `source_mode`;
+
+INSERT INTO `enquiry_statuses` (`id`, `status_key`, `label`, `bg`, `filter_color`, `list_color`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, 'pipeline', 'Pipeline', '#fff8b7', '#000', '#000', '6', '1', '2025-05-05 13:49:08', '2026-01-06 15:14:00');
+
+UPDATE `enquiry_statuses` SET `sort_order` = '7' WHERE `enquiry_statuses`.`id` = 4;
+UPDATE `enquiry_statuses` SET `sort_order` = '8' WHERE `enquiry_statuses`.`id` = 5;
+UPDATE `enquiry_statuses` SET `sort_order` = '9' WHERE `enquiry_statuses`.`id` = 6;
+UPDATE `enquiry_statuses` SET `sort_order` = '10' WHERE `enquiry_statuses`.`id` = 7;
+UPDATE `enquiry_statuses` SET `sort_order` = '11' WHERE `enquiry_statuses`.`id` = 8;
+UPDATE `enquiry_statuses` SET `sort_order` = '12' WHERE `enquiry_statuses`.`id` = 9;
+UPDATE `enquiry_statuses` SET `bg` = '#be85ff' WHERE `enquiry_statuses`.`id` = 12;
+
+ALTER TABLE `enquiries` CHANGE `status` `status` ENUM('new_enquiry','started_discussion','proposal_submitted','project_approved','project_rejected','not_interested','not_responding','invalid_spam','signed_payment_pending','ongoing_discussion','preparing_scope','pipeline') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'new_enquiry' COMMENT 'New Enquiry, Started Discussion,\r\nOngoing Discussion,\r\nPreparing Scope of Work, Proposal Submitted, \r\nPipeline,\r\nProject Approved, Project Rejected, Not Interested, Not Responding, Invalid/Spam';
+
+ALTER TABLE `enquiry_status_histories` CHANGE `status` `status` ENUM('new_enquiry','started_discussion','proposal_submitted','project_approved','project_rejected','not_interested','not_responding','invalid_spam','signed_payment_pending','ongoing_discussion','preparing_scope','pipeline') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'New Enquiry, Started Discussion,\\r\\nOngoing Discussion,\\r\\nPreparing Scope of Work, Proposal Submitted, Pipeline, Project Approved, Project Rejected, Not Interested, Not Responding, Invalid/Spam';
