@@ -20,35 +20,41 @@
                 <div class="aiz-topbar-item">
                     <div class="d-flex align-items-center">
 
-                        <a class="btn btn-soft-danger btn-sm d-flex align-items-center" href="{{ route('cache.clear')}}">
+                        <a class="btn btn-soft-danger btn-sm d-flex align-items-center pl-2 pr-2" href="{{ route('cache.clear')}}">
                             <i class="las la-hdd fs-20"></i>
                             <span class="fw-500 ml-1 mr-0 d-none d-md-block">{{  trans('messages.clear_cache') }}</span>
                         </a>
 
-                        <a class="btn btn-soft-primary btn-sm d-flex align-items-center ml-1" href="{{ route('customers.index')}}">
+                        <a class="btn btn-soft-dark d-flex btn-sm align-items-center ml-1 pl-2 pr-2" href="{{ route('data.index')}}">
+                            <i class="las la-user fs-20"></i>&nbsp;
+                            <span class="fw-500 d-none d-md-block">Data</span>
+                        </a>
+
+                        <a class="btn btn-soft-primary btn-sm d-flex align-items-center ml-1 pl-2 pr-2" href="{{ route('customers.index')}}">
                             <i class="las la-users fs-20"></i>&nbsp;
                             <span class="fw-500 d-none d-md-block">Customers</span>
                         </a>
 
-                        <a class="btn btn-soft-success btn-sm d-flex align-items-center ml-1" href="{{ route('enquiries.index')}}">
+                        <a class="btn btn-soft-success btn-sm d-flex align-items-center ml-1 pl-2 pr-2" href="{{ route('enquiries.index')}}">
                             <i class="las la-envelope-open fs-20"></i> &nbsp;
                             <span class="fw-500 d-none d-md-block">Enquiries</span>
                         </a>
 
-                        <a class="btn btn-soft-warning btn-sm d-flex align-items-center ml-1" href="{{ route('enquiry-scopes.index')}}">
+                        <a class="btn btn-soft-warning btn-sm d-flex align-items-center ml-1 pl-2 pr-2" href="{{ route('enquiry-scopes.index')}}">
                             <i class="las la-file-alt fs-20"></i> &nbsp;
                             <span class="fw-500 d-none d-md-block">Enquiry Scopes</span>
                         </a>
 
-                        <a class="btn btn-soft-info d-flex btn-sm align-items-center ml-1" href="{{ route('followups.index')}}">
+                        <a class="btn btn-soft-info d-flex btn-sm align-items-center ml-1 pl-2 pr-2" href="{{ route('followups.index')}}">
                             <i class="las la-calendar fs-20"></i>&nbsp;
                             <span class="fw-500 d-none d-md-block">Follow-ups</span>
                         </a>
 
-                        <a class="btn btn-soft-secondary d-flex btn-sm align-items-center ml-1" href="{{ route('projects.index')}}">
+                        <a class="btn btn-soft-secondary d-flex btn-sm align-items-center ml-1 pl-2 pr-2" href="{{ route('projects.index')}}">
                             <i class="las la-cogs fs-20"></i>&nbsp;
                             <span class="fw-500 d-none d-md-block">Projects</span>
                         </a>
+                        
                     </div>
                 </div>
             </div>
