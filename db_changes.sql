@@ -133,123 +133,121 @@
 
 
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_data', 'Manage Data', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, NULL, 'manage_data', 'Manage Data', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'view_data', 'View Data', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'view_data', 'View Data', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'add_data', 'Add Data', 'web', '1', NULL, NULL);
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'add_data', 'Add Data', 'web', '1', NULL, NULL);
 
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'edit_data', 'Edit Data', 'web', '1', NULL, NULL);
-
-
-CREATE TABLE IF NOT EXISTS `datas` (
-  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `data_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
-  `sales_person` int UNSIGNED DEFAULT NULL,
-  `company_name` varchar(255) DEFAULT NULL,
-  `company_email` varchar(100) DEFAULT NULL,
-  `industry_id` int DEFAULT NULL,
-  `company_address` text,
-  `company_country` int DEFAULT NULL,
-  `emirate` int DEFAULT NULL,
-  `website_link` varchar(255) DEFAULT NULL,
-  `google_location` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `industry_id` (`industry_id`),
-  KEY `company_country` (`company_country`),
-  KEY `emirate` (`emirate`),
-  KEY `sales_person` (`sales_person`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'edit_data', 'Edit Data', 'web', '1', NULL, NULL);
 
 
-ALTER TABLE `datas`
-  ADD CONSTRAINT `datas_ibfk_1` FOREIGN KEY (`industry_id`) REFERENCES `industries` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `datas_ibfk_2` FOREIGN KEY (`company_country`) REFERENCES `countries` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `datas_ibfk_3` FOREIGN KEY (`emirate`) REFERENCES `emirates` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `datas_ibfk_4` FOREIGN KEY (`sales_person`) REFERENCES `users` (`id`) ON DELETE CASCADE;
-
-  ALTER TABLE `datas` DROP FOREIGN KEY `datas_ibfk_1`; ALTER TABLE `datas` ADD CONSTRAINT `datas_ibfk_1` FOREIGN KEY (`industry_id`) REFERENCES `industries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `datas` DROP FOREIGN KEY `datas_ibfk_2`; ALTER TABLE `datas` ADD CONSTRAINT `datas_ibfk_2` FOREIGN KEY (`company_country`) REFERENCES `countries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `datas` DROP FOREIGN KEY `datas_ibfk_3`; ALTER TABLE `datas` ADD CONSTRAINT `datas_ibfk_3` FOREIGN KEY (`emirate`) REFERENCES `emirates`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
-
-  ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_1`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`industry_id`) REFERENCES `industries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_2`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_2` FOREIGN KEY (`company_country`) REFERENCES `countries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_3`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_3` FOREIGN KEY (`emirate`) REFERENCES `emirates`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_4`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_4` FOREIGN KEY (`sales_person`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
-
-
-  CREATE TABLE IF NOT EXISTS `data_contacts` (
-  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
-  `data_id` bigint UNSIGNED NOT NULL,
-  `name` varchar(255) DEFAULT NULL,
-  `email` varchar(255) DEFAULT NULL,
-  `landline_number` varchar(50) DEFAULT NULL,
-  `mobile_number` varchar(50) DEFAULT NULL,
-  `whatsapp_number` varchar(50) DEFAULT NULL,
-  `designation` varchar(100) DEFAULT NULL,
-  `is_primary` tinyint(1) NOT NULL DEFAULT '0',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `data_id` (`data_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-ALTER TABLE `data_contacts` ADD CONSTRAINT `data_contacts_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `datas` (`id`) ON DELETE CASCADE;
-
-ALTER TABLE `data_contacts` ADD CONSTRAINT `data_contacts_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `datas` (`id`) ON DELETE CASCADE;
-
-ALTER TABLE `datas` ADD `entry_date` DATE NULL DEFAULT NULL AFTER `data_code`, ADD `status` ENUM('to_be_contacted','contacted','follow_up','not_interested','not_responding','invalid_spam','convert_to_enquiry') NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nFollow Up,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry' AFTER `entry_date`, ADD `requirement` LONGTEXT NULL DEFAULT NULL AFTER `status`;
-
-ALTER TABLE `datas` ADD `last_updated` DATE NULL DEFAULT NULL AFTER `is_active`, ADD `next_followup` DATE NULL DEFAULT NULL AFTER `last_updated`;
-
-ALTER TABLE `datas` ADD `source_id` INT NULL DEFAULT NULL AFTER `status`;
-
-ALTER TABLE `datas` ADD FOREIGN KEY (`source_id`) REFERENCES `enquiry_sources`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
-
-ALTER TABLE `datas` ADD `last_comment` TEXT NULL DEFAULT NULL AFTER `next_followup`;
-
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'import_data', 'Import Data', 'web', '1', NULL, NULL);
-
-CREATE TABLE IF NOT EXISTS `data_statuses` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `status_key` varchar(50) DEFAULT NULL,
-  `label` varchar(50) DEFAULT NULL,
-  `bg` varchar(10) DEFAULT NULL,
-  `filter_color` varchar(10) DEFAULT NULL,
-  `sort_order` int NOT NULL DEFAULT '0',
-  `is_active` tinyint(1) NOT NULL DEFAULT '1',
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
---
--- Dumping data for table `data_statuses`
---
-
-INSERT INTO `data_statuses` (`id`, `status_key`, `label`, `bg`, `filter_color`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
-(1, 'to_be_contacted', 'To Be Contacted', '#d4d4f8', NULL, 1, 1, '2026-01-17 06:39:40', '2026-01-19 11:45:22'),
-(2, 'contacted', 'Contacted', '#5e8aff', NULL, 2, 1, '2026-01-17 06:42:42', '2026-01-19 11:51:15'),
-(3, 'follow_up', 'Follow Up', '#0eced4', NULL, 3, 1, '2026-01-17 06:44:44', '2026-01-19 11:50:35'),
-(4, 'not_interested', 'Not Interested', '#da0000', NULL, 4, 1, '2026-01-17 06:46:34', '2026-01-19 11:48:04'),
-(5, 'not_responding', 'Not Responding', '#f18b8b', NULL, 5, 1, '2026-01-17 06:50:12', '2026-01-19 11:48:33'),
-(6, 'invalid_spam', 'Invalid/Spam', '#848181', NULL, 6, 1, '2026-01-17 07:07:24', '2026-01-19 11:49:01'),
-(7, 'convert_to_enquiry', 'Convert To Enquiry', '#008600', NULL, 7, 1, '2026-01-17 07:07:24', '2026-01-19 11:49:37');
-
-CREATE TABLE IF NOT EXISTS `data_status_histories` (
-  `id` bigint NOT NULL AUTO_INCREMENT,
-  `data_id` bigint UNSIGNED DEFAULT NULL,
-  `status` enum('to_be_contacted','contacted','follow_up','not_interested','not_responding','invalid_spam','convert_to_enquiry') NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nFollow Up,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry',
-  `status_date` date DEFAULT NULL,
-  `comment` text,
-  `followup_date` date DEFAULT NULL,
-  `changed_by` int UNSIGNED DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  KEY `date_id` (`data_id`),
-  KEY `changed_by` (`changed_by`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+-- CREATE TABLE IF NOT EXISTS `datas` (
+--   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+--   `data_code` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL,
+--   `sales_person` int UNSIGNED DEFAULT NULL,
+--   `company_name` varchar(255) DEFAULT NULL,
+--   `company_email` varchar(100) DEFAULT NULL,
+--   `industry_id` int DEFAULT NULL,
+--   `company_address` text,
+--   `company_country` int DEFAULT NULL,
+--   `emirate` int DEFAULT NULL,
+--   `website_link` varchar(255) DEFAULT NULL,
+--   `google_location` text CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci,
+--   `is_active` tinyint(1) NOT NULL DEFAULT '1',
+--   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   PRIMARY KEY (`id`),
+--   KEY `industry_id` (`industry_id`),
+--   KEY `company_country` (`company_country`),
+--   KEY `emirate` (`emirate`),
+--   KEY `sales_person` (`sales_person`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 
-ALTER TABLE `data_status_histories`
-  ADD CONSTRAINT `data_status_histories_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `datas` (`id`) ON DELETE CASCADE,
-  ADD CONSTRAINT `data_status_histories_ibfk_2` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+-- ALTER TABLE `datas`
+--   ADD CONSTRAINT `datas_ibfk_1` FOREIGN KEY (`industry_id`) REFERENCES `industries` (`id`) ON DELETE CASCADE,
+--   ADD CONSTRAINT `datas_ibfk_2` FOREIGN KEY (`company_country`) REFERENCES `countries` (`id`) ON DELETE CASCADE,
+--   ADD CONSTRAINT `datas_ibfk_3` FOREIGN KEY (`emirate`) REFERENCES `emirates` (`id`) ON DELETE CASCADE,
+--   ADD CONSTRAINT `datas_ibfk_4` FOREIGN KEY (`sales_person`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+  -- ALTER TABLE `datas` DROP FOREIGN KEY `datas_ibfk_1`; ALTER TABLE `datas` ADD CONSTRAINT `datas_ibfk_1` FOREIGN KEY (`industry_id`) REFERENCES `industries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `datas` DROP FOREIGN KEY `datas_ibfk_2`; ALTER TABLE `datas` ADD CONSTRAINT `datas_ibfk_2` FOREIGN KEY (`company_country`) REFERENCES `countries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `datas` DROP FOREIGN KEY `datas_ibfk_3`; ALTER TABLE `datas` ADD CONSTRAINT `datas_ibfk_3` FOREIGN KEY (`emirate`) REFERENCES `emirates`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+
+  -- ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_1`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_1` FOREIGN KEY (`industry_id`) REFERENCES `industries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_2`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_2` FOREIGN KEY (`company_country`) REFERENCES `countries`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_3`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_3` FOREIGN KEY (`emirate`) REFERENCES `emirates`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION; ALTER TABLE `customers` DROP FOREIGN KEY `customers_ibfk_4`; ALTER TABLE `customers` ADD CONSTRAINT `customers_ibfk_4` FOREIGN KEY (`sales_person`) REFERENCES `users`(`id`) ON DELETE CASCADE ON UPDATE NO ACTION;
+
+
+--   CREATE TABLE IF NOT EXISTS `data_contacts` (
+--   `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+--   `data_id` bigint UNSIGNED NOT NULL,
+--   `name` varchar(255) DEFAULT NULL,
+--   `email` varchar(255) DEFAULT NULL,
+--   `landline_number` varchar(50) DEFAULT NULL,
+--   `mobile_number` varchar(50) DEFAULT NULL,
+--   `whatsapp_number` varchar(50) DEFAULT NULL,
+--   `designation` varchar(100) DEFAULT NULL,
+--   `is_primary` tinyint(1) NOT NULL DEFAULT '0',
+--   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   PRIMARY KEY (`id`),
+--   KEY `data_id` (`data_id`)
+-- ) ENGINE=InnoDB AUTO_INCREMENT=112 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- ALTER TABLE `data_contacts` ADD CONSTRAINT `data_contacts_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `datas` (`id`) ON DELETE CASCADE;
+
+-- ALTER TABLE `datas` ADD `entry_date` DATE NULL DEFAULT NULL AFTER `data_code`, ADD `status` ENUM('to_be_contacted','contacted','follow_up','not_interested','not_responding','invalid_spam','convert_to_enquiry') NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nFollow Up,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry' AFTER `entry_date`, ADD `requirement` LONGTEXT NULL DEFAULT NULL AFTER `status`;
+
+-- ALTER TABLE `datas` ADD `last_updated` DATE NULL DEFAULT NULL AFTER `is_active`, ADD `next_followup` DATE NULL DEFAULT NULL AFTER `last_updated`;
+
+-- ALTER TABLE `datas` ADD `source_id` INT NULL DEFAULT NULL AFTER `status`;
+
+-- ALTER TABLE `datas` ADD FOREIGN KEY (`source_id`) REFERENCES `enquiry_sources`(`id`) ON DELETE SET NULL ON UPDATE NO ACTION;
+
+-- ALTER TABLE `datas` ADD `last_comment` TEXT NULL DEFAULT NULL AFTER `next_followup`;
+
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'import_data', 'Import Data', 'web', '1', NULL, NULL);
+
+-- CREATE TABLE IF NOT EXISTS `data_statuses` (
+--   `id` int NOT NULL AUTO_INCREMENT,
+--   `status_key` varchar(50) DEFAULT NULL,
+--   `label` varchar(50) DEFAULT NULL,
+--   `bg` varchar(10) DEFAULT NULL,
+--   `filter_color` varchar(10) DEFAULT NULL,
+--   `sort_order` int NOT NULL DEFAULT '0',
+--   `is_active` tinyint(1) NOT NULL DEFAULT '1',
+--   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   PRIMARY KEY (`id`)
+-- ) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --
+-- -- Dumping data for table `data_statuses`
+-- --
+
+-- INSERT INTO `data_statuses` (`id`, `status_key`, `label`, `bg`, `filter_color`, `sort_order`, `is_active`, `created_at`, `updated_at`) VALUES
+-- (1, 'to_be_contacted', 'To Be Contacted', '#d4d4f8', NULL, 1, 1, '2026-01-17 06:39:40', '2026-01-19 11:45:22'),
+-- (2, 'contacted', 'Contacted', '#5e8aff', NULL, 2, 1, '2026-01-17 06:42:42', '2026-01-19 11:51:15'),
+-- (3, 'follow_up', 'Follow Up', '#0eced4', NULL, 3, 1, '2026-01-17 06:44:44', '2026-01-19 11:50:35'),
+-- (4, 'not_interested', 'Not Interested', '#da0000', NULL, 4, 1, '2026-01-17 06:46:34', '2026-01-19 11:48:04'),
+-- (5, 'not_responding', 'Not Responding', '#f18b8b', NULL, 5, 1, '2026-01-17 06:50:12', '2026-01-19 11:48:33'),
+-- (6, 'invalid_spam', 'Invalid/Spam', '#848181', NULL, 6, 1, '2026-01-17 07:07:24', '2026-01-19 11:49:01'),
+-- (7, 'convert_to_enquiry', 'Convert To Enquiry', '#008600', NULL, 7, 1, '2026-01-17 07:07:24', '2026-01-19 11:49:37');
+
+-- CREATE TABLE IF NOT EXISTS `data_status_histories` (
+--   `id` bigint NOT NULL AUTO_INCREMENT,
+--   `data_id` bigint UNSIGNED DEFAULT NULL,
+--   `status` enum('to_be_contacted','contacted','follow_up','not_interested','not_responding','invalid_spam','convert_to_enquiry') NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nFollow Up,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry',
+--   `status_date` date DEFAULT NULL,
+--   `comment` text,
+--   `followup_date` date DEFAULT NULL,
+--   `changed_by` int UNSIGNED DEFAULT NULL,
+--   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+--   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+--   PRIMARY KEY (`id`),
+--   KEY `date_id` (`data_id`),
+--   KEY `changed_by` (`changed_by`)
+-- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+
+-- ALTER TABLE `data_status_histories`
+--   ADD CONSTRAINT `data_status_histories_ibfk_1` FOREIGN KEY (`data_id`) REFERENCES `datas` (`id`) ON DELETE CASCADE,
+--   ADD CONSTRAINT `data_status_histories_ibfk_2` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
