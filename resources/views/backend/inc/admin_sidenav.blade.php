@@ -30,6 +30,33 @@
                         </li>
                     @endcan
 
+                    @canany(['manage_data'])
+                        <li class="aiz-side-nav-item">
+                            <a href="#" class="aiz-side-nav-link">
+                                <i class="las la-user aiz-side-nav-icon fs-18"></i>
+                                <span class="aiz-side-nav-text">Data</span>
+                                <span class="aiz-side-nav-arrow"></span>
+                            </a>
+                            <ul class="aiz-side-nav-list level-2">
+                                @can('add_data')
+                                    <li class="aiz-side-nav-item">
+                                        <a href="{{ route('data.create') }}"
+                                            class="aiz-side-nav-link {{ areActiveRoutes(['data.create']) }}">
+                                            <span class="aiz-side-nav-text">Add New Data</span>
+                                        </a>
+                                    </li>
+                                @endcan
+                                
+                                <li class="aiz-side-nav-item">
+                                    <a href="{{ route('data.index') }}"
+                                        class="aiz-side-nav-link {{ areActiveRoutes(['data.index', 'data.edit', 'data.show','data-import.index']) }}">
+                                        <span class="aiz-side-nav-text">All Data</span>
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+                    @endcanany
+
                     @canany(['manage_customers'])
                         <li class="aiz-side-nav-item">
                             <a href="#" class="aiz-side-nav-link">

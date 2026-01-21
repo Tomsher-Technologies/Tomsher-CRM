@@ -3,7 +3,9 @@
 use App\Models\BusinessSetting;
 use App\Utility\CategoryUtility;
 use App\Models\EnquiryStatus;
+use App\Models\DataStatus;
 use App\Models\EnquiryFollowup;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Request;
@@ -208,6 +210,22 @@ function getEnquiryStatuses(){
                                             'bg' => $status->bg,
                                             'filter_color' => $status->filter_color,
                                             'list_color' => $status->list_color
+                                        ]
+                                    ];
+                                })
+                                ->toArray();
+    return $stutuses;
+}
+
+function getDataStatuses(){
+    $stutuses = DataStatus::where('is_active', 1)->orderBy('sort_order','asc')->get()
+                                ->mapWithKeys(function ($status) {
+                                    return [
+                                        $status->status_key => [
+                                            'label' => $status->label,
+                                            'bg' => $status->bg,
+                                            'filter_color' => $status->filter_color,
+                                            // 'list_color' => $status->list_color
                                         ]
                                     ];
                                 })
