@@ -11,6 +11,7 @@ use App\Http\Controllers\TechnologyController;
 use App\Http\Controllers\ProjectTypesController;
 use App\Http\Controllers\EnquirySourcesController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\DataController;
 use App\Http\Controllers\EnquiryController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\EnquiryFollowupController;
@@ -69,6 +70,15 @@ Route::group(['middleware' => ['auth']], function () {
     Route::post('/enquiry-sources/update/{id}', [EnquirySourcesController::class, 'update'])->name('enquiry_sources.update');
     Route::post('/enquiry-sources/status', [EnquirySourcesController::class, 'updateStatus'])->name('enquiry_sources.status');
     Route::get('/enquiry-sources/delete/{id}', [EnquirySourcesController::class, 'destroy'])->name('enquiry_sources.destroy');
+
+    Route::resource('data', DataController::class);
+    Route::post('/data/change-status', [DataController::class, 'changeStatus'])->name('data.changeStatus');
+    Route::get('/data/{id}', [DataController::class, 'show'])->name('data.show');
+    Route::get('/data-details/{id}/{status}', [DataController::class, 'getStatusData']);
+    Route::get('/data-import', [DataController::class, 'importData'])->name('data-import.index');
+    Route::post('/data/import', [DataController::class, 'import'])->name('data.import');
+    Route::get('/data/{id}/timeline', [DataController::class, 'timeline'])->name('data.timeline');
+
 
     Route::resource('customers', CustomerController::class);
     Route::post('/customer/status', [CustomerController::class, 'updateStatus'])->name('customer.status');

@@ -7,16 +7,16 @@
     .info-label {
         font-weight: 600;
         color: #000;
-        font-size: 14px;
+        font-size: 12px;
         margin-bottom: 4px;
     }
     .info-value {
-        font-size: 14px;
+        font-size: 12px;
         color: #333;
         margin-bottom: 16px;
     }
     .section-title {
-        font-size: 14px;
+        font-size: 16px;
         font-weight: 600;
         color: #2c3e50;
         border-left: 5px solid #0d6efd;
