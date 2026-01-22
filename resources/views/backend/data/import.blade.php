@@ -42,7 +42,7 @@
                         <ul class="list-unstyled mb-0">
                             <li class="mb-1"><strong>to_be_contacted</strong> – To Be Contacted</li>
                             <li class="mb-1"><strong>contacted</strong> – Contacted</li>
-                            <li class="mb-1"><strong>follow_up</strong> – Follow Up</li>
+                            <li class="mb-1"><strong>ongoing_discussion</strong> – Ongoing Discussion</li>
                             <li class="mb-1"><strong>not_interested</strong> – Not Interested</li>
                             <li class="mb-1"><strong>not_responding</strong> – Not Responding</li>
                             <li class="mb-1"><strong>invalid_spam</strong> – Invalid / Spam</li>
