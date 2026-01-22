@@ -200,6 +200,9 @@ class DataController extends Controller
     public function edit($id)
     {
         $data = Data::findOrFail($id);
+        if (auth()->user()->cannot('edit_all_data') && auth()->id() !== $data->sales_person) {
+            abort(403, 'Unauthorized access');
+        }
         $industries = Industry::where('status',1)->orderBy('name','ASC')->get();
         $countries = Country::orderBy('name','ASC')->get();
         $emirates = Emirate::orderBy('name','ASC')->get();
@@ -219,6 +222,10 @@ class DataController extends Controller
 
         DB::transaction(function () use ($request, $validated, $id) {
             $data = Data::findOrFail($id);
+
+            if (auth()->user()->cannot('edit_all_data') && auth()->id() !== $data->sales_person) {
+                abort(403, 'Unauthorized access');
+            }
 
             $old_sale_person = $data->sales_person;
             $data->update([
@@ -265,7 +272,7 @@ class DataController extends Controller
     {
         $request->validate([
             'data_id' => 'required|exists:datas,id',
-            'status' => 'required|in:to_be_contacted,contacted,follow_up,not_interested,not_responding,invalid_spam,convert_to_enquiry',
+            'status' => 'required|in:to_be_contacted,contacted,ongoing_discussion,not_interested,not_responding,invalid_spam,convert_to_enquiry',
             'status_date' => 'required|date',
             'comment' => 'nullable|string',
         ]);
@@ -342,7 +349,7 @@ class DataController extends Controller
 
             $validated['enquiry_date'] = date('Y-m-d');
             $validated['enquiry_source_id'] = $data->source_id;
-            $validated['project_details'] = $data->requirement;
+            $validated['project_details'] = $request->comment ?? NULL;
             $validated['source_mode'] = 'self';
             $validated['status'] = 'new_enquiry';
 
@@ -366,10 +373,13 @@ class DataController extends Controller
                 'transferred_by' => NULL,
                 'transferred_to' => $data->sales_person ?? auth()->id(),
             ]);
-        }
 
-        flash('Data status updated successfully.')->success();
-        return response()->json(['success' => true]);
+            flash('Data status updated successfully.')->success();
+            return response()->json(['success' => true, 'route' => route('enquiries.edit', $enquiry)]);
+        }else{
+            flash('Data status updated successfully.')->success();
+            return response()->json(['success' => true, 'route' => $request->session()->get('data_last_url') ?? route('data.index')]);
+        }
     }
 
     public function getStatusData($id, $status)
