@@ -69,7 +69,52 @@
                         <tr @if($cust->is_active != 1) style="background:#f7d3d369;" @endif>
                             <td class="text-center">{{ ($key+1) + ($customers->currentPage() - 1)*$customers->perPage() }}</td>
                             <td>{{ $cust->customer_code }}</td>
-                            <td style="word-break: break-all;">{{ $cust->company_name }}</td>
+                            
+                            <td style="word-break: break-word;position: relative;">
+                                    
+                                <div>
+                                    {{ $cust->company_name }}
+                                    <a href="javascript:void(0)" class="show-popup-company" data-id="{{ $key }}">
+                                        <i class="las la-info-circle fs-16 text-primary" style="cursor: pointer;"></i>
+                                    </a>
+                                </div>
+
+                                <div class="popup-card-company" id="popup-company-{{ $key }}">
+                                    <div class="popup-card-header">
+                                        <span><i class="las la-id-card"></i> Company Info</span>
+                                        <i class="las la-times close-popup-company" data-id="{{ $key }}"></i>
+                                    </div>
+                                    <div class="popup-card-body">
+                                        @if ($cust->company_name)
+                                            <div><strong>Company Name :</strong>
+                                                {{ $cust->company_name }}</div>
+                                        @endif
+                                        @if ($cust->company_email)
+                                            <div> <strong>Email :</strong>
+                                                {{ $cust->company_email }}</div>
+                                        @endif
+                                        @if ($cust->company_address)
+                                            <div><strong>Address :</strong>
+                                                {{ $cust->company_address }}</div>
+                                        @endif
+                                        @if ($cust->company_country)
+                                            <div><strong>Country :</strong>
+                                                {{ $cust->country?->name }}</div>
+                                        @endif
+
+                                        @if ($cust->emirate)
+                                            <div> <strong>Emirate :</strong>
+                                                {{ $cust->uae_emirate?->name }}</div>
+                                        @endif
+                                        @if ($cust->website_link)
+                                            <div> <strong>Website :</strong>
+                                                {{ $cust->website_link }}</div>
+                                        @endif
+                                    </div>
+                                </div>
+
+                            </td>
+
                             <td style="position: relative;">
                                 @php $primary = $cust->main_contact; @endphp
                             
@@ -177,6 +222,63 @@
 
 @section('style')
 <style>
+     .popup-card-company {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 280px;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 10px 35px rgba(0, 0, 0, 0.1);
+            z-index: 9999;
+            overflow: hidden;
+            animation: fadeIn 0.3s ease;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        /* .popup-card-header {
+            background: linear-gradient(135deg, #0058a2, #43a1ef);
+            color: #fff;
+            padding: 5px 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+            font-size: 14px;
+        } */
+
+        .popup-card-header i.close-popup-company {
+            cursor: pointer;
+            font-size: 16px;
+            color: #fff;
+            transition: 0.3s;
+        }
+
+        .popup-card-header i.close-popup-company:hover {
+            color: #ffc107;
+        }
+
+        /* .popup-card-body {
+            padding: 15px 16px;
+            font-size: 12px;
+            color: #444;
+        }
+
+        .popup-card-body div {
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .popup-card-body i {
+            color: #007bff;
+            font-size: 16px;
+        } */
+
+
+
     .popup-card {
         display: none;
         position: absolute;
@@ -221,8 +323,8 @@
     }
 
     .popup-card-body div {
-        margin-bottom: 10px;
-        display: flex;
+        margin-bottom: 5px;
+        /* display: flex; */
         align-items: center;
         gap: 6px;
     }
@@ -267,6 +369,18 @@
     });
 
 
+    $(document).on('click', '.show-popup-company', function(e) {
+        e.stopPropagation();
+        $('.popup-card-company').hide(); // hide others
+        const idd = $(this).data('id');
+        $('#popup-company-' + idd).fadeIn(200);
+    });
+
+    $(document).on('click', '.close-popup-company', function(e) {
+        e.stopPropagation();
+        const id = $(this).data('id');
+        $('#popup-company-' + id).fadeOut(200);
+    });
 
 
     function update_status(el) {
