@@ -331,6 +331,7 @@ class EnquiryController extends Controller
     {
         $request->session()->put('previous_section', 'enquiry_view');
         $request->session()->put('enquiry_view_last_url', url()->full());
+        $request->session()->put('enquiry_scopes_last_url', url()->full());
 
         $enquiry = Enquiry::with(['followups' => function($query) {
             $query->orderBy('followup_time', 'asc');
