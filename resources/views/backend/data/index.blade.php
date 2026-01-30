@@ -7,11 +7,11 @@
             <h5 class="mb-0">All Data</h5>
             <div>
                 @can('add_data')
-                    <a href="{{ route('data.create') }}" class="btn btn-success">Add Data</a>
+                    <a href="{{ route('data.create') }}" class="btn btn-success btn-sm">Add Data</a>
                 @endcan
 
                 @can('import_data')
-                    <a href="{{ route('data-import.index') }}" class="btn btn-warning">Import Data</a>
+                    <a href="{{ route('data-import.index') }}" class="btn btn-warning btn-sm">Import Data</a>
                 @endcan
             </div>
         </div>
@@ -89,10 +89,10 @@
                         data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
                 </div>
 
-                <div class="col-sm-2 d-flex mt-1 ">
+                <div class="col-sm-2  mt-1 ">
                     <input type="hidden" value="{{ request('sort_by') }}" name="sort_by" id="sort_by_form">
-                    <button type="submit" class="btn btn-xs btn-primary ">Filter</button>
-                    <button class="btn btn-xs ml-1 btn-secondary"><a href="{{ route('data.index') }}"
+                    <button type="submit" class="btn btn-xs btn-primary mt-2">Filter</button>
+                    <button class="btn btn-xs ml-1 btn-secondary mt-2"><a href="{{ route('data.index') }}"
                             class="text-white">Reset</a></button>
                 </div>
             </form>

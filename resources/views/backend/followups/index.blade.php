@@ -6,7 +6,7 @@
     <div class="card-header">
         <h5 class="mb-0">All Follow-ups</h5>
         @can('add_followups')
-            <a href="{{ route('followups.create') }}" class="btn btn-success">Add Followups</a>
+            <a href="{{ route('followups.create') }}" class="btn btn-success btn-sm">Add Followups</a>
         @endcan
     </div>
     <div class="card-body">
@@ -83,8 +83,8 @@
         
             <!-- Submit -->
             <div class="col-md-2 d-flex align-items-end mb-1">
-                <button class="btn btn-primary w-50">Filter</button>
-                <a href="{{ route('followups.index') }}" class="btn btn-secondary w-5  ml-1">Reset</a>
+                <button class="btn btn-primary w-50 btn-sm">Filter</button>
+                <a href="{{ route('followups.index') }}" class="btn btn-secondary w-5  ml-1 btn-sm">Reset</a>
             </div>
         </form>
 

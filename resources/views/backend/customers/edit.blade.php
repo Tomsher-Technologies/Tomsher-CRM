@@ -139,13 +139,13 @@
                     </div>
                     @endforeach
                 </div>
-                <button type="button" id="add-contact" class="btn btn-outline-primary mt-3">+ Add Contact</button>
+                <button type="button" id="add-contact" class="btn btn-outline-primary mt-3 btn-sm">+ Add Contact</button>
             </div>
 
             <!-- SUBMIT BUTTON -->
             <div class="mt-4 text-start">
-                <button type="submit" class="btn btn-success">Update Customer</button>
-                <a href="{{ Session::has('customers_last_url') ? Session::get('customers_last_url') : route('customers.index') }}" class="btn btn-info">Cancel</a>
+                <button type="submit" class="btn btn-success btn-sm">Update Customer</button>
+                <a href="{{ Session::has('customers_last_url') ? Session::get('customers_last_url') : route('customers.index') }}" class="btn btn-info btn-sm">Cancel</a>
             </div>
         </form>
     </div>

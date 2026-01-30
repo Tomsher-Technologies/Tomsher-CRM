@@ -5,7 +5,7 @@
         <div class="card-header">
             <h5 class="mb-0">All Projects</h5>
             @can('add_project')
-                <a href="{{ route('projects.create') }}" class="btn btn-success">Add Project</a>
+                <a href="{{ route('projects.create') }}" class="btn btn-success btn-sm">Add Project</a>
             @endcan
         </div>
         <div class="card-body">
@@ -70,9 +70,9 @@
                         <option value="not_completed" {{ request('payment_status') == 'not_completed' ? 'selected' : '' }}>Not Completed</option>
                     </select>
                 </div>
-                <div class="col-md-2 d-flex gap-2 mb-1">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                    <a href="{{ route('projects.index') }}" class="btn btn-secondary w-100  ml-1">Reset</a>
+                <div class="col-md-2 gap-2 mb-1">
+                    <button type="submit" class="btn btn-primary btn-sm ">Filter</button>
+                    <a href="{{ route('projects.index') }}" class="btn btn-secondary btn-sm ml-1">Reset</a>
                 </div>
             </form>
            

@@ -6,7 +6,7 @@
     <div class="card-header">
         <h5 class="mb-0">All Customers</h5>
         @can('add_customer')
-            <a href="{{ route('customers.create') }}" class="btn btn-success" >Add Customer</a>
+            <a href="{{ route('customers.create') }}" class="btn btn-success btn-sm" >Add Customer</a>
         @endcan
     </div>
     <div class="card-body">
@@ -44,9 +44,9 @@
                 </select>
             </div>
 
-            <div class="col-md-2 d-flex gap-2">
-                <button type="submit" class="btn btn-primary w-100">Filter</button>
-                <a href="{{ route('customers.index') }}" class="btn btn-secondary w-100">Reset</a>
+            <div class="col-md-2  gap-2">
+                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                <a href="{{ route('customers.index') }}" class="btn btn-secondary btn-sm ">Reset</a>
             </div>
         </form>
         <table class="table table-bordered aiz-table mb-0">

@@ -5,7 +5,7 @@
         <div class="card-header">
             <h5 class="mb-0">All Enquiries</h5>
             @can('add_enquiries')
-                <a href="{{ route('enquiries.create') }}" class="btn btn-success">Add Enquiry</a>
+                <a href="{{ route('enquiries.create') }}" class="btn btn-success btn-sm">Add Enquiry</a>
             @endcan
         </div>
         <div class="card-body">
@@ -136,7 +136,7 @@
                     </select>
                 </div>
 
-                <div class="col-md-2 d-flex gap-2 ">
+                <div class="col-md-2  gap-2 ">
                     <input type="hidden" value="{{ request('sort_by') }}" name="sort_by" id="sort_by_form" >
                     <button type="submit" class="btn btn-primary btn-sm">Filter</button>
                     <a href="{{ route('enquiries.index') }}" class="btn btn-secondary  btn-sm  ml-1">Reset</a>
