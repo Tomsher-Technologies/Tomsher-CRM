@@ -47,8 +47,8 @@
                 </div>
                
                 <div class="col-md-2 d-flex gap-2 mb-1">
-                    <button type="submit" class="btn btn-primary w-100">Filter</button>
-                    <a href="{{ route('enquiry-scopes.index') }}" class="btn btn-secondary w-100  ml-1">Reset</a>
+                    <button type="submit" class="btn btn-primary w-100 btn-sm">Filter</button>
+                    <a href="{{ route('enquiry-scopes.index') }}" class="btn btn-secondary w-100  ml-1 btn-sm">Reset</a>
                 </div>
             </form>
             

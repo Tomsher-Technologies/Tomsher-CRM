@@ -125,10 +125,10 @@
                 </div>
             </div>
             <div class="text-end">
-                <button type="submit" class="btn btn-success px-4">
+                <button type="submit" class="btn btn-success btn-sm px-4">
                     <i class="bi bi-save me-1"></i> Create Project
                 </button>
-                <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('projects.index') }}" class="btn btn-info" >Cancel</a>
+                <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('projects.index') }}" class="btn btn-info btn-sm" >Cancel</a>
             </div>
         </form>
     </div>

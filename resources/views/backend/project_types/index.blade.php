@@ -6,7 +6,7 @@
     <div class="card-header">
         <h5 class="mb-0">All Project Categories</h5>
         @can('add_project_type')
-            <button class="btn btn-success" data-toggle="modal" data-target="#categoryModal">Add Project Category</button>
+            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#categoryModal">Add Project Category</button>
         @endcan
     
     </div>
@@ -25,8 +25,8 @@
             </div>
 
             <div class="col-md-4 mb-1">
-                <button class="btn btn-info " type="submit">Filter</button>
-                <a href="{{ route('project_category.index') }}" class="btn btn-cancel">Reset</a>
+                <button class="btn btn-info  btn-sm" type="submit">Filter</button>
+                <a href="{{ route('project_category.index') }}" class="btn btn-cancel btn-sm">Reset</a>
             </div>
         </form>
 
@@ -96,8 +96,8 @@
                         <input type="text" class="form-control form-control-sm" id="name" placeholder="Enter project category name" >
                         <input type="hidden" id="project_typeId">
                         <span id="errorShow" class="mt-1 error" style="color: red;"></span><br>
-                        <button type="submit" class="btn btn-primary mt-3" id="saveBtn">Save</button>
-                        <button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary mt-3 btn-sm" id="saveBtn">Save</button>
+                        <button type="button" class="btn btn-secondary mt-3 btn-sm" data-dismiss="modal">Cancel</button>
                     </form>
                 </div>
             </div>

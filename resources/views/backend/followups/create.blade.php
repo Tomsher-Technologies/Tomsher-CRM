@@ -133,17 +133,17 @@
                 </div>
 
                 <div class="col-12 text-center">
-                    <button class="btn btn-success mt-3">💾 Save Follow-up</button>
+                    <button class="btn btn-success mt-3 btn-sm">💾 Save Follow-up</button>
                     
 
                     @if (Session::has('previous_section') && Session::get('previous_section') === 'enquiry')
-                        <a href="{{ Session::has('enquiries_last_url') ? Session::get('enquiries_last_url') : route('enquiries.index') }}" class="btn btn-info mt-3" >Cancel</a>
+                        <a href="{{ Session::has('enquiries_last_url') ? Session::get('enquiries_last_url') : route('enquiries.index') }}" class="btn btn-info mt-3 btn-sm" >Cancel</a>
                     @elseif (Session::has('previous_section') && Session::get('previous_section') === 'followup')
-                        <a href="{{ Session::has('followups_last_url') ? Session::get('followups_last_url') : route('followups.index') }}" class="btn btn-info mt-3" >Cancel</a>
+                        <a href="{{ Session::has('followups_last_url') ? Session::get('followups_last_url') : route('followups.index') }}" class="btn btn-info mt-3 btn-sm  " >Cancel</a>
                     @elseif (Session::has('previous_section') && Session::get('previous_section') === 'enquiry_view')
-                        <a href="{{ Session::has('enquiry_view_last_url') ? Session::get('enquiry_view_last_url') : route('enquiries.index') }}" class="btn btn-info mt-3" >Cancel</a>
+                        <a href="{{ Session::has('enquiry_view_last_url') ? Session::get('enquiry_view_last_url') : route('enquiries.index') }}" class="btn btn-info mt-3 btn-sm" >Cancel</a>
                     @else
-                        <a href="{{ route('followups.index') }}" class="btn btn-info mt-3" >Cancel</a>
+                        <a href="{{ route('followups.index') }}" class="btn btn-info mt-3 btn-sm" >Cancel</a>
                     @endif
                     
                 </div>

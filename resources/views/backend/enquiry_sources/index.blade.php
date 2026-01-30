@@ -5,7 +5,7 @@
     <div class="card-header">
         <h5 class="mb-0 ">All Enquiry Sources</h5>
         @can('add_enquiry_source')
-            <button class="btn btn-success" data-toggle="modal" data-target="#enquiry_sourceModal">Add Enquiry Source</button>
+            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#enquiry_sourceModal">Add Enquiry Source</button>
         @endcan
     </div>
     <div class="card-body">
@@ -23,8 +23,8 @@
             </div>
 
             <div class="col-md-4 mb-1">
-                <button class="btn btn-info " type="submit">Filter</button>
-                <a href="{{ route('enquiry_sources.index') }}" class="btn btn-cancel">Reset</a>
+                <button class="btn btn-info btn-sm " type="submit">Filter</button>
+                <a href="{{ route('enquiry_sources.index') }}" class="btn btn-cancel btn-sm">Reset</a>
             </div>
         </form>
         <table class="table aiz-table table-bordered mb-0">
@@ -93,8 +93,8 @@
                         <input type="text" class="form-control" id="name" placeholder="Enter enquiry source name" >
                         <input type="hidden" id="enquiry_sourceId">
                         <span id="errorShow" class="mt-1 error" style="color: red;"></span><br>
-                        <button type="submit" class="btn btn-primary mt-3" id="saveBtn">Save</button>
-                        <button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary btn-sm mt-3" id="saveBtn">Save</button>
+                        <button type="button" class="btn btn-secondary btn-sm mt-3" data-dismiss="modal">Cancel</button>
                     </form>
                 </div>
             </div>

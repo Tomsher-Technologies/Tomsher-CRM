@@ -6,7 +6,7 @@
     <div class="card-header">
         <h5 class="mb-0">All Technologies</h5>
         @can('add_technology')
-            <button class="btn btn-success" data-toggle="modal" data-target="#technologyModal">Add Technology</button>
+            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#technologyModal">Add Technology</button>
         @endcan
     </div>
     <div class="card-body">
@@ -24,8 +24,8 @@
             </div>
 
             <div class="col-md-4 mb-1">
-                <button class="btn btn-info " type="submit">Filter</button>
-                <a href="{{ route('technologies.index') }}" class="btn btn-cancel">Reset</a>
+                <button class="btn btn-info  btn-sm" type="submit">Filter</button>
+                <a href="{{ route('technologies.index') }}" class="btn btn-cancel btn-sm">Reset</a>
             </div>
         </form>
         <table class="table table-bordered aiz-table mb-0">
@@ -94,8 +94,8 @@
                         <input type="text" class="form-control form-control-sm" id="name" placeholder="Enter technology name" >
                         <input type="hidden" id="technologyId">
                         <span id="errorShow" class="mt-1 error" style="color: red;"></span><br>
-                        <button type="submit" class="btn btn-primary mt-3" id="saveBtn">Save</button>
-                        <button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary mt-3 btn-sm" id="saveBtn">Save</button>
+                        <button type="button" class="btn btn-secondary mt-3 btn-sm" data-dismiss="modal">Cancel</button>
                     </form>
                 </div>
             </div>

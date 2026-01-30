@@ -6,7 +6,7 @@
     <div class="card-header">
         <h5 class="mb-0 h6">{{trans('messages.all_staffs')}}</h5>
         @can('add_staff')
-            <a href="{{ route('staffs.create') }}" class="btn btn-circle btn-success">
+            <a href="{{ route('staffs.create') }}" class="btn btn-circle btn-success btn-sm">
                 <span>{{trans('messages.add_new_staffs')}}</span>
             </a>
         @endcan
@@ -31,8 +31,8 @@
             </div>
             
             <div class="col-md-4 mb-1">
-                <button class="btn btn-info " type="submit">Filter</button>
-                <a href="{{ route('staffs.index') }}" class="btn btn-cancel">Reset</a>
+                <button class="btn btn-info btn-sm" type="submit">Filter</button>
+                <a href="{{ route('staffs.index') }}" class="btn btn-cancel btn-sm">Reset</a>
             </div>
         </form>
         <table class="table table-bordered aiz-table mb-0">

@@ -6,7 +6,7 @@
     <div class="card-header">
         <h5 class="mb-0">All Industries</h5>
         @can('add_industry')
-            <button class="btn btn-success" data-toggle="modal" data-target="#industryModal">Add Industry</button>
+            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#industryModal">Add Industry</button>
         @endcan
     </div>
     <div class="card-body">
@@ -34,8 +34,8 @@
             </div>
 
             <div class="col-md-2 mb-1">
-                <button class="btn btn-info " type="submit">Filter</button>
-                <a href="{{ route('industries.index') }}" class="btn btn-cancel">Reset</a>
+                <button class="btn btn-info  btn-sm" type="submit">Filter</button>
+                <a href="{{ route('industries.index') }}" class="btn btn-cancel btn-sm">Reset</a>
             </div>
         </form>
 
@@ -124,8 +124,8 @@
                         </div>
                         <input type="hidden" id="industryId">
                         <span id="errorShow" class="mt-1 error" style="color: red;"></span><br>
-                        <button type="submit" class="btn btn-primary mt-3" id="saveBtn">Save</button>
-                        <button type="button" class="btn btn-secondary mt-3" data-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary mt-3 btn-sm" id="saveBtn">Save</button>
+                        <button type="button" class="btn btn-secondary mt-3 btn-sm" data-dismiss="modal">Cancel</button>
                     </form>
                 </div>
             </div>
