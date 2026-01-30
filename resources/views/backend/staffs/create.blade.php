@@ -106,8 +106,8 @@
 
 
                     <div class="form-group mb-0 text-right">
-                        <button type="submit" class="btn btn-primary">{{trans('messages.Save')}}</button>
-                        <a href="{{ route('staffs.index') }}" class="btn btn-cancel">Cancel</a>
+                        <button type="submit" class="btn btn-primary btn-sm">{{trans('messages.Save')}}</button>
+                        <a href="{{ route('staffs.index') }}" class="btn btn-cancel btn-sm">Cancel</a>
                     </div>
                 </div>
             </form>

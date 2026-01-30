@@ -135,10 +135,10 @@
 
 
             <div class="text-end">
-                <button type="submit" class="btn btn-success px-4">
+                <button type="submit" class="btn btn-success px-4 btn-sm">
                     <i class="bi bi-save me-1"></i> Update Project
                 </button>
-                <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('projects.index') }}" class="btn btn-info" >Cancel</a>
+                <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('projects.index') }}" class="btn btn-info btn-sm" >Cancel</a>
             </div>
         </form>
     </div>

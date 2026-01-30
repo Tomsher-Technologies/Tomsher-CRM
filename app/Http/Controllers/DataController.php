@@ -394,7 +394,9 @@ class DataController extends Controller
     }
 
     public function importData(){
-        return view('backend.data.import');
+
+        $sources = EnquirySource::where('status', 1)->orderBy('name', 'asc')->get();
+        return view('backend.data.import', compact('sources'));
     }
 
     public function import(Request $request)

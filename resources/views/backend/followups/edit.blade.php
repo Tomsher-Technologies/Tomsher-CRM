@@ -54,8 +54,8 @@
                     @enderror
                 </div>                
 
-                <button class="btn btn-success mt-3">Update</button>
-                <a href="{{ Session::has('followups_last_url') ? Session::get('followups_last_url') : route('followups.index') }}" class="btn btn-info mt-3" >Cancel</a>
+                <button class="btn btn-success mt-3 btn-sm">Update</button>
+                <a href="{{ Session::has('followups_last_url') ? Session::get('followups_last_url') : route('followups.index') }}" class="btn btn-info mt-3 btn-sm" >Cancel</a>
             </form>
         </div>
     </div>

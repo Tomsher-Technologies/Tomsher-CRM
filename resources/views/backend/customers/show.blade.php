@@ -37,10 +37,10 @@
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h3><i class="fas fa-building me-2"></i>Customer Details</h3>
         <div>
-            <a href="{{ Session::has('customers_last_url') ? Session::get('customers_last_url') : route('customers.index') }}" class="btn btn-outline-primary me-2">
+            <a href="{{ Session::has('customers_last_url') ? Session::get('customers_last_url') : route('customers.index') }}" class="btn btn-outline-primary me-2 btn-sm">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <a href="{{ route('customers.edit', $customer->id) }}" class="btn btn-primary">
+            <a href="{{ route('customers.edit', $customer->id) }}" class="btn btn-primary btn-sm">
                 <i class="fas fa-edit"></i> Edit
             </a>
         </div>

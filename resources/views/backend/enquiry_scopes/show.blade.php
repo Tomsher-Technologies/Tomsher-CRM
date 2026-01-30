@@ -44,7 +44,7 @@
                 @can('edit_enquiry_scope_work')
                     @if($scope->status != 'closed')
                         <div class="d-flex justify-content-end mt-2">
-                            <button class="btn btn-md btn-success" data-toggle="modal" data-target="#editScopeModal">
+                            <button class="btn btn-sm btn-success" data-toggle="modal" data-target="#editScopeModal">
                                 Edit Scope Content
                             </button>
                         </div>
@@ -72,8 +72,8 @@
                     </div>
 
                     <div class="modal-footer">
-                        <button class="btn btn-success">Save Changes</button>
-                        <button type="button" class="btn btn-danger" class="close" data-dismiss="modal">Cancel</button>
+                        <button class="btn btn-success btn-sm">Save Changes</button>
+                        <button type="button" class="btn btn-danger btn-sm" class="close" data-dismiss="modal">Cancel</button>
                     </div>
                 </div>
             </form>

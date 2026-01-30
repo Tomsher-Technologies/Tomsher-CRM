@@ -88,9 +88,13 @@
             <a href="{{ Session::has('data_last_url') ? Session::get('data_last_url') : route('data.index') }}" class="btn btn-outline-primary btn-sm me-2">
                 <i class="fas fa-arrow-left"></i> Back
             </a>
-            <a href="{{ route('data.edit', $data->id) }}" class="btn btn-sm btn-primary">
-                <i class="fas fa-edit"></i> Edit
-            </a>
+            @if ($data->status != 'convert_to_enquiry' && ((auth()->user()->id === $data->sales_person) || auth()->user()->can('edit_all_data')))
+                @can('edit_data')
+                    <a href="{{ route('data.edit', $data->id) }}" class="btn btn-sm btn-primary">
+                        <i class="fas fa-edit"></i> Edit
+                    </a>
+                @endcan
+            @endif
         </div>
     </div>
 
@@ -111,7 +115,8 @@
                     @php
                         $statuses = getDataStatuses();
                     @endphp
-                    <span class="badge  badge-inline " style="background: {{$statuses[$data->status]['bg'] ?? '' }}; color:{{$statuses[$data->status]['list_color'] ?? '' }}">
+                    
+                    <span class="badge  badge-inline " style="background: {{$statuses[$data->status]['bg'] ?? '' }}; color:{{$statuses[$data->status]['filter_color'] ?? '' }}">
                         {{ ucfirst(str_replace('_', ' ', $data->status)) }}
                     </span>
                 </div>

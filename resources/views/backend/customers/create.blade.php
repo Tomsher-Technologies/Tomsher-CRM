@@ -98,14 +98,14 @@
             <div>
                 <h5 class=" mb-3">👥 Contact Persons</h5>
                 <div id="contact-persons" class="mb-4"></div>
-                <button type="button" id="add-contact" class="btn btn-outline-primary mt-3">+ Add Contact</button>
+                <button type="button" id="add-contact" class="btn btn-outline-primary mt-3 btn-sm">+ Add Contact</button>
             </div>
 
             <!-- SUBMIT BUTTON -->
             <div class="mt-4 text-start">
-                <button type="submit" class="btn btn-success" name="button" value="save">Save</button>
-                <button type="submit" class="btn btn-soft-success" name="button" value="save_create">Save & Create Enquiry</button>
-                <a href="{{ route('customers.index') }}" class="btn btn-info" >Cancel</a>
+                <button type="submit" class="btn btn-success btn-sm" name="button" value="save">Save</button>
+                <button type="submit" class="btn btn-soft-success btn-sm" name="button" value="save_create">Save & Create Enquiry</button>
+                <a href="{{ route('customers.index') }}" class="btn btn-info btn-sm" >Cancel</a>
             </div>
         </form>
 

@@ -129,7 +129,7 @@
         @endcan
 
         <div class="text-end mt-4">
-            <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('enquiries.index') }}" class="btn btn-primary">Back to Projects</a>
+            <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('enquiries.index') }}" class="btn btn-primary btn-sm">Back to Projects</a>
         </div>
     </div>
 </div>

@@ -16,13 +16,15 @@
    <div class="card-body">
         <div class="row">
             <!-- Left Column: Import Form -->
-            <div class="col-md-8 m-auto">
+            <div class="col-md-4 m-auto p-0">
                 <h6 class="fw-bold mb-2">Import Excel File</h6>
                 
                 <form action="{{ route('data.import') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="input-group mb-2">
                         <input type="file" name="file" class="form-control" >
+                    </div>
+                    <div class="input-group mb-2">
                         <button class="btn btn-primary">Import Excel</button>
                     </div>
                     @error('file')
@@ -33,24 +35,49 @@
             </div>
 
             <!-- Right Column: Status Reference -->
-            <div class="col-md-4">
+            <div class="col-md-3">
                 <div class="card shadow-sm">
                     <div class="card-header bg-light">
                         <h6 class="mb-0 fw-bold">Status Reference</h6>
                     </div>
                     <div class="card-body p-3">
                         <ul class="list-unstyled mb-0">
-                            <li class="mb-1"><strong>to_be_contacted</strong> – To Be Contacted</li>
-                            <li class="mb-1"><strong>contacted</strong> – Contacted</li>
-                            <li class="mb-1"><strong>ongoing_discussion</strong> – Ongoing Discussion</li>
-                            <li class="mb-1"><strong>not_interested</strong> – Not Interested</li>
-                            <li class="mb-1"><strong>not_responding</strong> – Not Responding</li>
-                            <li class="mb-1"><strong>invalid_spam</strong> – Invalid / Spam</li>
-                            <li><strong>convert_to_enquiry</strong> – Convert To Enquiry</li>
+                            <li class="mb-1"><strong>to_be_contacted</strong></li>
+                            <li class="mb-1"><strong>contacted</strong></li>
+                            <li class="mb-1"><strong>ongoing_discussion</strong></li>
+                            <li class="mb-1"><strong>not_interested</strong></li>
+                            <li class="mb-1"><strong>not_responding</strong></li>
+                            <li class="mb-1"><strong>invalid_spam</strong></li>
+                            <li><strong>convert_to_enquiry</strong></li>
                         </ul>
                     </div>
                 </div>
             </div>
+
+            <div class="col-md-4">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0 fw-bold">Source Reference</h6>
+                    </div>
+
+                    <div class="card-body p-3">
+                        <div class="row">
+                            @foreach ($sources->chunk(ceil($sources->count() / 2)) as $chunk)
+                                <div class="col-6">
+                                    <ul class="list-unstyled mb-0">
+                                        @foreach ($chunk as $src)
+                                            <li class="mb-1">
+                                                <strong>{{ $src->name }}</strong>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                </div>
+                            @endforeach
+                        </div>
+                    </div>
+                </div>
+            </div>
+
 
             <div class="col-md-12">
                 @if(session('import_errors'))

@@ -5,7 +5,7 @@
     <div class="card-header">
         <h5 class="mb-0">{{trans('messages.all_roles')}}</h5>
         @can('add_role')
-            <a href="{{ route('roles.create') }}" class="btn btn-circle btn-success">
+            <a href="{{ route('roles.create') }}" class="btn btn-circle btn-success btn-sm">
                 <span>{{trans('messages.add_new_role')}}</span>
             </a>
         @endcan

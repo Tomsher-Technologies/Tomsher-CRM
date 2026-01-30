@@ -253,20 +253,13 @@
 --   ADD CONSTRAINT `data_status_histories_ibfk_2` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 
-UPDATE `data_statuses` SET `label` = 'Ongoing Discussion' WHERE `data_statuses`.`id` = 3;
+-- UPDATE `data_statuses` SET `label` = 'Ongoing Discussion' WHERE `data_statuses`.`id` = 3;
 
-UPDATE `data_statuses` SET `status_key` = 'ongoing_discussion' WHERE `data_statuses`.`id` = 3;
+-- UPDATE `data_statuses` SET `status_key` = 'ongoing_discussion' WHERE `data_statuses`.`id` = 3;
 
-ALTER TABLE `datas` CHANGE `status` `status` ENUM('to_be_contacted','contacted','ongoing_discussion','not_interested','not_responding','invalid_spam','convert_to_enquiry') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nOngoing Discussion,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry';
+-- ALTER TABLE `datas` CHANGE `status` `status` ENUM('to_be_contacted','contacted','ongoing_discussion','not_interested','not_responding','invalid_spam','convert_to_enquiry') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nOngoing Discussion,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry';
 
-ALTER TABLE `data_status_histories` CHANGE `status` `status` ENUM('to_be_contacted','contacted','ongoing_discussion','not_interested','not_responding','invalid_spam','convert_to_enquiry') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nOngoing Discussion,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry';
+-- ALTER TABLE `data_status_histories` CHANGE `status` `status` ENUM('to_be_contacted','contacted','ongoing_discussion','not_interested','not_responding','invalid_spam','convert_to_enquiry') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'to_be_contacted' COMMENT 'To Be Contacted,\r\nContacted,\r\nOngoing Discussion,\r\nNot Interested,\r\nNot Responding,\r\nInvalid/Spam,\r\nConvert To Enquiry';
 
 
-UPDATE `data_statuses` SET `filter_color` = '#000' WHERE `data_statuses`.`id` = 1;
-UPDATE `data_statuses` SET `filter_color` = '#fff' WHERE `data_statuses`.`id` = 2;
-UPDATE `data_statuses` SET `filter_color` = '#000' WHERE `data_statuses`.`id` = 3;
-UPDATE `data_statuses` SET `filter_color` = '#fff' WHERE `data_statuses`.`id` = 4;
-UPDATE `data_statuses` SET `filter_color` = '#000' WHERE `data_statuses`.`id` = 5;
-UPDATE `data_statuses` SET `filter_color` = '#fff' WHERE `data_statuses`.`id` = 6;
-UPDATE `data_statuses` SET `filter_color` = '#fff' WHERE `data_statuses`.`id` = 7;
-INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'edit_all_data', 'Edit All User Data', 'web', '1', NULL, NULL);
+-- 
