@@ -342,7 +342,19 @@
                 @endphp
                 @foreach($timeline as $history)
                     <li class="mt-3">
-                        <h6><strong >{{ ucwords(str_replace('_',' ', $history->status)) }}</strong></h6>
+                        <h6>
+                            <strong >{{ ucwords(str_replace('_',' ', $history->status)) }}</strong>
+                            @if($history->status === 'preparing_scope')
+                                <a href="{{ route('enquiry-scopes.show', $enquiry->scopeOfWork->id) }}" 
+                                            class="btn btn-info btn-sm btn-icon btn-circle ml-1" 
+                                            title="View Scope of Work">
+                                                <i class="las la-file-alt" style="margin-top: 2px;"></i>
+                                            </a>
+                            @endif
+                        </h6>
+
+                        
+
                         <small class="text-muted">on {{ \Carbon\Carbon::parse($history->status_date)->format('d M Y') }}</small>
                         <small class="text-muted">&nbsp; By: {{ $history->changedBy->name ?? 'System' }}</small>
 
