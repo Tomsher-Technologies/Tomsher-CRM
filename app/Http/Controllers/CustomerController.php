@@ -38,7 +38,12 @@ class CustomerController extends Controller
                   ->orWhere('company_name', 'like', "%$keyword%")
                   ->orWhere('company_email', 'like', "%$keyword%")
                   ->orWhere('company_country', 'like', "%$keyword%")
-                  ->orWhere('emirate', 'like', "%$keyword%");
+                  ->orWhere('emirate', 'like', "%$keyword%")
+                  ->orWhereHas('contacts', function ($contact) use ($keyword) {
+                        $contact->where('landline_number', 'like', "%{$keyword}%")
+                                ->orWhere('mobile_number', 'like', "%{$keyword}%")
+                                ->orWhere('whatsapp_number', 'like', "%{$keyword}%");
+                    });
             });
         }
 
