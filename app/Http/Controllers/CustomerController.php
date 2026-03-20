@@ -10,6 +10,8 @@ use App\Models\User;
 use App\Models\SalespersonAssignment;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\CustomersExport;
 
 class CustomerController extends Controller
 {
@@ -22,6 +24,12 @@ class CustomerController extends Controller
         $this->middleware('permission:view_customers',  ['only' => ['show']]);
         $this->middleware('permission:add_customer',  ['only' => ['create','store']]);
         $this->middleware('permission:edit_customer',  ['only' => ['edit','update','updateStatus']]);
+        $this->middleware('permission:export_customer',  ['only' => ['export']]);
+    }
+
+    public function export(Request $request)
+    {
+        return Excel::download(new CustomersExport($request), 'customers.xlsx');
     }
 
     public function index(Request $request)

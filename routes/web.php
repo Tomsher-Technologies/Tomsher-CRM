@@ -83,6 +83,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::resource('customers', CustomerController::class);
     Route::post('/customer/status', [CustomerController::class, 'updateStatus'])->name('customer.status');
     Route::get('/customers/{id}', [CustomerController::class, 'show'])->name('customers.show');
+    Route::get('/customer/export', [CustomerController::class, 'export'])->name('customers.export');
 
     // Manage Enquiries
     Route::resource('enquiries', EnquiryController::class);
