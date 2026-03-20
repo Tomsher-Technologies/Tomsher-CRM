@@ -12,11 +12,11 @@
     <div class="card-body">
         <!-- Filter Form -->
         <form method="GET" class="row g-3 mb-4">
-            <div class="col-md-3">
+            <div class="col-md-5">
                 <input type="text" name="keyword" class="form-control form-control-sm" placeholder="Search by Code, Name, Email, Country, Emirate" value="{{ request('keyword') }}">
             </div>
 
-            <div class="col-md-3">
+            <div class="col-md-4">
                 <select name="industry" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                     <option value="">-- Select Industry --</option>
                     @foreach ($industries as $industry)
@@ -25,15 +25,7 @@
                 </select>
             </div>
 
-            <div class="col-md-2">
-                <select name="is_active" class="form-control form-control-sm aiz-selectpicker">
-                    <option value="">Active Status</option>
-                    <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Active</option>
-                    <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Inactive</option>
-                </select>
-            </div>
-
-            <div class="col-md-2">
+            <div class="col-md-3">
                 <select name="user_id" id="user_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                     <option value="">Select User</option>
                     @foreach ($users as $user)
@@ -44,9 +36,24 @@
                 </select>
             </div>
 
-            <div class="col-md-2  gap-2">
+            <div class="col-md-3 mt-2">
+                <select name="is_active" class="form-control form-control-sm aiz-selectpicker">
+                    <option value="">Active Status</option>
+                    <option value="1" {{ request('is_active') === '1' ? 'selected' : '' }}>Active</option>
+                    <option value="0" {{ request('is_active') === '0' ? 'selected' : '' }}>Inactive</option>
+                </select>
+            </div>
+
+            
+
+            <div class="col-md-3  gap-2 mt-2">
                 <button type="submit" class="btn btn-primary btn-sm">Filter</button>
                 <a href="{{ route('customers.index') }}" class="btn btn-secondary btn-sm ">Reset</a>
+                @can('export_customer')
+                    <a href="{{ route('customers.export', request()->query()) }}" class="btn btn-warning btn-sm">
+                        Export Excel
+                    </a>
+                @endcan
             </div>
         </form>
         <table class="table table-bordered aiz-table mb-0">
