@@ -263,3 +263,4 @@
 
 
 -- 
+INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '55', 'export_customer', 'Export Customers Data to Excel', 'web', '1', NULL, NULL);
