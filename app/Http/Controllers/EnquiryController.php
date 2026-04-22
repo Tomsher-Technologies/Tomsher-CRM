@@ -319,10 +319,10 @@ class EnquiryController extends Controller
         $previous = $request->session()->get('previous_section');
 
         if($previous === 'enquiry_view'){
-            $route = $request->session()->get('enquiry_view_last_url');
+            $route = $request->session()->get('enquiry_view_last_url') ?? route('enquiries.show', $enquiry->id) ;
             return redirect($route);
         }else{
-            $route = $request->session()->get('enquiries_last_url');
+            $route = $request->session()->get('enquiries_last_url') ?? route('enquiries.index') ;
             return redirect($route);
         }
     }
