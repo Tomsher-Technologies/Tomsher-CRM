@@ -51,6 +51,9 @@ class DataController extends Controller
             });
         }
 
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
         // Filter by source
         if ($request->filled('source')) {
             $query->where('source_id',  $request->source);
