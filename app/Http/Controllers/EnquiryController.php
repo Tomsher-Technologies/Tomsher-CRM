@@ -424,6 +424,7 @@ class EnquiryController extends Controller
             }else{
                 $project = Project::where('enquiry_id', $enquiry->id)->first();
                 $project->project_total_cost = $enquiry->approved_cost ?? 0;
+                $project->pending_amount = ($enquiry->approved_cost - $project->paid_amount) ?? 0;
                 $project->updated_by = auth()->user()->id;
                 $project->save();
             }
