@@ -211,16 +211,19 @@
                             @php
                                 $pendingFollowups = getDueFutureFollowups($enquiry->id);
 
-                                $backGroundColor = '';
+                                $backGroundColor = $approved = '';
                                 if($pendingFollowups != 0){
                                     $backGroundColor = '#ffdc2812';
                                 }else{
-
+                                    
                                     if(in_array($enquiry->status, ['project_rejected','not_interested','not_responding','invalid_spam']) ){
                                         $backGroundColor = '#d3d3d36e';
                                     }elseif ($enquiry->status === 'project_approved') {
                                         $backGroundColor = '#90ee903b';
                                     }
+                                }
+                                if ($enquiry->status === 'project_approved') {
+                                    $approved = 'mb-1';
                                 }
                             @endphp
                             <tr style="background-color:{{ $backGroundColor }}" data-id="{{ $enquiry->status }}">
@@ -288,10 +291,16 @@
                                 <td class="text-center">{{ ($enquiry->source_mode != NULL) ? ucfirst($enquiry->source_mode).' Lead' : '' }}</td>
                                 <td class="text-center">
                                     
-                                    <span class="badge  badge-inline " style="background: {{$statuses[$enquiry->status]['bg'] ?? '' }}; color:{{$statuses[$enquiry->status]['list_color'] ?? '' }}">
+                                    <span class="badge  badge-inline {{$approved ?? '' }}" style="background: {{$statuses[$enquiry->status]['bg'] ?? '' }}; color:{{$statuses[$enquiry->status]['list_color'] ?? '' }}">
                                         {{ ucfirst(str_replace('_', ' ', $enquiry->status)) }}
                                     </span>
-                                
+                                    @can('view_enquiries_list_project_cost')
+                                        @if($enquiry->status === "project_approved") 
+                                            <br>
+                                            <strong> AED {{ $enquiry->approved_cost ?? '' }} </strong>
+                                        @endif
+                                    @endcan
+                                   
                                 </td>
                                 <td class="text-center">
                                     {{ date('d, M Y', strtotime($enquiry->enquiry_date)) }}
