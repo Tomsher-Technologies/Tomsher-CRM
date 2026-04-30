@@ -392,7 +392,7 @@ class DataController extends Controller
             'comment' => $statusData->comment ?? '',
             'status_date' => $statusData->status_date ?? date('Y-m-d'),
             'status' => $status,
-            'followup_date' => $statusData->followup_date ?? date('Y-m-d')
+            'followup_date' => $statusData->followup_date ?? ''
         ]);
     }
 

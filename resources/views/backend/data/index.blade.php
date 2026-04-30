@@ -395,7 +395,7 @@
                         <div class="form-group col-sm-6" id="next_followup_date">
                             <label><b> Next Follow-up Date</b></label>
                             <input type="date" name="followup_date" id="followup_date"
-                                class="form-control form-control-sm followup_date" required>
+                                class="form-control form-control-sm followup_date">
                         </div>
 
                         <div class="form-group col-sm-12">
@@ -707,7 +707,7 @@
             const dataId = $(this).data('id');
             const currentStatus = $(this).data('status');
             const statusDate = $(this).data('status-date') || new Date().toISOString().split('T')[0];
-            const followupDate = $(this).data('followup-date') || new Date().toISOString().split('T')[0];
+            const followupDate = $(this).attr('data-followup-date') || '';
             const comment = $(this).data('comment') || '';
 
             $('#status-data-id').val(dataId);
@@ -737,7 +737,7 @@
             $.get('/data-details/' + dataId + '/' + selectedStatus, function(response) {
                 const comment = response.comment;
                 const status_date = response.status_date;
-                const followup_date = response.followup_date;
+                const followup_date = response.followup_date || '';
 
                 $('#statusComment').val(comment);
                 $('#status_date').val(status_date);
