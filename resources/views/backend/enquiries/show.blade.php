@@ -989,7 +989,7 @@
                         document.getElementById('followupModal').style.display = 'none';
                         document.body.classList.remove('modal-open');
                         document.querySelector('.modal-backdrop')?.remove();
-                        // Optionally refetch calendar events
+                        
                         AIZ.plugins.notify('success', response.message);
                         setTimeout(() => {
                             window.location.reload();
