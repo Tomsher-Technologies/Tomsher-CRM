@@ -463,6 +463,10 @@
                                 <td style="width:25%;"><strong>Enquiry</strong></td>
                                 <td><span id="modal-enquiry"></span></td>
                             </tr>
+                            {{-- <tr>
+                                <td style="width:25%;"><strong>Customer Info</strong></td>
+                                <td><span id="modal-customer"></span></td>
+                            </tr> --}}
                             <tr>
                                 <td style="width:25%;"><strong>Follow-up Type</strong></td>
                                 <td><span id="modal-type" ></span></td>
@@ -483,15 +487,14 @@
                                 <td style="width:25%;"><strong>Location</strong></td>
                                 <td><span id="modal-location"></span></td>
                             </tr>
-
-                            <tr id="modal-participants-wrapper" style="display: none;">
-                                <td style="width:25%;"><strong>Participants</strong></td>
-                                <td><span id="modal-participants"></span></td>
-                            </tr>
-
+                            
                             <tr>
                                 <td style="width:25%;"><strong>Status</strong></td>
                                 <td><span id="modal-status" class="badge badge-inline"></span></td>
+                            </tr>
+                            <tr id="modal-participants-wrapper" style="display: none;">
+                                <td style="width:25%;"><strong>Participants</strong></td>
+                                <td><span id="modal-participants"></span></td>
                             </tr>
                             <tr>
                                 <td style="width:25%;"><strong>Created By</strong></td>
@@ -501,6 +504,30 @@
                             <tr>
                                 <td style="width:25%;"><strong>Post-Follow-up Comment</strong></td>
                                 <td><span id="modal-comment"></span></td>
+                            </tr>
+                            
+                        
+                            <tr id="edit-followup-row">
+                                <td>Change Status</td>
+                                <td>
+                                    <div class="form-group col-12 d-flex">
+                                        <label class="col-4">Follow-up Status </label>
+                                        <select id="followup-status" class="form-control form-control-sm col-8">
+                                            <option value="pending">Pending</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="canceled">Canceled</option>
+                                            <option value="rescheduled">Rescheduled</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-12 d-flex">
+                                        <label class="col-4">Post-Follow-up Comment </label>
+                                        <textarea name="post_comment" id="post_comment" class="form-control form-control-sm col-8"  rows="3"></textarea>
+                                    </div>
+                                    <div class="form-group col-12" style="text-align: end;">
+                                        <button id="update-status-btn" class="btn btn-success w-auto btn-sm">Update Status</button>
+                                    </div>
+                                    
+                                </td>
                             </tr>
                             
                         </tbody>
@@ -632,7 +659,14 @@
             $('#modal-created_by').text($(this).data('createdby'));
             $('#modal-comment').text($(this).data('post-comment'));
             $('#modal-participants').text($(this).data('participants'));
-            
+            $('#followup-status').val($(this).data('followup-status'));
+            $('#post_comment').val($(this).data('post-comment'));
+
+            const btnUpdate = document.getElementById('update-status-btn');
+            if (btnUpdate) {
+                btnUpdate.setAttribute('data-followup-id', $(this).data('followup-id'));
+            }
+
             let status = $(this).data('status');
             let statusclass = $(this).data('statusclass');
             let badge = $('#modal-status');
@@ -653,6 +687,7 @@
                 $('#modal-location-wrapper').hide();
                 $('#modal-participants-wrapper').hide();
             }
+           
             $('#modal-time').html(timeDisplay);
         });
 
@@ -933,6 +968,38 @@
             $('textarea[name="comment"]').val('');
             $('#submitted-cost-field').addClass('d-none');
             $('#approved-cost-field').addClass('d-none');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.id === 'update-status-btn') {
+                const followupId = e.target.getAttribute('data-followup-id');
+                const newStatus = document.getElementById('followup-status').value;
+                const post_comment = document.getElementById('post_comment').value;
+                
+                $.ajax({
+                    url: `/followups/${followupId}/update-status`,  // you'll define this route
+                    type: 'POST',
+                    data: {
+                        status: newStatus,
+                        post_comment:post_comment,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        document.getElementById('followupModal').classList.remove('show');
+                        document.getElementById('followupModal').style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        document.querySelector('.modal-backdrop')?.remove();
+                        // Optionally refetch calendar events
+                        AIZ.plugins.notify('success', response.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    },
+                    error: function(xhr) {
+                        alert('Error updating status.');
+                    }
+                });
+            }
         });
     });
 </script>

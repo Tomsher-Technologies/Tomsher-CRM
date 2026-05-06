@@ -106,7 +106,7 @@
                             data-toggle="modal" data-target="#followupModal"
                             data-enquiry="{{ $followup->enquiry->enquiry_code ?? '' }} - {{ $followup->enquiry->customer->company_name ?? '' }}"
                             data-type="{{ ucfirst($followup->followup_type) }}"
-                            data-subtype="{{ ucfirst($followup->sub_type) }}"
+                            data-subtype="{{ ucfirst($followup->sub_type) }}" data-followup-status="{{ $followup->status }}"
                             @if ($followup->followup_type === 'meeting')
                                 data-time-from="{{ \Carbon\Carbon::parse($followup->followup_from)->format('d, M Y h:i A') }}"
                                 data-time-to="{{ \Carbon\Carbon::parse($followup->followup_to)->format('d, M Y h:i A') }}"
@@ -119,7 +119,9 @@
                             data-status="{{ $followup->status }}"
                             data-statusclass="{{$statusClass}}"
                             data-createdby="{{ $followup->added_by->name ?? '' }}"
-                            data-participants="{{ $participantNames }}">
+                            data-participants="{{ $participantNames }}"
+                            data-followup-id="{{ $followup->id }}"
+                        >   
                             <i class="las la-eye"></i>
                         </button>
                     </td>
