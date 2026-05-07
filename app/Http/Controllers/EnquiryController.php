@@ -148,10 +148,21 @@ class EnquiryController extends Controller
                 break;
         }
         
+        $approvedCostSummary = (clone $query)
+            ->reorder()
+            ->where('status', 'project_approved')
+            ->whereNotNull('approved_cost')
+            ->selectRaw('COALESCE(SUM(approved_cost), 0) as total, COUNT(approved_cost) as count')
+            ->first();
+
+        $approvedCostTotal = (float) ($approvedCostSummary->total ?? 0);
+        $approvedCostCount = (int) ($approvedCostSummary->count ?? 0);
+        $approvedCostAverage = $approvedCostCount > 0 ? $approvedCostTotal / $approvedCostCount : 0;
+
         $enquiries = $query->paginate(30);
 
 
-        return view('backend.enquiries.index', compact('enquiries','customers', 'sources', 'projectTypes','users'));
+        return view('backend.enquiries.index', compact('enquiries','customers', 'sources', 'projectTypes','users','approvedCostTotal','approvedCostAverage'));
     }
 
     public function create(Request $request)
