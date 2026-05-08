@@ -181,6 +181,7 @@
                     <div class="mb-1">{{ $enquiry->addedBy->name ?? '-' }}</div>
 
                     <div class="text-muted">Current Status</div>
+                    
                     <div class="mb-1">
                         @php
                             $statuses = getEnquiryStatuses();
@@ -190,7 +191,13 @@
                         </span>
                     
                     </div>
-
+                    
+                    <div class="text-muted">Source Mode</div>
+                    <div class="mb-1">
+                        @if($enquiry->source_mode != NULL)
+                            {{ ($enquiry->source_mode == 'cross_up_sell') ? 'Cross/Up Sell' : ucfirst($enquiry->source_mode).' Lead' }} 
+                        @endif
+                    </div>
                     <div class="text-muted">Project Categories</div>
                     @if($enquiry->projectTypes->count())
                         <ul class="list-unstyled">
@@ -208,10 +215,11 @@
            
             <h6 class="mb-3">Project Details</h6>
             <p>{!! nl2br(e($enquiry->project_details)) !!}</p>
-
+            
             @if($enquiry->comments)
-                <div class="mt-4 mb-3">Internal Comments</div>
-                <div class="text-muted">{!! nl2br(e($enquiry->comments)) !!}</div>
+                <hr>
+                <h6 class="mb-3">Internal Comments</h6>
+                <p>{!! nl2br(e($enquiry->comments)) !!}</p>
             @endif
             <hr>
             <p class="text-right text-muted">
@@ -333,17 +341,18 @@
 
     <div class="card">
         <div class="card-header">
-            <h6 class="mt-1">Milestone Timeline</h6>
+            <h5 class="mt-1">Milestone Timeline</h5>
         </div>
         <div class="card-body">
             <ul class="timeline">
                 @php
                     $timeline = $enquiry->statusHistories()->orderBy('status_date','asc')->get();
+                    $followupsByStatus = $enquiry->followups->groupBy('enquiry_status');
                 @endphp
                 @foreach($timeline as $history)
-                    <li class="mt-3">
-                        <h6>
-                            <strong >{{ ucwords(str_replace('_',' ', $history->status)) }}</strong>
+                    <li class="mt-3 mb-2">
+                        <h6 class="fs-17">
+                            <strong class="text-info ">{{ ucwords(str_replace('_',' ', $history->status)) }}</strong>
                             @if($history->status === 'preparing_scope')
                                 <a href="{{ route('enquiry-scopes.show', $enquiry->scopeOfWork->id) }}" 
                                             class="btn btn-info btn-sm btn-icon btn-circle ml-1" 
@@ -404,6 +413,13 @@
                         @if($history->comment)
                             <p class="mt-1">{{ $history->comment }}</p>
                         @endif
+
+                        @php
+                            $milestoneFollowups = $followupsByStatus->get($history->status, collect());
+                        @endphp
+                        @if($milestoneFollowups->isNotEmpty())
+                            @include('backend.enquiries.partials.followup-table', ['followups' => $milestoneFollowups])
+                        @endif
                     </li>
                 @endforeach
             </ul>
@@ -439,154 +455,6 @@
         </div>
     @endif
     
-    @if ($enquiry->followups->isNotEmpty())
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mt-1">Follow-ups</h6>
-            </div>
-            <div class="card-body">
-                <table class="table table-bordered aiz-table">
-                    <thead>
-                        <tr>
-                            <th class="text-center">#</th>
-                            <th class="text-center">Follow-up</th>
-                            <th class="text-center">Type</th>
-                            <th class="text-center">Time</th>
-                            <th>Location</th>
-                            <th class="text-center">Followup Status</th>
-                            <th class="text-center">Enquiry Status</th>
-                            <th class="text-center">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach($enquiry->followups as $key => $followup)
-                            @php
-                                $icon = '';
-                                switch ($followup->followup_type) {
-                                    case 'call': $icon = '<i class="las fs-18 la-phone text-primary me-1"></i>'; break;
-                                    case 'email': $icon = '<i class="las fs-18 la-envelope text-danger me-1"></i>'; break;
-                                    case 'whatsapp': $icon = '<i class="lab fs-18 la-whatsapp text-success me-1"></i>'; break;
-                                    case 'meeting': $icon = '<i class="las fs-18 la-handshake text-warning me-1"></i>'; break;
-                                }
-                            @endphp 
-                            <tr>
-                                <td class="text-center">{{ $key+1 }}</td>
-                                <td class="text-center">{!! $icon !!} {{ ucfirst($followup->followup_type) }}</td>
-                                <td class="text-center">{{ ucfirst($followup->sub_type) }}</td>
-                                <td class="text-center">
-                                    
-                                     @if ($followup->followup_type === 'meeting')
-                                        <div><strong>From:</strong> {{ \Carbon\Carbon::parse($followup->followup_from)->format('d, M Y h:i A') }}</div>
-                                        <div><strong>To:</strong> {{ \Carbon\Carbon::parse($followup->followup_to)->format('d, M Y h:i A') }}</div>
-                                    @else
-                                        <div>{{ \Carbon\Carbon::parse($followup->followup_time)->format('d, M Y h:i A') }}</div>
-                                    @endif
-
-                                </td>
-                                <td>{{ $followup->location ?? '-' }}</td>
-                                <td class="text-center">
-
-                                    @php
-                                        $statusClass = '';
-                                    @endphp
-                                    @if ($followup->status === 'pending')
-                                        @if ($followup->followup_type === 'meeting')
-                                            @php
-                                                $followupTime = \Carbon\Carbon::parse($followup->followup_from);
-                                            @endphp
-                                            {{-- $followupTime->isToday() ||  --}}
-                                            @if($followupTime->isFuture())
-                                                @php
-                                                    $statusClass = 'pending-upcoming';
-                                                @endphp
-                                                <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
-                                            @else
-                                                @php
-                                                    $statusClass = 'pending-due';
-                                                @endphp
-                                                <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
-                                            @endif
-                                        @else
-                                            @php
-                                                $followupTime = \Carbon\Carbon::parse($followup->followup_time);
-                                            @endphp
-                                            {{-- $followupTime->isToday() ||  --}}
-                                            @if($followupTime->isFuture())
-                                                @php
-                                                    $statusClass = 'pending-upcoming';
-                                                @endphp
-                                                <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
-                                            @else
-                                                @php
-                                                    $statusClass = 'pending-due';
-                                                @endphp
-                                                <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
-                                            @endif
-                                        @endif
-
-                                    @elseif($followup->status == 'completed')
-                                        @php
-                                            $statusClass = 'completed';
-                                        @endphp
-                                        <span class="badge  badge-inline completed">
-                                            {{ ucfirst($followup->status) }}
-                                        </span>
-                                    @elseif($followup->status == 'canceled')
-                                        @php
-                                            $statusClass = 'badge-secondary';
-                                        @endphp
-                                        <span class="badge  badge-inline badge-secondary">
-                                            {{ ucfirst($followup->status) }}
-                                        </span>
-                                    @elseif($followup->status == 'rescheduled')
-                                        @php
-                                            $statusClass = 'badge-warning';
-                                        @endphp
-                                        <span class="badge  badge-inline badge-warning">
-                                            {{ ucfirst($followup->status) }}
-                                        </span>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    @if ($followup->enquiry_status != NULL)
-                                        <span class="text-success">({{ ucfirst(str_replace('_', ' ', $followup->enquiry_status)) }})</span>
-                                    @endif
-                                </td>
-                                <td class="text-center">
-                                    @php
-                                        $participantNames = $followup->participants
-                                            ->where('pivot.is_main', false) // exclude main participant if needed
-                                            ->pluck('name')
-                                            ->join(', ');
-                                    @endphp
-                                    <button type="button" class="btn btn-soft-warning btn-sm btn-icon btn-circle view-followup"
-                                        data-toggle="modal" data-target="#followupModal"
-                                        data-enquiry="{{ $followup->enquiry->enquiry_code ?? '' }} - {{ $followup->enquiry->customer->company_name ?? '' }}"
-                                        data-type="{{ ucfirst($followup->followup_type) }}"
-                                        data-subtype="{{ ucfirst($followup->sub_type) }}"
-                                        @if ($followup->followup_type === 'meeting')
-                                            data-time-from="{{ \Carbon\Carbon::parse($followup->followup_from)->format('d, M Y h:i A') }}"
-                                            data-time-to="{{ \Carbon\Carbon::parse($followup->followup_to)->format('d, M Y h:i A') }}"
-                                        @else
-                                            data-time="{{ \Carbon\Carbon::parse($followup->followup_time)->format('d, M Y h:i A') }}"
-                                        @endif
-                                        data-subject="{{ $followup->subject }}" 
-                                        data-post-comment="{{ $followup->post_comment }}" 
-                                        data-location="{{ $followup->location }}"
-                                        data-status="{{ $followup->status }}"
-                                        data-statusclass="{{$statusClass}}" 
-                                        data-createdby="{{ $followup->added_by->name ?? '' }}" 
-                                        data-participants="{{ $participantNames }}">
-                                        <i class="las la-eye"></i>
-                                    </button>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    @endif
     <div class="modal fade" id="followupModal" tabindex="-1" aria-labelledby="followupModalLabel" role="dialog" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered  modal-lg" role="document">
             <div class="modal-content">
@@ -603,6 +471,10 @@
                                 <td style="width:25%;"><strong>Enquiry</strong></td>
                                 <td><span id="modal-enquiry"></span></td>
                             </tr>
+                            {{-- <tr>
+                                <td style="width:25%;"><strong>Customer Info</strong></td>
+                                <td><span id="modal-customer"></span></td>
+                            </tr> --}}
                             <tr>
                                 <td style="width:25%;"><strong>Follow-up Type</strong></td>
                                 <td><span id="modal-type" ></span></td>
@@ -623,15 +495,14 @@
                                 <td style="width:25%;"><strong>Location</strong></td>
                                 <td><span id="modal-location"></span></td>
                             </tr>
-
-                            <tr id="modal-participants-wrapper" style="display: none;">
-                                <td style="width:25%;"><strong>Participants</strong></td>
-                                <td><span id="modal-participants"></span></td>
-                            </tr>
-
+                            
                             <tr>
                                 <td style="width:25%;"><strong>Status</strong></td>
                                 <td><span id="modal-status" class="badge badge-inline"></span></td>
+                            </tr>
+                            <tr id="modal-participants-wrapper" style="display: none;">
+                                <td style="width:25%;"><strong>Participants</strong></td>
+                                <td><span id="modal-participants"></span></td>
                             </tr>
                             <tr>
                                 <td style="width:25%;"><strong>Created By</strong></td>
@@ -641,6 +512,30 @@
                             <tr>
                                 <td style="width:25%;"><strong>Post-Follow-up Comment</strong></td>
                                 <td><span id="modal-comment"></span></td>
+                            </tr>
+                            
+                        
+                            <tr id="edit-followup-row">
+                                <td>Change Status</td>
+                                <td>
+                                    <div class="form-group col-12 d-flex">
+                                        <label class="col-4">Follow-up Status </label>
+                                        <select id="followup-status" class="form-control form-control-sm col-8">
+                                            <option value="pending">Pending</option>
+                                            <option value="completed">Completed</option>
+                                            <option value="canceled">Canceled</option>
+                                            <option value="rescheduled">Rescheduled</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group col-12 d-flex">
+                                        <label class="col-4">Post-Follow-up Comment </label>
+                                        <textarea name="post_comment" id="post_comment" class="form-control form-control-sm col-8"  rows="3"></textarea>
+                                    </div>
+                                    <div class="form-group col-12" style="text-align: end;">
+                                        <button id="update-status-btn" class="btn btn-success w-auto btn-sm">Update Status</button>
+                                    </div>
+                                    
+                                </td>
                             </tr>
                             
                         </tbody>
@@ -772,7 +667,14 @@
             $('#modal-created_by').text($(this).data('createdby'));
             $('#modal-comment').text($(this).data('post-comment'));
             $('#modal-participants').text($(this).data('participants'));
-            
+            $('#followup-status').val($(this).data('followup-status'));
+            $('#post_comment').val($(this).data('post-comment'));
+
+            const btnUpdate = document.getElementById('update-status-btn');
+            if (btnUpdate) {
+                btnUpdate.setAttribute('data-followup-id', $(this).data('followup-id'));
+            }
+
             let status = $(this).data('status');
             let statusclass = $(this).data('statusclass');
             let badge = $('#modal-status');
@@ -793,6 +695,7 @@
                 $('#modal-location-wrapper').hide();
                 $('#modal-participants-wrapper').hide();
             }
+           
             $('#modal-time').html(timeDisplay);
         });
 
@@ -1073,6 +976,38 @@
             $('textarea[name="comment"]').val('');
             $('#submitted-cost-field').addClass('d-none');
             $('#approved-cost-field').addClass('d-none');
+        });
+
+        document.addEventListener('click', function (e) {
+            if (e.target && e.target.id === 'update-status-btn') {
+                const followupId = e.target.getAttribute('data-followup-id');
+                const newStatus = document.getElementById('followup-status').value;
+                const post_comment = document.getElementById('post_comment').value;
+                
+                $.ajax({
+                    url: `/followups/${followupId}/update-status`,  // you'll define this route
+                    type: 'POST',
+                    data: {
+                        status: newStatus,
+                        post_comment:post_comment,
+                        _token: '{{ csrf_token() }}'
+                    },
+                    success: function(response) {
+                        document.getElementById('followupModal').classList.remove('show');
+                        document.getElementById('followupModal').style.display = 'none';
+                        document.body.classList.remove('modal-open');
+                        document.querySelector('.modal-backdrop')?.remove();
+                        
+                        AIZ.plugins.notify('success', response.message);
+                        setTimeout(() => {
+                            window.location.reload();
+                        }, 1500);
+                    },
+                    error: function(xhr) {
+                        alert('Error updating status.');
+                    }
+                });
+            }
         });
     });
 </script>

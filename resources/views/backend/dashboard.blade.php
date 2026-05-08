@@ -21,15 +21,18 @@
         $years = range(now()->year - 10, now()->year); // Display the last 5 years
         $statusDetails = getEnquiryStatuses();
     @endphp
-    <div class="row d-flex align-items-stretch">
+    <div class="row d-flex align-items-stretch dashboard-overview-row">
         <div class="col-md-12 d-flex">
-            <div class="card w-100">
-                <div class="card-header row">
-                    <h5 class="col-sm-3 mt-2">Dashboard</h5>
-                    <div class="col-sm-9">
+            <div class="card w-100 dashboard-overview-card">
+                <div class="card-header dashboard-overview-header">
+                    <div class="dashboard-title-block w-25">
+                        <span class="dashboard-kicker">Overview</span>
+                        <h5>Dashboard</h5>
+                    </div>
+                    <div class="dashboard-filter-panel">
                         @canany(['view_total_counts', 'view_enquiries_by_current_status','view_enquiries_by_source','view_enquiries_by_project_type','view_enquiries_by_milestone'])
-                            <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-12 justify-content-end align-items-end">
-                                <div class="col-md-3">
+                            <form method="GET" action="{{ route('admin.dashboard') }}" class="dashboard-filter-form">
+                                <div class="dashboard-filter-field">
                                     <select name="user_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                                         <option value="">All Users</option>
 
@@ -50,7 +53,7 @@
                                     </select>
                                 </div>
                                 
-                                <div class="col-md-3">
+                                <div class="dashboard-filter-field">
                                     <select name="source_mode" id="source_mode" class="form-control form-control-sm">
                                         <option value="">All Source Modes</option>
                                         <option value="inhouse" {{ request('source_mode') == "inhouse" ? 'selected' : '' }}>
@@ -59,65 +62,66 @@
                                         <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
                                             Self Lead
                                         </option>
+                                        <option value="cross_up_sell" {{ request('source_mode') == "cross_up_sell" ? 'selected' : '' }}>
+                                            Cross/Up Sell
+                                        </option>
                                     </select>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="dashboard-filter-field dashboard-filter-date">
                                     <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('date_range') ?? now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y') }}" name="date_range" placeholder="Filter by date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
                                 </div>
                             
-                                <div class="col-md-2 text-end d-flex m-auto">
+                                <div class="dashboard-filter-actions">
                                     <button type="submit" class="btn btn-primary btn-sm">Filter</button>
-                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-danger ml-1 btn-sm" >Cancel</a>
+                                    <a href="{{ route('admin.dashboard') }}" class="btn btn-light btn-sm">Cancel</a>
                                 </div>
                             </form>
                         @endcanany
                     </div>
                 </div>
-                <div class="col-lg-12 card-body">
+                <div class="card-body dashboard-overview-body">
                     
                     @can('view_total_counts')
-                        <div class="row gutters-10">
+                        <div class="dashboard-metrics-grid">
                             {{-- Total Customers Block --}}
-                            <div class="col-md-4">
-                                <div class="card shadow" style="background: linear-gradient(to right, #008080, #00bfae); color: #fff; border-radius: 12px;">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title">Total Customers</h6>
-                                        <h5>{{ $totalCustomers }}</h5>
-                                    </div>
-                                    {{-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
-                                        <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
-                                            d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                                        </path>
-                                    </svg> --}}
+                            <div class="dashboard-metric-card dashboard-metric-customers">
+                                <div class="dashboard-metric-icon"><i class="fa-solid fa-users"></i></div>
+                                <div class="dashboard-metric-copy">
+                                    <span>Total Customers</span>
+                                    <strong>{{ $totalCustomers }}</strong>
                                 </div>
                             </div>
                             {{-- Total Enquiries Block --}}
-                            <div class="col-md-4">
-                                <div class="card shadow" style="background: linear-gradient(to right, #8348bd, #b659c2); color: #fff; border-radius: 12px;">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title">Total Enquiries</h6>
-                                        <h5>{{ $totalEnquiries }}</h5>
-                                    </div>
-                                    {{-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
-                                        <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
-                                            d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                                        </path>
-                                    </svg> --}}
+                            <div class="dashboard-metric-card dashboard-metric-enquiries">
+                                <div class="dashboard-metric-icon"><i class="fa-solid fa-clipboard-list"></i></div>
+                                <div class="dashboard-metric-copy">
+                                    <span>Total Enquiries</span>
+                                    <strong>{{ $totalEnquiries }}</strong>
+                                </div>
+                            </div>
+                            {{-- Total Data Block --}}
+                            <div class="dashboard-metric-card dashboard-metric-data">
+                                <div class="dashboard-metric-icon"><i class="fa-solid fa-database"></i></div>
+                                <div class="dashboard-metric-copy">
+                                    <span>Total Data</span>
+                                    <strong>{{ $totalData }}</strong>
+                                </div>
+                            </div>
+                            {{-- Total Followups Block --}}
+                            <div class="dashboard-metric-card dashboard-metric-followups">
+                                <div class="dashboard-metric-icon"><i class="fa-solid fa-phone-volume"></i></div>
+                                <div class="dashboard-metric-copy">
+                                    <span>Total Followups</span>
+                                    <strong>{{ $totalFollowups }}</strong>
                                 </div>
                             </div>
                             {{-- Total Projects Block --}}
-                            <div class="col-md-4">
-                                <div class="card shadow" style="background: linear-gradient(to right, #c54a56e7, #e37391); color: #fff; border-radius: 12px;">
-                                    <div class="card-body text-center">
-                                        <h6 class="card-title">Total Projects</h6>
-                                        <h5>{{ $totalProjects }}</h5>
-                                    </div>
-                                    {{-- <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
-                                        <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
-                                            d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                                        </path>
-                                    </svg> --}}
+                            <div class="dashboard-metric-card dashboard-metric-projects">
+                                <div class="dashboard-metric-icon"><i class="fa-solid fa-diagram-project"></i></div>
+                                <div class="dashboard-metric-copy">
+                                    <span>Total Projects</span>
+                                    <strong>{{ $totalProjects }}</strong>
                                 </div>
                             </div>
                         </div>
@@ -128,29 +132,26 @@
     </div>
     
     @can('view_enquiries_by_current_status')
-        <div class="row d-flex align-items-stretch">
+        <div class="row d-flex align-items-stretch dashboard-status-row">
             <div class="col-md-12 d-flex">
-                <div class="card w-100">
-                    <div class="card-header">
-                        <h6>
-                            Enquiries by Current Status
-                        </h6>
+                <div class="card w-100 dashboard-status-card">
+                    <div class="card-header dashboard-section-header">
+                        <div>
+                            <span class="dashboard-kicker">Live Pipeline</span>
+                            <h6>Enquiries by Current Status</h6>
+                        </div>
                     </div>
-                    <div class="card-body col-lg-12">
-                        <div class="row gutters-10">
+                    <div class="card-body dashboard-status-body">
+                        <div class="dashboard-status-grid">
                             {{-- Status Wise Blocks --}}
                             @foreach($statusDetails as $key => $status)
-                                <div class="col-md-2">
-                                    <div class="card shadow status-card" style="background-color: {{ $status['bg'] }}; color: {{ $status['list_color'] }}; border-radius: 12px;">
-                                        <div class="card-body text-center">
-                                            <h6 class="card-title">{{ $status['label'] }}</h6>
-                                            <h5>{{ $statusCounts[$key] ?? 0 }}</h5>
-                                        </div>
-                                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 200">
-                                            <path fill="rgba(255,255,255,0.3)" fill-opacity="1"
-                                                d="M0,128L34.3,112C68.6,96,137,64,206,96C274.3,128,343,224,411,250.7C480,277,549,235,617,213.3C685.7,192,754,192,823,181.3C891.4,171,960,149,1029,117.3C1097.1,85,1166,43,1234,58.7C1302.9,75,1371,149,1406,186.7L1440,224L1440,320L1405.7,320C1371.4,320,1303,320,1234,320C1165.7,320,1097,320,1029,320C960,320,891,320,823,320C754.3,320,686,320,617,320C548.6,320,480,320,411,320C342.9,320,274,320,206,320C137.1,320,69,320,34,320L0,320Z">
-                                            </path>
-                                        </svg>
+                                <div class="dashboard-status-tile" style="--status-bg: {{ $status['bg'] ?: '#eef2f6' }}; --status-color: {{ $status['list_color'] ?: '#111827' }};">
+                                    <div class="dashboard-status-content">
+                                        <span class="dashboard-status-marker"></span>
+                                        <span>{{ $status['label'] }}</span>
+                                    </div>
+                                    <div class="dashboard-status-count">
+                                        <strong>{{ $statusCounts[$key] ?? 0 }}</strong>
                                     </div>
                                 </div>
                             @endforeach
@@ -180,7 +181,7 @@
         <div class="row d-flex align-items-stretch">
             <div class="col-md-6 d-flex">
                 <div class="card w-100">
-                    <div class="card-header">
+                    <div class="card-header  dashboard-section-header">
                         <h6>
                             Enquiries by Source Mode
                         </h6>
@@ -192,7 +193,7 @@
             </div>
             <div class="col-md-6 d-flex">
                 <div class="card w-100">
-                    <div class="card-header">
+                    <div class="card-header  dashboard-section-header">
                         <h6>
                             Enquiries by Source Chart
                         </h6>
@@ -228,7 +229,7 @@
         @can('view_enquiries_by_project_type')
             <div class="col-md-12">
                 <div class="card">
-                    <div class="card-header">
+                    <div class="card-header  dashboard-section-header">
                         <h6>
                             Enquiries by Project Type 
                         </h6>
@@ -243,7 +244,7 @@
         @can('view_enquiries_by_milestone')
             <div class="col-md-12 d-flex">
                 <div class="card w-100">
-                    <div class="card-header">
+                    <div class="card-header  dashboard-section-header">
                         <h6>
                             Enquiries By Milestone 
                         </h6>
@@ -259,14 +260,15 @@
     @can('view_enquiries_total')
         <div class="row d-flex align-items-stretch">
             <div class="col-md-12 d-flex">
-                <div class="card w-100">
-                    <div class="card-header mt-1">
-                        <h6 class="col-md-4">
-                            Enquiries - Total, Pending & Contacted <small class="text-muted">({{$enquiriesBarTitle}})</small>
-                        </h6>
+                <div class="card w-100 dashboard-graph-card"  id="enquiries-total-section">
+                    <div class="card-header dashboard-graph-header">
+                        <div class="dashboard-graph-title">
+                            <h6>Enquiry Activity Overview</h6>
+                            <span class="dashboard-kicker">({{$enquiriesBarTitle}})</span>
+                        </div>
 
-                        <form method="GET" action="{{ route('admin.dashboard') }}" class="row col-md-8">
-                            <div class="col-md-3 p-1">
+                        <form method="GET" action="{{ route('admin.dashboard') }}#enquiries-total-section" class="dashboard-graph-filter-form">
+                            <div class="dashboard-graph-filter-field">
                                 <select name="user_id_graph" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                                     <option value="">All Users</option>
 
@@ -286,7 +288,7 @@
 
                                 </select>
                             </div>
-                            <div class="col-md-3 p-1">
+                            <div class="dashboard-graph-filter-field">
                                 <select name="source_mode_graph" id="source_mode_graph" class="form-control form-control-sm">
                                     <option value="">All Source Modes</option>
                                     <option value="inhouse" {{ request('source_mode_graph') == "inhouse" ? 'selected' : '' }}>
@@ -295,9 +297,12 @@
                                     <option value="self" {{ request('source_mode_graph') == "self" ? 'selected' : '' }}>
                                         Self Lead
                                     </option>
+                                    <option value="cross_up_sell" {{ request('source_mode_graph') == "cross_up_sell" ? 'selected' : '' }}>
+                                        Cross/Up Sell
+                                    </option>
                                 </select>
                             </div>
-                            <div class="col-md-2 p-1">
+                            <div class="dashboard-graph-filter-field">
                                 <select name="month" class="form-control form-control-sm">
                                     <option value="">All Months</option>
                                     @foreach($months as $key => $month)
@@ -307,7 +312,7 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2 p-1">
+                            <div class="dashboard-graph-filter-field">
                                 <select name="year" class="form-control form-control-sm">
                                     <option value="">All Years</option>
                                     @foreach($years as $year)
@@ -317,17 +322,13 @@
                                     @endforeach
                                 </select>
                             </div>
-                            <div class="col-md-2 p-1 text-start d-flex">
-                                <button type="submit" class="btn btn-primary btn-xs">Filter</button>
-                                
-                                <button class="btn btn-danger ml-1 btn-xs">
-                                    <a href="{{ route('admin.dashboard') }}" class="text-white" >Cancel
-                                    </a>
-                                </button>
+                            <div class="dashboard-graph-filter-actions">
+                                <button type="submit" class="btn btn-primary btn-sm">Filter</button>
+                                <a href="{{ route('admin.dashboard') }}#enquiries-total-section" class="btn btn-light btn-sm">Cancel</a>
                             </div>
                         </form>
                     </div>
-                    <div class="card-body">
+                    <div class="card-body dashboard-graph-body">
                         <canvas id="enquiryChart" style="max-height: 500px;min-height: 500px;"></canvas>
                     </div>
                 </div>
@@ -339,11 +340,486 @@
 
 @section('style')
 <style>
-    .status-card {
-        height: 80%; /* fixed height */
+    .dashboard-overview-row,
+    .dashboard-status-row {
+        margin-bottom: 18px;
+    }
+
+    .dashboard-overview-card,
+    .dashboard-status-card {
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        overflow: hidden;
+    }
+
+    .dashboard-overview-card {
+        overflow: visible;
+    }
+
+    .dashboard-overview-header,
+    .dashboard-section-header {
+        align-items: center;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
         display: flex;
-        flex-direction: column;
-        justify-content: center; /* center vertically */
+        gap: 16px;
+        justify-content: space-between;
+        padding: 16px 18px;
+    }
+
+    .dashboard-title-block h5,
+    .dashboard-section-header h6 {
+        color: #111827;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1.2;
+        margin: 0;
+    }
+
+    .dashboard-section-header h6 {
+        font-size: 16px;
+    }
+
+    .dashboard-kicker {
+        color: #6b7280;
+        display: block;
+        font-size: 10px;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1;
+        margin-bottom: 5px;
+        text-transform: uppercase;
+        margin-top: 3%;
+    }
+
+    .dashboard-filter-panel {
+        flex: 1;
+        position: relative;
+        z-index: 5;
+    }
+
+    .dashboard-overview-header,
+    .dashboard-filter-form,
+    .dashboard-filter-field {
+        overflow: visible;
+    }
+
+    .dashboard-filter-field .dropdown-menu {
+        z-index: 1050;
+    }
+
+    .dashboard-filter-form {
+        align-items: center;
+        display: grid;
+        gap: 8px;
+        grid-template-columns: minmax(145px, 1fr) minmax(145px, 1fr) minmax(220px, 1.25fr) auto;
+        justify-content: end;
+        margin: 0;
+        width: 100%;
+    }
+
+    .dashboard-filter-field .form-control,
+    .dashboard-filter-actions .btn {
+        border-radius: 6px;
+        min-height: 36px;
+    }
+
+    .dashboard-filter-field .form-control {
+        background-color: #ffffff;
+        border-color: #d1d5db;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .dashboard-filter-field .form-control:focus {
+        background-color: #ffffff;
+        border-color: #2563eb;
+        box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    .dashboard-filter-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        white-space: nowrap;
+    }
+
+    .dashboard-filter-actions .btn {
+        font-weight: 600;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .dashboard-filter-actions .btn-light {
+        background: #ffffff;
+        border-color: #d1d5db;
+        color: #374151;
+    }
+
+    .dashboard-overview-body,
+    .dashboard-status-body {
+        background: #f9fafb;
+        padding: 16px;
+    }
+
+    .dashboard-metrics-grid {
+        display: grid;
+        gap: 14px;
+        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+    }
+
+    .dashboard-metric-card {
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        display: flex;
+        gap: 14px;
+        min-height: 112px;
+        overflow: hidden;
+        padding: 18px;
+        position: relative;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dashboard-metric-card::before {
+        bottom: 0;
+        content: "";
+        left: 0;
+        position: absolute;
+        top: 0;
+        width: 4px;
+    }
+
+    .dashboard-metric-card::after {
+        content: none;
+    }
+
+    .dashboard-metric-card:hover,
+    .dashboard-status-tile:hover {
+        border-color: #cbd5e1;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+    }
+
+    .dashboard-metric-icon {
+        align-items: center;
+        border-radius: 8px;
+        display: flex;
+        flex: 0 0 46px;
+        height: 46px;
+        justify-content: center;
+        position: relative;
+        width: 46px;
+        z-index: 1;
+    }
+
+    .dashboard-metric-icon i {
+        font-size: 19px;
+    }
+
+    .dashboard-metric-copy {
+        min-width: 0;
+        position: relative;
+        z-index: 1;
+    }
+
+    .dashboard-metric-copy span,
+    .dashboard-status-content span {
+        color: #6b7280;
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0;
+        line-height: 1.3;
+    }
+
+    .dashboard-metric-copy strong {
+        color: #111827;
+        display: block;
+        font-size: 26px;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1;
+        margin-top: 8px;
+    }
+
+    .dashboard-metric-customers::before {
+        background: #0f766e;
+    }
+
+    .dashboard-metric-enquiries::before {
+        background: #2563eb;
+    }
+
+    .dashboard-metric-data::before {
+        background: #9333ea;
+    }
+
+    .dashboard-metric-followups::before {
+        background: #f59e0b;
+    }
+
+    .dashboard-metric-projects::before {
+        background: #0f172a;
+    }
+
+    .dashboard-metric-customers .dashboard-metric-icon {
+        background: #d1fae5;
+        color: #0f766e;
+    }
+
+    .dashboard-metric-enquiries .dashboard-metric-icon {
+        background: #dbeafe;
+        color: #1d4ed8;
+    }
+
+    .dashboard-metric-data .dashboard-metric-icon {
+        background: #f3e8ff;
+        color: #7e22ce;
+    }
+
+    .dashboard-metric-followups .dashboard-metric-icon {
+        background: #fef3c7;
+        color: #b45309;
+    }
+
+    .dashboard-metric-projects .dashboard-metric-icon {
+        background: #e2e8f0;
+        color: #0f172a;
+    }
+
+    .dashboard-status-content span {
+        color: #374151;
+    }
+
+    .dashboard-status-grid {
+        display: grid;
+        gap: 12px;
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    }
+
+    .dashboard-status-tile {
+        align-items: center;
+        background: #ffffff;
+        border: 1px solid #e5e7eb;
+        border-left: 5px solid var(--status-bg);
+        border-radius: 8px;
+        display: grid;
+        gap: 12px;
+        grid-template-columns: minmax(0, 1fr) auto;
+        min-height: 72px;
+        overflow: hidden;
+        padding: 14px 14px 14px 16px;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .dashboard-status-tile::before {
+        content: none;
+    }
+
+    .dashboard-status-tile::after {
+        content: none;
+    }
+
+    .dashboard-status-count {
+        align-items: center;
+        background: var(--status-bg);
+        border-radius: 8px;
+        color: var(--status-color);
+        display: flex;
+        flex: 0 0 auto;
+        justify-content: center;
+        min-width: 54px;
+        padding: 9px 12px;
+    }
+
+    .dashboard-status-content {
+        align-items: center;
+        display: flex;
+        gap: 10px;
+        min-width: 0;
+        padding: 0;
+    }
+
+    .dashboard-status-marker {
+        background: var(--status-bg);
+        border-radius: 999px;
+        box-shadow: 0 0 0 4px rgba(15, 23, 42, 0.04);
+        flex: 0 0 12px;
+        height: 12px;
+        width: 12px;
+    }
+
+    .dashboard-status-content span {
+        color: #374151;
+        display: block;
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0;
+        line-height: 1.35;
+        word-break: break-word;
+    }
+
+    .dashboard-status-count strong {
+        color: var(--status-color);
+        display: block;
+        font-size: 18px;
+        font-weight: 800;
+        letter-spacing: 0;
+        line-height: 1;
+        margin: 0;
+    }
+
+    #enquiries-total-section {
+        scroll-margin-top: 24px;
+    }
+
+    .dashboard-graph-card {
+        border: 1px solid #e5e7eb;
+        border-radius: 8px;
+        box-shadow: 0 6px 18px rgba(15, 23, 42, 0.05);
+        overflow: visible;
+    }
+
+    .dashboard-graph-header {
+        align-items: center;
+        background: #ffffff;
+        border-bottom: 1px solid #e5e7eb;
+        display: flex;
+        gap: 18px;
+        justify-content: space-between;
+        padding: 16px 18px;
+    }
+
+    .dashboard-graph-title {
+        flex: 0 0 300px;
+        /* min-width: 30%; */
+        margin-top: 1%;
+    }
+
+    .dashboard-graph-title h6 {
+        color: #111827;
+        font-size: 16px;
+        font-weight: 700;
+        letter-spacing: 0;
+        line-height: 1.25;
+        margin: 0 0 2px;
+    }
+
+    .dashboard-graph-filter-form {
+        align-items: center;
+        display: grid;
+        flex: 1;
+        gap: 8px;
+        grid-template-columns: minmax(145px, 1fr) minmax(145px, 1fr) minmax(120px, 0.75fr) minmax(120px, 0.75fr) auto;
+        margin: 0;
+    }
+
+    .dashboard-graph-filter-field,
+    .dashboard-graph-filter-form {
+        overflow: visible;
+    }
+
+    .dashboard-graph-filter-field .form-control,
+    .dashboard-graph-filter-actions .btn {
+        border-radius: 6px;
+        min-height: 36px;
+    }
+
+    .dashboard-graph-filter-field .form-control {
+        border-color: #d1d5db;
+        color: #374151;
+        font-weight: 500;
+    }
+
+    .dashboard-graph-filter-field .dropdown-menu {
+        z-index: 1050;
+    }
+
+    .dashboard-graph-filter-actions {
+        display: flex;
+        gap: 8px;
+        justify-content: flex-end;
+        white-space: nowrap;
+    }
+
+    .dashboard-graph-filter-actions .btn {
+        font-weight: 600;
+        padding-left: 16px;
+        padding-right: 16px;
+    }
+
+    .dashboard-graph-filter-actions .btn-light {
+        background: #ffffff;
+        border-color: #d1d5db;
+        color: #374151;
+    }
+
+    .dashboard-graph-body {
+        background: #ffffff;
+        padding: 18px;
+    }
+
+    @media (max-width: 1199.98px) {
+        .dashboard-overview-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .dashboard-filter-form,
+        .dashboard-graph-filter-form {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .dashboard-filter-date,
+        .dashboard-filter-actions,
+        .dashboard-graph-filter-actions {
+            grid-column: span 2;
+        }
+
+        .dashboard-graph-header {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .dashboard-graph-title {
+            flex: none;
+            min-width: 0;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .dashboard-overview-header,
+        .dashboard-section-header,
+        .dashboard-overview-body,
+        .dashboard-status-body {
+            padding: 14px;
+        }
+
+        .dashboard-filter-form,
+        .dashboard-graph-filter-form,
+        .dashboard-metrics-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-filter-date,
+        .dashboard-filter-actions,
+        .dashboard-graph-filter-actions {
+            grid-column: auto;
+        }
+
+        .dashboard-filter-actions,
+        .dashboard-graph-filter-actions {
+            justify-content: stretch;
+        }
+
+        .dashboard-filter-actions .btn,
+        .dashboard-graph-filter-actions .btn {
+            flex: 1;
+        }
     }
 </style>
 @endsection

@@ -51,6 +51,9 @@
                         <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
                             Self Lead
                         </option>
+                        <option value="cross_up_sell" {{ request('source_mode') == "cross_up_sell" ? 'selected' : '' }}>
+                            Cross/Up Sell
+                        </option>
                     </select>
                 </div>
 
@@ -199,6 +202,9 @@
                         {{-- <th>Project Category</th> --}}
                         <th>Source Mode</th>
                         <th class="text-center">Current Status</th>
+                        @can('view_enquiries_list_project_cost')
+                            <th class="text-center">Approved Cost</th>
+                        @endcan
                         <th class="text-center">Enquiry Date</th>
                         <th class="text-center">Enquiry Owner</th>
                         <th class="text-center">Updated Date</th>
@@ -288,20 +294,25 @@
                                         <em>N/A</em>
                                     @endif
                                 </td> --}}
-                                <td class="text-center">{{ ($enquiry->source_mode != NULL) ? ucfirst($enquiry->source_mode).' Lead' : '' }}</td>
+                                <td class="text-center">
+                                    @if($enquiry->source_mode != NULL)
+                                       {{ ($enquiry->source_mode == 'cross_up_sell') ? 'Cross/Up Sell' : ucfirst($enquiry->source_mode).' Lead' }} 
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     
                                     <span class="badge  badge-inline {{$approved ?? '' }}" style="background: {{$statuses[$enquiry->status]['bg'] ?? '' }}; color:{{$statuses[$enquiry->status]['list_color'] ?? '' }}">
                                         {{ ucfirst(str_replace('_', ' ', $enquiry->status)) }}
                                     </span>
-                                    @can('view_enquiries_list_project_cost')
-                                        @if($enquiry->status === "project_approved") 
-                                            <br>
-                                            <strong> AED {{ $enquiry->approved_cost ?? '' }} </strong>
-                                        @endif
-                                    @endcan
                                    
                                 </td>
+                                @can('view_enquiries_list_project_cost')
+                                    <td class="text-center">
+                                        @if($enquiry->status === "project_approved")
+                                            <strong>AED {{ number_format((float) ($enquiry->approved_cost ?? 0), 2) }}</strong>
+                                        @endif
+                                    </td>
+                                @endcan
                                 <td class="text-center">
                                     {{ date('d, M Y', strtotime($enquiry->enquiry_date)) }}
                                 </td>
@@ -354,6 +365,28 @@
                         @endforeach
                     @endcan
                 </tbody>
+                @can('view_enquiries_list_project_cost')
+                    <tfoot class="fs-13">
+                        <tr>
+                            <th colspan="6" class="text-right">
+                                <span class="p-2">Total Approved Cost</span>
+                            </th>
+                            <th colspan="2" class="text-center">
+                                <span class="p-2">AED {{ number_format($approvedCostTotal ?? 0, 2) }}</span>
+                            </th>
+                            <th colspan="3"></th>
+                        </tr>
+                        <tr>
+                            <th colspan="6" class="text-right">
+                                <span class="p-2">Average Approved Cost</span>
+                            </th>
+                            <th colspan="2" class="text-center">
+                                <span class="p-2">AED {{ number_format($approvedCostAverage ?? 0, 2) }}</span>
+                            </th>
+                            <th colspan="3"></th>
+                        </tr>
+                    </tfoot>
+                @endcan
             </table>
             <div class="aiz-pagination mt-2">
                 @can('view_enquiries')

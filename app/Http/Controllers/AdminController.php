@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Models\Enquiry;
 use App\Models\Customer;
+use App\Models\Data;
 use App\Models\EnquirySource;
 use App\Models\ProjectType;
 use App\Models\Project;
@@ -125,7 +126,7 @@ class AdminController extends Controller
                             ->pluck('total', 'enquiry_source_id')
                             ->toArray();
 
-        $allSourceModes = ['inhouse', 'self'];
+        $allSourceModes = ['inhouse', 'self','cross_up_sell'];
         $enquiriesBySourceMode = (clone $query)
                             ->select('source_mode', \DB::raw('count(*) as total'))
                             
@@ -195,6 +196,56 @@ class AdminController extends Controller
                                 }
                             })
                             ->count();
+
+        $dataQuery = Data::query();
+
+        if (!empty($from_date) && !empty($to_date)) {
+            $dataQuery->whereBetween('entry_date', [
+                Carbon::createFromFormat('d-m-Y', $from_date)->startOfDay(),
+                Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay(),
+            ]);
+        }
+
+        $totalData = $dataQuery->when($user_id, function ($q) use ($user_id) {
+                                if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                    $q->where('sales_person', $user_id);
+                                }
+                            })
+                            ->count();
+
+        $followupsQuery = EnquiryFollowup::query();
+
+        if (!empty($from_date) && !empty($to_date)) {
+            $followupsQuery->where(function ($q) use ($from_date, $to_date) {
+                $from = Carbon::createFromFormat('d-m-Y', $from_date)->startOfDay();
+                $to = Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay();
+
+                $q->where(function ($subQ) use ($from, $to) {
+                    $subQ->where('followup_type', 'meeting')
+                        ->whereBetween('followup_from', [$from, $to]);
+                })->orWhere(function ($subQ) use ($from, $to) {
+                    $subQ->where('followup_type', '!=', 'meeting')
+                        ->whereBetween('followup_time', [$from, $to]);
+                });
+            });
+        }
+
+        $totalFollowups = $followupsQuery->when($user_id, function ($q) use ($user_id) {
+                                    if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                        $q->where(function ($subQ) use ($user_id) {
+                                            $subQ->where('created_by', $user_id)
+                                                ->orWhereHas('participants', function ($participantQ) use ($user_id) {
+                                                    $participantQ->where('user_id', $user_id);
+                                                });
+                                        });
+                                    }
+                                })
+                                ->when($source_mode, function ($q) use ($source_mode) {
+                                    $q->whereHas('enquiry', function ($enquiryQ) use ($source_mode) {
+                                        $enquiryQ->where('source_mode', $source_mode);
+                                    });
+                                })
+                                ->count();
     
         $queryProjectType = Enquiry::query()
                         ->leftJoin('enquiry_project_types', 'enquiries.id', '=', 'enquiry_project_types.enquiry_id')
@@ -405,7 +456,7 @@ class AdminController extends Controller
             $chartType = 'daywise';
         }
 
-        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','totalCustomers','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
+        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','totalCustomers','totalData','totalFollowups','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
     }
 
     function clearCache(Request $request)
