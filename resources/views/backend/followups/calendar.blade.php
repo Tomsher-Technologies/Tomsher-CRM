@@ -161,7 +161,7 @@
                                     <textarea name="post_comment" id="post_comment" class="form-control form-control-sm col-8"  rows="3"></textarea>
                                 </div>
                                 <div class="form-group col-12" style="text-align: end;">
-                                    <button id="update-status-btn" class="btn btn-success w-auto btn-sm">Update Status</button>
+                                    <button id="update-status-btn" class="btn btn-success w-auto btn-sm" >Update Status</button>
                                 </div>
                                 
                             </td>

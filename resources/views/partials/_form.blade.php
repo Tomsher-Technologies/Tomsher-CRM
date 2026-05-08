@@ -54,6 +54,9 @@
                 <option value="self" {{ old('source_mode', $enquiry->source_mode ?? '') == "self" ? 'selected' : '' }}>
                     Self Lead
                 </option>
+                <option value="cross_up_sell" {{ old('source_mode', $enquiry->source_mode ?? '') == "cross_up_sell" ? 'selected' : '' }}>
+                    Cross/Up Sell
+                </option>
             </select>
             @error('source_mode')
                 <span class="text-danger">{{ $message }}</span>

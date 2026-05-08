@@ -2,7 +2,18 @@
 @section('content')
 <div class="container">
     <div class="bg-white shadow-lg rounded-xl p-4">
-        <h4 class="text-center mb-4">📄 Project Details</h4>
+        <div class="d-flex align-items-center justify-content-between flex-wrap mb-4">
+            <h4 class="mb-0">📄 Project Details</h4>
+            <div class="d-flex align-items-center gap-2 mt-2 mt-md-0">
+                @if($project->enquiry)
+                    <a href="{{ route('enquiries.show', $project->enquiry) }}" class="btn btn-success btn-sm">
+                        View Enquiry
+                    </a>
+                @endif
+                <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('enquiries.index') }}" class="btn btn-primary btn-sm ml-1">Back to Projects</a>
+            </div>
+        </div>
+
         <!-- Project Info -->
         <div class="row mb-4">
             <div class="col-md-6">
@@ -128,9 +139,6 @@
             @endif
         @endcan
 
-        <div class="text-end mt-4">
-            <a href="{{ Session::has('projects_last_url') ? Session::get('projects_last_url') : route('enquiries.index') }}" class="btn btn-primary btn-sm">Back to Projects</a>
-        </div>
     </div>
 </div>
 @endsection
