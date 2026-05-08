@@ -181,6 +181,7 @@
                     <div class="mb-1">{{ $enquiry->addedBy->name ?? '-' }}</div>
 
                     <div class="text-muted">Current Status</div>
+                    
                     <div class="mb-1">
                         @php
                             $statuses = getEnquiryStatuses();
@@ -190,7 +191,13 @@
                         </span>
                     
                     </div>
-
+                    
+                    <div class="text-muted">Source Mode</div>
+                    <div class="mb-1">
+                        @if($enquiry->source_mode != NULL)
+                            {{ ($enquiry->source_mode == 'cross_up_sell') ? 'Cross/Up Sell' : ucfirst($enquiry->source_mode).' Lead' }} 
+                        @endif
+                    </div>
                     <div class="text-muted">Project Categories</div>
                     @if($enquiry->projectTypes->count())
                         <ul class="list-unstyled">
@@ -208,10 +215,11 @@
            
             <h6 class="mb-3">Project Details</h6>
             <p>{!! nl2br(e($enquiry->project_details)) !!}</p>
-
+            
             @if($enquiry->comments)
-                <div class="mt-4 mb-3">Internal Comments</div>
-                <div class="text-muted">{!! nl2br(e($enquiry->comments)) !!}</div>
+                <hr>
+                <h6 class="mb-3">Internal Comments</h6>
+                <p>{!! nl2br(e($enquiry->comments)) !!}</p>
             @endif
             <hr>
             <p class="text-right text-muted">

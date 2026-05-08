@@ -51,6 +51,9 @@
                         <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
                             Self Lead
                         </option>
+                        <option value="cross_up_sell" {{ request('source_mode') == "cross_up_sell" ? 'selected' : '' }}>
+                            Cross/Up Sell
+                        </option>
                     </select>
                 </div>
 
@@ -291,7 +294,11 @@
                                         <em>N/A</em>
                                     @endif
                                 </td> --}}
-                                <td class="text-center">{{ ($enquiry->source_mode != NULL) ? ucfirst($enquiry->source_mode).' Lead' : '' }}</td>
+                                <td class="text-center">
+                                    @if($enquiry->source_mode != NULL)
+                                       {{ ($enquiry->source_mode == 'cross_up_sell') ? 'Cross/Up Sell' : ucfirst($enquiry->source_mode).' Lead' }} 
+                                    @endif
+                                </td>
                                 <td class="text-center">
                                     
                                     <span class="badge  badge-inline {{$approved ?? '' }}" style="background: {{$statuses[$enquiry->status]['bg'] ?? '' }}; color:{{$statuses[$enquiry->status]['list_color'] ?? '' }}">
