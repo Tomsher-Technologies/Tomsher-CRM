@@ -334,11 +334,13 @@
                                             class="btn btn-soft-success btn-sm btn-icon btn-circle m-auto" title="Edit enquiry details">
                                             <i class="las la-edit" style="margin-top: 3px;"></i>
                                         </a>
-                                    @endcan
+                                    
 
-                                    <a href="javascript:void(0)" class="btn-change-status-icon btn btn-sm btn-icon btn-circle change-status-btn m-auto" data-id="{{ $enquiry->id }}" data-status="{{ $enquiry->status }}" title="Change Status">
-                                        <i class="las la-exchange-alt" style="margin-top: 2px;"></i>
-                                    </a>
+                                        <a href="javascript:void(0)" class="btn-change-status-icon btn btn-sm btn-icon btn-circle change-status-btn m-auto" data-id="{{ $enquiry->id }}" data-status="{{ $enquiry->status }}" title="Change Status">
+                                            <i class="las la-exchange-alt" style="margin-top: 2px;"></i>
+                                        </a>
+
+                                    @endcan
 
                                     @can('add_followups')
                                         <!-- Follow-up icon with tooltip -->
