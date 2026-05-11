@@ -54,7 +54,7 @@
             color: #000000;
             border-radius: 50%;
             /* width: calc(2.02rem + 2px);
-                height: calc(2.02rem + 2px); */
+                                    height: calc(2.02rem + 2px); */
             transition: all 0.3s ease;
             box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
         }
@@ -395,48 +395,52 @@
                                 {{ \Carbon\Carbon::parse($history->status_date)->format('d M Y') }}</small>
                             <small class="text-muted">&nbsp; By: {{ $history->changedBy->name ?? 'System' }}</small>
 
-                            @if ($history->status === 'proposal_submitted')
-                                @php
-                                    $proposalItems = $history->proposalItems()->get();
-                                @endphp
-                                @if (!empty($proposalItems) && $proposalItems->count() > 0)
-                                    <br>
-                                    <table class="table table-bordered aiz-table w-75 mt-2">
-                                        <thead>
-                                            <tr>
-                                                <th class="text-center w-10">#</th>
-                                                <th class="text-start w-50">Title</th>
-                                                <th class="text-center w-20">Cost</th>
-                                                <th class="text-center w-10">Internal Days</th>
-                                                <th class="text-center w-10">Client Days</th>
-                                            </tr>
-                                        </thead>
-                                        <tbody>
-                                            @forelse ($proposalItems as $it => $items)
-                                                @php
-                                                    $selected = $items->selected == 1 ? 'background: lightgreen;' : '';
-                                                @endphp
-                                                <tr style="{{ $selected }}">
-                                                    <td class="text-center">{{ $it + 1 }}</td>
-                                                    <td class="text-start">{{ $items->title }}</td>
-                                                    <td class="text-center">{{ $items->cost }}</td>
-                                                    <td class="text-center">{{ $items->internal_days }}</td>
-                                                    <td class="text-center">{{ $items->client_days }}</td>
-                                                </tr>
-                                            @empty
+                            @can('view_enquiries_project_cost')
+                                @if ($history->status === 'proposal_submitted')
+                                    @php
+                                        $proposalItems = $history->proposalItems()->get();
+                                    @endphp
+                                    @if (!empty($proposalItems) && $proposalItems->count() > 0)
+                                        <br>
+                                        <table class="table table-bordered aiz-table w-75 mt-2">
+                                            <thead>
                                                 <tr>
-                                                    <td colspan="5" class="text-center">No proposal items found.</td>
+                                                    <th class="text-center w-10">#</th>
+                                                    <th class="text-start w-50">Title</th>
+                                                    <th class="text-center w-20">Cost</th>
+                                                    <th class="text-center w-10">Internal Days</th>
+                                                    <th class="text-center w-10">Client Days</th>
                                                 </tr>
-                                            @endforelse
-                                        </tbody>
-                                    </table>
+                                            </thead>
+                                            <tbody>
+                                                @forelse ($proposalItems as $it => $items)
+                                                    @php
+                                                        $selected =
+                                                            $items->selected == 1 ? 'background: lightgreen;' : '';
+                                                    @endphp
+                                                    <tr style="{{ $selected }}">
+                                                        <td class="text-center">{{ $it + 1 }}</td>
+                                                        <td class="text-start">{{ $items->title }}</td>
+                                                        <td class="text-center">{{ $items->cost }}</td>
+                                                        <td class="text-center">{{ $items->internal_days }}</td>
+                                                        <td class="text-center">{{ $items->client_days }}</td>
+                                                    </tr>
+                                                @empty
+                                                    <tr>
+                                                        <td colspan="5" class="text-center">No proposal items found.</td>
+                                                    </tr>
+                                                @endforelse
+                                            </tbody>
+                                        </table>
+                                    @endif
                                 @endif
-                            @endif
 
-                            @if (!empty($history->approved_cost) && $history->approved_cost != 0.0)
-                                <br><span class="text-success mt-1">Approved Cost: AED
-                                    {{ $history->approved_cost }}</span>
-                            @endif
+
+                                @if (!empty($history->approved_cost) && $history->approved_cost != 0.0)
+                                    <br><span class="text-success mt-1">Approved Cost: AED
+                                        {{ $history->approved_cost }}</span>
+                                @endif
+                            @endcan
                             @if ($history->comment)
                                 <p class="mt-1">{{ $history->comment }}</p>
                             @endif
