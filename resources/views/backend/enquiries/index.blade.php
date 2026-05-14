@@ -164,18 +164,42 @@
             </form>
             
             <div class="row" style="text-align: -webkit-right;">
-                <div class="col-md-10 d-flex flex-wrap mt-4">
+                <div class="col-md-2 m-auto">
+                    <form action="{{ route('enquiries.index') }}" method="GET">
+                        @foreach (request()->except(['page', 'per_page']) as $k => $v)
+                            @if (is_array($v))
+                                @foreach ($v as $vv)
+                                    <input type="hidden" name="{{ $k }}[]" value="{{ $vv }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                            @endif
+                        @endforeach
+
+                        <div class="d-flex align-items-center ">
+                            <label class="mb-0 mr-2 text-muted fs-12" for="per_page">Per page</label>
+                            <select name="per_page" id="per_page" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                                @foreach ([30, 50, 100, 200] as $pageLimit)
+                                    <option value="{{ $pageLimit }}" {{ (int) request('per_page', 30) === $pageLimit ? 'selected' : '' }}>
+                                        {{ $pageLimit }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-8 d-flex flex-wrap mt-4">
                     <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
-                        <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
+                        <span class="d-inline-block" style="width:25px; height:15px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
+                        <span class="ms-2 fs-11" style="margin-left: 5px;">Pending Followups</span>
                     </div>
                     <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
-                        <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
+                        <span class="d-inline-block" style="width:25px; height:15px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
+                        <span class="ms-2 fs-11" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
                     </div>
                     <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
-                        <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
+                        <span class="d-inline-block" style="width:25px; height:15px; background-color: #90ee903b; border:1px solid #ccc;"></span>
+                        <span class="ms-2 fs-11" style="margin-left: 5px;">Project Approved</span>
                     </div>
                 </div>
                 <div class="col-md-2 m-auto">
@@ -208,6 +232,7 @@
                         </select>
                     </form>
                 </div>
+                
             </div>
             <table class="table aiz-table table-bordered mb-0">
                 <thead>
@@ -432,16 +457,16 @@
 
             <div class="d-flex flex-wrap mt-4">
                 <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
+                    <span class="d-inline-block" style="width:25px; height:15px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
+                    <span class="ms-2 fs-11" style="margin-left: 5px;">Pending Followups</span>
                 </div>
                 <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
+                    <span class="d-inline-block" style="width:25px; height:15px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
+                    <span class="ms-2 fs-11" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
                 </div>
                 <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
+                    <span class="d-inline-block" style="width:25px; height:15px; background-color: #90ee903b; border:1px solid #ccc;"></span>
+                    <span class="ms-2 fs-11" style="margin-left: 5px;">Project Approved</span>
                 </div>
             </div>
         </div>

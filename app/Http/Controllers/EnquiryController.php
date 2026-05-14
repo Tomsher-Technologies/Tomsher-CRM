@@ -192,7 +192,11 @@ class EnquiryController extends Controller
                 });
         }], 'cost');
 
-        $enquiries = $query->paginate(30);
+        $allowedPageLimits = [30, 50, 100, 200];
+        $perPage = (int) $request->input('per_page', 30);
+        $perPage = in_array($perPage, $allowedPageLimits) ? $perPage : 30;
+
+        $enquiries = $query->paginate($perPage);
 
 
         return view('backend.enquiries.index', compact('enquiries','customers', 'sources', 'projectTypes','users','approvedCostTotal','approvedCostAverage'));
