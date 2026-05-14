@@ -185,6 +185,13 @@ class EnquiryController extends Controller
         $approvedCostCount = (int) ($approvedCostSummary->count ?? 0);
         $approvedCostAverage = $approvedCostCount > 0 ? $approvedCostTotal / $approvedCostCount : 0;
 
+        $query->withMax(['proposalItems as highest_submitted_proposal_cost' => function ($q) {
+            $q->where('status', 1)
+                ->whereHas('status_history', function ($historyQuery) {
+                    $historyQuery->where('status', 'proposal_submitted');
+                });
+        }], 'cost');
+
         $enquiries = $query->paginate(30);
 
 

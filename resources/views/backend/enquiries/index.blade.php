@@ -325,8 +325,25 @@
                                 </td>
                                 @can('view_enquiries_list_project_cost')
                                     <td class="text-center">
-                                        @if($enquiry->status === "project_approved")
-                                            <strong>AED {{ number_format((float) ($enquiry->approved_cost ?? 0), 2) }}</strong>
+                                        @php
+                                            $approvedCost = (float) ($enquiry->approved_cost ?? 0);
+                                            $submittedProposalCost = (float) ($enquiry->highest_submitted_proposal_cost ?? 0);
+                                            $displayApprovedCost = ($enquiry->approved_cost != 0)
+                                                ? $approvedCost
+                                                : $submittedProposalCost;
+                                        @endphp
+                                        
+                                    
+                                        @if($displayApprovedCost > 0)
+                                            @if($approvedCost > 0)
+                                                @if($enquiry->status == 'project_approved')
+                                                    <strong>AED {{ number_format($displayApprovedCost, 2) }}</strong>
+                                                @else
+                                                    <span class="text-info" title="Approved Cost">AED {{ number_format($displayApprovedCost, 2) }}</span>
+                                                @endif
+                                            @elseif($submittedProposalCost > 0)
+                                                <span class="text-info" title="Highest Submitted Proposal Cost">AED {{ number_format($submittedProposalCost, 2) }}</span>
+                                            @endif
                                         @endif
                                     </td>
                                 @endcan
