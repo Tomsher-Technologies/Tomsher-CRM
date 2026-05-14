@@ -45,24 +45,33 @@ class EnquiryController extends Controller
 
         $date = $request->enquiry_date;
 
-        $query = Enquiry::with(['customer', 'source', 'projectTypes']);
+        $query = Enquiry::with(['customer.contacts', 'source', 'projectTypes']);
         
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->customer_id);
         }
     
         if ($request->filled('enquiry_source_id')) {
-            $query->where('enquiry_source_id', $request->enquiry_source_id);
+            $sourceIds = array_filter((array) $request->input('enquiry_source_id'));
+            if (!empty($sourceIds)) {
+                $query->whereIn('enquiry_source_id', $sourceIds);
+            }
         }
 
         if ($request->filled('source_mode')) {
-            $query->where('source_mode', $request->source_mode);
+            $sourceModes = array_filter((array) $request->input('source_mode'));
+            if (!empty($sourceModes)) {
+                $query->whereIn('source_mode', $sourceModes);
+            }
         }
     
         if ($request->filled('project_type_id')) {
-            $query->whereHas('projectTypes', function ($q) use ($request) {
-                $q->where('project_type_id', $request->project_type_id);
-            });
+            $projectTypeIds = array_filter((array) $request->input('project_type_id'));
+            if (!empty($projectTypeIds)) {
+                $query->whereHas('projectTypes', function ($q) use ($projectTypeIds) {
+                    $q->whereIn('project_type_id', $projectTypeIds);
+                });
+            }
         }
 
         if ($request->filled('keyword')) {
@@ -70,39 +79,53 @@ class EnquiryController extends Controller
 
             $query->where(function ($q) use ($keyword) {
                 $q->where('enquiry_code', 'like', '%' . $keyword . '%')
-                ->orWhere('project_title', 'like', '%' . $keyword . '%');
+                    ->orWhere('project_title', 'like', '%' . $keyword . '%')
+                    ->orWhereHas('customer', function ($customer) use ($keyword) {
+                        $customer->where('customer_code', 'like', '%' . $keyword . '%')
+                            ->orWhere('company_name', 'like', '%' . $keyword . '%')
+                            ->orWhere('company_email', 'like', '%' . $keyword . '%')
+                            ->orWhere('company_address', 'like', '%' . $keyword . '%')
+                            ->orWhere('website_link', 'like', '%' . $keyword . '%')
+                            // ->orWhere('google_location', 'like', '%' . $keyword . '%')
+                            // ->orWhere('ntc', 'like', '%' . $keyword . '%')
+                            ->orWhereHas('contacts', function ($contact) use ($keyword) {
+                                $contact->where('name', 'like', '%' . $keyword . '%')
+                                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                                    ->orWhere('landline_number', 'like', '%' . $keyword . '%')
+                                    ->orWhere('mobile_number', 'like', '%' . $keyword . '%')
+                                    ->orWhere('whatsapp_number', 'like', '%' . $keyword . '%')
+                                    ->orWhere('designation', 'like', '%' . $keyword . '%');
+                            });
+                    });
             });
         }
     
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-    
-        if ($request->filled('milestone_status')) {
-            $milestoneStatus = $request->milestone_status;
-
-            $query->whereHas('statusHistories', function ($q) use ($milestoneStatus) {
-                $q->where('status', $milestoneStatus);
-            });
+            $statuses = array_filter((array) $request->input('status'));
+            if (!empty($statuses)) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
         $updated_date = $request->last_updated_date ?? '';
 
         if ($request->filled('milestone_status')) {
-            $milestoneStatus = $request->milestone_status;
+            $milestoneStatuses = array_filter((array) $request->input('milestone_status'));
 
-            $query->whereHas('statusHistories', function ($q) use ($milestoneStatus, $updated_date) {
-                // Filter by milestone status
-                $q->where('status', $milestoneStatus);
+            if (!empty($milestoneStatuses)) {
+                $query->whereHas('statusHistories', function ($q) use ($milestoneStatuses, $updated_date) {
+                    // Filter by milestone status
+                    $q->whereIn('status', $milestoneStatuses);
 
-                // Apply date range if provided
-                if ($updated_date != null) {
-                    $q->whereBetween('status_date', [
-                        Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[0])->startOfDay(),
-                        Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[1])->endOfDay(),
-                    ]);
-                }
-            });
+                    // Apply date range if provided
+                    if ($updated_date != null) {
+                        $q->whereBetween('status_date', [
+                            Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[0])->startOfDay(),
+                            Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[1])->endOfDay(),
+                        ]);
+                    }
+                });
+            }
         }else{
             if ($updated_date != null) {
                 $query->whereDate('updated_at', '>=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[0])))->whereDate('updated_at', '<=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[1])));
@@ -111,7 +134,10 @@ class EnquiryController extends Controller
 
 
         if ($request->filled('added_by')) {
-            $query->where('owner_id', $request->added_by);
+            $userIds = array_filter((array) $request->input('added_by'));
+            if (!empty($userIds)) {
+                $query->whereIn('owner_id', $userIds);
+            }
         }
         
         if ($date != null) {
@@ -159,7 +185,18 @@ class EnquiryController extends Controller
         $approvedCostCount = (int) ($approvedCostSummary->count ?? 0);
         $approvedCostAverage = $approvedCostCount > 0 ? $approvedCostTotal / $approvedCostCount : 0;
 
-        $enquiries = $query->paginate(30);
+        $query->withMax(['proposalItems as highest_submitted_proposal_cost' => function ($q) {
+            $q->where('status', 1)
+                ->whereHas('status_history', function ($historyQuery) {
+                    $historyQuery->where('status', 'proposal_submitted');
+                });
+        }], 'cost');
+
+        $allowedPageLimits = [30, 50, 100, 200];
+        $perPage = (int) $request->input('per_page', 30);
+        $perPage = in_array($perPage, $allowedPageLimits) ? $perPage : 30;
+
+        $enquiries = $query->paginate($perPage);
 
 
         return view('backend.enquiries.index', compact('enquiries','customers', 'sources', 'projectTypes','users','approvedCostTotal','approvedCostAverage'));
