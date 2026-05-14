@@ -52,7 +52,8 @@ class EnquiryController extends Controller
         }
     
         if ($request->filled('enquiry_source_id')) {
-            $query->where('enquiry_source_id', $request->enquiry_source_id);
+            $sourceIds = array_filter((array) $request->input('enquiry_source_id'));
+            $query->whereIn('enquiry_source_id', $sourceIds);
         }
 
         if ($request->filled('source_mode')) {

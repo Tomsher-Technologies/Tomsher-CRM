@@ -29,12 +29,15 @@
                 </div>
 
                 <div class="col-md-3 mb-1">
-                    <select name="enquiry_source_id" id="enquiry_source_id" class="form-control form-control-sm aiz-selectpicker"
-                        data-live-search="true">
-                        <option value="">All Enquiry Sources</option>
+                    @php
+                        $selectedSourceIds = array_map('strval', array_filter((array) request('enquiry_source_id', [])));
+                    @endphp
+                    <select name="enquiry_source_id[]" id="enquiry_source_id" class="form-control form-control-sm aiz-selectpicker"
+                        data-live-search="true" multiple title="All Enquiry Sources" data-actions-box="true"
+                        data-selected-text-format="count > 2">
                         @foreach ($sources as $source)
                             <option value="{{ $source->id }}"
-                                {{ request('enquiry_source_id') == $source->id ? 'selected' : '' }}>
+                                {{ in_array((string) $source->id, $selectedSourceIds) ? 'selected' : '' }}>
                                 {{ $source->name }}
                             </option>
                         @endforeach
