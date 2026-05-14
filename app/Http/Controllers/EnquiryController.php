@@ -53,17 +53,25 @@ class EnquiryController extends Controller
     
         if ($request->filled('enquiry_source_id')) {
             $sourceIds = array_filter((array) $request->input('enquiry_source_id'));
-            $query->whereIn('enquiry_source_id', $sourceIds);
+            if (!empty($sourceIds)) {
+                $query->whereIn('enquiry_source_id', $sourceIds);
+            }
         }
 
         if ($request->filled('source_mode')) {
-            $query->where('source_mode', $request->source_mode);
+            $sourceModes = array_filter((array) $request->input('source_mode'));
+            if (!empty($sourceModes)) {
+                $query->whereIn('source_mode', $sourceModes);
+            }
         }
     
         if ($request->filled('project_type_id')) {
-            $query->whereHas('projectTypes', function ($q) use ($request) {
-                $q->where('project_type_id', $request->project_type_id);
-            });
+            $projectTypeIds = array_filter((array) $request->input('project_type_id'));
+            if (!empty($projectTypeIds)) {
+                $query->whereHas('projectTypes', function ($q) use ($projectTypeIds) {
+                    $q->whereIn('project_type_id', $projectTypeIds);
+                });
+            }
         }
 
         if ($request->filled('keyword')) {
@@ -76,34 +84,31 @@ class EnquiryController extends Controller
         }
     
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
-        }
-    
-        if ($request->filled('milestone_status')) {
-            $milestoneStatus = $request->milestone_status;
-
-            $query->whereHas('statusHistories', function ($q) use ($milestoneStatus) {
-                $q->where('status', $milestoneStatus);
-            });
+            $statuses = array_filter((array) $request->input('status'));
+            if (!empty($statuses)) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
         $updated_date = $request->last_updated_date ?? '';
 
         if ($request->filled('milestone_status')) {
-            $milestoneStatus = $request->milestone_status;
+            $milestoneStatuses = array_filter((array) $request->input('milestone_status'));
 
-            $query->whereHas('statusHistories', function ($q) use ($milestoneStatus, $updated_date) {
-                // Filter by milestone status
-                $q->where('status', $milestoneStatus);
+            if (!empty($milestoneStatuses)) {
+                $query->whereHas('statusHistories', function ($q) use ($milestoneStatuses, $updated_date) {
+                    // Filter by milestone status
+                    $q->whereIn('status', $milestoneStatuses);
 
-                // Apply date range if provided
-                if ($updated_date != null) {
-                    $q->whereBetween('status_date', [
-                        Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[0])->startOfDay(),
-                        Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[1])->endOfDay(),
-                    ]);
-                }
-            });
+                    // Apply date range if provided
+                    if ($updated_date != null) {
+                        $q->whereBetween('status_date', [
+                            Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[0])->startOfDay(),
+                            Carbon::createFromFormat('d-m-Y', explode(" to ", $updated_date)[1])->endOfDay(),
+                        ]);
+                    }
+                });
+            }
         }else{
             if ($updated_date != null) {
                 $query->whereDate('updated_at', '>=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[0])))->whereDate('updated_at', '<=', date('Y-m-d', strtotime(explode(" to ", $updated_date)[1])));
@@ -112,7 +117,10 @@ class EnquiryController extends Controller
 
 
         if ($request->filled('added_by')) {
-            $query->where('owner_id', $request->added_by);
+            $userIds = array_filter((array) $request->input('added_by'));
+            if (!empty($userIds)) {
+                $query->whereIn('owner_id', $userIds);
+            }
         }
         
         if ($date != null) {

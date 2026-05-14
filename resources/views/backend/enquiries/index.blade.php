@@ -34,7 +34,7 @@
                     @endphp
                     <select name="enquiry_source_id[]" id="enquiry_source_id" class="form-control form-control-sm aiz-selectpicker"
                         data-live-search="true" multiple title="All Enquiry Sources" data-actions-box="true"
-                        data-selected-text-format="count > 2">
+                        data-selected-text-format="values">
                         @foreach ($sources as $source)
                             <option value="{{ $source->id }}"
                                 {{ in_array((string) $source->id, $selectedSourceIds) ? 'selected' : '' }}>
@@ -45,27 +45,33 @@
                 </div>
 
                 <div class="col-md-3 mb-1">
-                    <select name="source_mode" id="source_mode" class="form-control form-control-sm aiz-selectpicker"
-                        data-live-search="true">
-                        <option value="">All Source Modes</option>
-                        <option value="inhouse" {{ request('source_mode') == "inhouse" ? 'selected' : '' }}>
+                    @php
+                        $selectedSourceModes = array_filter((array) request('source_mode', []));
+                    @endphp
+                    <select name="source_mode[]" id="source_mode" class="form-control form-control-sm aiz-selectpicker"
+                        data-live-search="true" multiple title="All Source Modes" data-actions-box="true"
+                        data-selected-text-format="values">
+                        <option value="inhouse" {{ in_array('inhouse', $selectedSourceModes) ? 'selected' : '' }}>
                             Inhouse Lead
                         </option>
-                        <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
+                        <option value="self" {{ in_array('self', $selectedSourceModes) ? 'selected' : '' }}>
                             Self Lead
                         </option>
-                        <option value="cross_up_sell" {{ request('source_mode') == "cross_up_sell" ? 'selected' : '' }}>
+                        <option value="cross_up_sell" {{ in_array('cross_up_sell', $selectedSourceModes) ? 'selected' : '' }}>
                             Cross/Up Sell
                         </option>
                     </select>
                 </div>
 
                 <div class="col-md-3 mb-1">
-                    <select name="project_type_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                        <option value="">All Project Categories</option>
+                    @php
+                        $selectedProjectTypeIds = array_map('strval', array_filter((array) request('project_type_id', [])));
+                    @endphp
+                    <select name="project_type_id[]" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                        multiple title="All Project Categories" data-actions-box="true" data-selected-text-format="values">
                         @foreach ($projectTypes as $type)
                             <option value="{{ $type->id }}"
-                                {{ request('project_type_id') == $type->id ? 'selected' : '' }}>
+                                {{ in_array((string) $type->id, $selectedProjectTypeIds) ? 'selected' : '' }}>
                                 {{ $type->name }}
                             </option>
                         @endforeach
@@ -76,11 +82,11 @@
                 <div class="col-md-3 mb-1">
                     @php
                         $statuses = getEnquiryStatuses();
-                       
+                        $selectedStatuses = array_filter((array) request('status', []));
                     @endphp
                 
-                    <select name="status" id="status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                        <option value="">All Current Status</option>
+                    <select name="status[]" id="status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                        multiple title="All Current Status" data-actions-box="true" data-selected-text-format="values">
                         @foreach ($statuses as $key => $data)
                             <option value="{{ $key }}"
                                 data-content="
@@ -89,7 +95,7 @@
                                         <span style='color: {{ $data['filter_color'] }}; font-weight: 600;'>{{ $data['label'] }}</span>
                                     </div>
                                 "
-                                {{ request('status') == $key ? 'selected' : '' }}>
+                                {{ in_array($key, $selectedStatuses) ? 'selected' : '' }}>
                                 {{ $data['label'] }}
                             </option>
                         @endforeach
@@ -98,10 +104,13 @@
 
                 @can('view_all_users_enquiries')
                     <div class="col-md-3 mb-1">
-                        <select name="added_by" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                            <option value="">All Users</option>
+                        @php
+                            $selectedUserIds = array_map('strval', array_filter((array) request('added_by', [])));
+                        @endphp
+                        <select name="added_by[]" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                            multiple title="All Users" data-actions-box="true" data-selected-text-format="values">
                             @foreach ($users as $user)
-                                <option value="{{ $user->id }}" {{ request('added_by') == $user->id ? 'selected' : '' }}>
+                                <option value="{{ $user->id }}" {{ in_array((string) $user->id, $selectedUserIds) ? 'selected' : '' }}>
                                     {{ $user->name }}
                                 </option>
                             @endforeach
@@ -123,10 +132,13 @@
                         data-advanced-range="true" autocomplete="off">
                 </div>
 
-
+            {{-- <div class="col-md-3 multi-value-filter"> --}}
                 <div class="col-md-3">
-                    <select name="milestone_status" id="milestone_status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                        <option value="">All Milestone Status</option>
+                    @php
+                        $selectedMilestoneStatuses = array_filter((array) request('milestone_status', []));
+                    @endphp
+                    <select name="milestone_status[]" id="milestone_status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                        multiple title="All Milestone Status" data-actions-box="true" data-selected-text-format="values">
                         @foreach ($statuses as $key => $data)
                             <option value="{{ $key }}"
                                 data-content="
@@ -135,7 +147,7 @@
                                         <span style='color: {{ $data['filter_color'] }}; font-weight: 600;'>{{ $data['label'] }}</span>
                                     </div>
                                 "
-                                {{ request('milestone_status') == $key ? 'selected' : '' }}>
+                                {{ in_array($key, $selectedMilestoneStatuses) ? 'selected' : '' }}>
                                 {{ $data['label'] }}
                             </option>
                         @endforeach
@@ -532,6 +544,19 @@
         .proposal-select-card.selected {
             border-color: #007bff;
             background-color: #e9f3ff;
+        }
+
+        .multi-value-filter .bootstrap-select .dropdown-toggle {
+            min-height: calc(1.5rem + 0.8rem + 2px);
+            height: auto;
+        }
+
+        .multi-value-filter .bootstrap-select .filter-option,
+        .multi-value-filter .bootstrap-select .filter-option-inner,
+        .multi-value-filter .bootstrap-select .filter-option-inner-inner {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
         }
 
         /* Icon-only Change Status button */
