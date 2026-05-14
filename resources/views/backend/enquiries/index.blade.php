@@ -86,7 +86,8 @@
                     @endphp
                 
                     <select name="status[]" id="status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
-                        multiple title="All Current Status" data-actions-box="true" data-selected-text-format="values">
+                        multiple title="All Current Status" data-actions-box="true" data-selected-text-format="values"
+                        data-show-content="false">
                         @foreach ($statuses as $key => $data)
                             <option value="{{ $key }}"
                                 data-content="
@@ -138,7 +139,8 @@
                         $selectedMilestoneStatuses = array_filter((array) request('milestone_status', []));
                     @endphp
                     <select name="milestone_status[]" id="milestone_status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
-                        multiple title="All Milestone Status" data-actions-box="true" data-selected-text-format="values">
+                        multiple title="All Milestone Status" data-actions-box="true" data-selected-text-format="values"
+                        data-show-content="false">
                         @foreach ($statuses as $key => $data)
                             <option value="{{ $key }}"
                                 data-content="
