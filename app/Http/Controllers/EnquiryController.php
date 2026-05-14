@@ -45,7 +45,7 @@ class EnquiryController extends Controller
 
         $date = $request->enquiry_date;
 
-        $query = Enquiry::with(['customer', 'source', 'projectTypes']);
+        $query = Enquiry::with(['customer.contacts', 'source', 'projectTypes']);
         
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->customer_id);
@@ -79,7 +79,24 @@ class EnquiryController extends Controller
 
             $query->where(function ($q) use ($keyword) {
                 $q->where('enquiry_code', 'like', '%' . $keyword . '%')
-                ->orWhere('project_title', 'like', '%' . $keyword . '%');
+                    ->orWhere('project_title', 'like', '%' . $keyword . '%')
+                    ->orWhereHas('customer', function ($customer) use ($keyword) {
+                        $customer->where('customer_code', 'like', '%' . $keyword . '%')
+                            ->orWhere('company_name', 'like', '%' . $keyword . '%')
+                            ->orWhere('company_email', 'like', '%' . $keyword . '%')
+                            ->orWhere('company_address', 'like', '%' . $keyword . '%')
+                            ->orWhere('website_link', 'like', '%' . $keyword . '%')
+                            // ->orWhere('google_location', 'like', '%' . $keyword . '%')
+                            // ->orWhere('ntc', 'like', '%' . $keyword . '%')
+                            ->orWhereHas('contacts', function ($contact) use ($keyword) {
+                                $contact->where('name', 'like', '%' . $keyword . '%')
+                                    ->orWhere('email', 'like', '%' . $keyword . '%')
+                                    ->orWhere('landline_number', 'like', '%' . $keyword . '%')
+                                    ->orWhere('mobile_number', 'like', '%' . $keyword . '%')
+                                    ->orWhere('whatsapp_number', 'like', '%' . $keyword . '%')
+                                    ->orWhere('designation', 'like', '%' . $keyword . '%');
+                            });
+                    });
             });
         }
     
