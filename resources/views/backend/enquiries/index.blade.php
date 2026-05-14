@@ -220,7 +220,7 @@
                         <th>Source Mode</th>
                         <th class="text-center">Current Status</th>
                         @can('view_enquiries_list_project_cost')
-                            <th class="text-center">Approved Cost</th>
+                            <th class="text-center">Project Cost</th>
                         @endcan
                         <th class="text-center">Enquiry Date</th>
                         <th class="text-center">Enquiry Owner</th>
