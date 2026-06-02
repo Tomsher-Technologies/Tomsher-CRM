@@ -45,7 +45,7 @@ class EnquiryController extends Controller
 
         $date = $request->enquiry_date;
 
-        $query = Enquiry::with(['customer.contacts', 'source', 'projectTypes']);
+        $query = Enquiry::with(['customer.contacts', 'source', 'projectTypes', 'statusHistories']);
         
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->customer_id);
