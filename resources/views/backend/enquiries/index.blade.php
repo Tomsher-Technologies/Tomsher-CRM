@@ -379,7 +379,11 @@
                                 <td class="text-center">{{ $enquiry->owner->name ?? '' }}</td>
 
                                 <td class="text-center">
-                                    {{ date('d, M Y', strtotime($enquiry->updated_at)) }}
+                                    @php
+                                        $latestStatusHistory = $enquiry->statusHistories->sortByDesc('id')->first();
+                                        $displayDate = $latestStatusHistory ? date('d, M Y', strtotime($latestStatusHistory->status_date)) : '';
+                                    @endphp
+                                    {{ $displayDate }}
                                 </td>
 
                                 <td class="text-center">
