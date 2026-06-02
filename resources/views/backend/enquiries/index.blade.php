@@ -10,7 +10,7 @@
         </div>
         <div class="card-body">
             <!-- Filter Form -->
-            <form method="GET" class="row g-3">
+            <form method="GET" class="row g-3 enquiry-filter-form">
 
                 <div class="col-md-3 mb-1">
                     <input type="text" class="form-control form-control-sm" value="{{ request('keyword') }}" name="keyword" placeholder="Search by enquiry code or title" >
@@ -607,6 +607,11 @@
             text-overflow: clip;
         }
 
+        /* Prevent raw multi-select flash before bootstrap-select rendering */
+        .enquiry-filter-form:not(.filters-ready) select.aiz-selectpicker[multiple] {
+            visibility: hidden;
+        }
+
         /* Icon-only Change Status button */
         .btn-change-status-icon {
             display: inline-flex;
@@ -704,6 +709,8 @@
 
 <script>
     $(document).ready(function () {
+        $('.enquiry-filter-form').addClass('filters-ready');
+
         document.getElementById('sort_by').addEventListener('change', function () {
             $('#sort_by_form').val(this.value);
             this.form.submit();
