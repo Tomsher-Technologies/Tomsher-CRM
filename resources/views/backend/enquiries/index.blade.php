@@ -29,12 +29,15 @@
                 </div>
 
                 <div class="col-md-3 mb-1">
-                    <select name="enquiry_source_id" id="enquiry_source_id" class="form-control form-control-sm aiz-selectpicker"
-                        data-live-search="true">
-                        <option value="">All Enquiry Sources</option>
+                    @php
+                        $selectedSourceIds = array_map('strval', array_filter((array) request('enquiry_source_id', [])));
+                    @endphp
+                    <select name="enquiry_source_id[]" id="enquiry_source_id" class="form-control form-control-sm aiz-selectpicker"
+                        data-live-search="true" multiple title="All Enquiry Sources" data-actions-box="true"
+                        data-selected-text-format="values">
                         @foreach ($sources as $source)
                             <option value="{{ $source->id }}"
-                                {{ request('enquiry_source_id') == $source->id ? 'selected' : '' }}>
+                                {{ in_array((string) $source->id, $selectedSourceIds) ? 'selected' : '' }}>
                                 {{ $source->name }}
                             </option>
                         @endforeach
@@ -42,27 +45,33 @@
                 </div>
 
                 <div class="col-md-3 mb-1">
-                    <select name="source_mode" id="source_mode" class="form-control form-control-sm aiz-selectpicker"
-                        data-live-search="true">
-                        <option value="">All Source Modes</option>
-                        <option value="inhouse" {{ request('source_mode') == "inhouse" ? 'selected' : '' }}>
+                    @php
+                        $selectedSourceModes = array_filter((array) request('source_mode', []));
+                    @endphp
+                    <select name="source_mode[]" id="source_mode" class="form-control form-control-sm aiz-selectpicker"
+                        data-live-search="true" multiple title="All Source Modes" data-actions-box="true"
+                        data-selected-text-format="values">
+                        <option value="inhouse" {{ in_array('inhouse', $selectedSourceModes) ? 'selected' : '' }}>
                             Inhouse Lead
                         </option>
-                        <option value="self" {{ request('source_mode') == "self" ? 'selected' : '' }}>
+                        <option value="self" {{ in_array('self', $selectedSourceModes) ? 'selected' : '' }}>
                             Self Lead
                         </option>
-                        <option value="cross_up_sell" {{ request('source_mode') == "cross_up_sell" ? 'selected' : '' }}>
+                        <option value="cross_up_sell" {{ in_array('cross_up_sell', $selectedSourceModes) ? 'selected' : '' }}>
                             Cross/Up Sell
                         </option>
                     </select>
                 </div>
 
                 <div class="col-md-3 mb-1">
-                    <select name="project_type_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                        <option value="">All Project Categories</option>
+                    @php
+                        $selectedProjectTypeIds = array_map('strval', array_filter((array) request('project_type_id', [])));
+                    @endphp
+                    <select name="project_type_id[]" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                        multiple title="All Project Categories" data-actions-box="true" data-selected-text-format="values">
                         @foreach ($projectTypes as $type)
                             <option value="{{ $type->id }}"
-                                {{ request('project_type_id') == $type->id ? 'selected' : '' }}>
+                                {{ in_array((string) $type->id, $selectedProjectTypeIds) ? 'selected' : '' }}>
                                 {{ $type->name }}
                             </option>
                         @endforeach
@@ -73,11 +82,12 @@
                 <div class="col-md-3 mb-1">
                     @php
                         $statuses = getEnquiryStatuses();
-                       
+                        $selectedStatuses = array_filter((array) request('status', []));
                     @endphp
                 
-                    <select name="status" id="status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                        <option value="">All Current Status</option>
+                    <select name="status[]" id="status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                        multiple title="All Current Status" data-actions-box="true" data-selected-text-format="values"
+                        data-show-content="false">
                         @foreach ($statuses as $key => $data)
                             <option value="{{ $key }}"
                                 data-content="
@@ -86,7 +96,7 @@
                                         <span style='color: {{ $data['filter_color'] }}; font-weight: 600;'>{{ $data['label'] }}</span>
                                     </div>
                                 "
-                                {{ request('status') == $key ? 'selected' : '' }}>
+                                {{ in_array($key, $selectedStatuses) ? 'selected' : '' }}>
                                 {{ $data['label'] }}
                             </option>
                         @endforeach
@@ -95,10 +105,13 @@
 
                 @can('view_all_users_enquiries')
                     <div class="col-md-3 mb-1">
-                        <select name="added_by" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                            <option value="">All Users</option>
+                        @php
+                            $selectedUserIds = array_map('strval', array_filter((array) request('added_by', [])));
+                        @endphp
+                        <select name="added_by[]" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                            multiple title="All Users" data-actions-box="true" data-selected-text-format="values">
                             @foreach ($users as $user)
-                                <option value="{{ $user->id }}" {{ request('added_by') == $user->id ? 'selected' : '' }}>
+                                <option value="{{ $user->id }}" {{ in_array((string) $user->id, $selectedUserIds) ? 'selected' : '' }}>
                                     {{ $user->name }}
                                 </option>
                             @endforeach
@@ -120,10 +133,14 @@
                         data-advanced-range="true" autocomplete="off">
                 </div>
 
-
+            {{-- <div class="col-md-3 multi-value-filter"> --}}
                 <div class="col-md-3">
-                    <select name="milestone_status" id="milestone_status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                        <option value="">All Milestone Status</option>
+                    @php
+                        $selectedMilestoneStatuses = array_filter((array) request('milestone_status', []));
+                    @endphp
+                    <select name="milestone_status[]" id="milestone_status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true"
+                        multiple title="All Milestone Status" data-actions-box="true" data-selected-text-format="values"
+                        data-show-content="false">
                         @foreach ($statuses as $key => $data)
                             <option value="{{ $key }}"
                                 data-content="
@@ -132,7 +149,7 @@
                                         <span style='color: {{ $data['filter_color'] }}; font-weight: 600;'>{{ $data['label'] }}</span>
                                     </div>
                                 "
-                                {{ request('milestone_status') == $key ? 'selected' : '' }}>
+                                {{ in_array($key, $selectedMilestoneStatuses) ? 'selected' : '' }}>
                                 {{ $data['label'] }}
                             </option>
                         @endforeach
@@ -147,18 +164,42 @@
             </form>
             
             <div class="row" style="text-align: -webkit-right;">
-                <div class="col-md-10 d-flex flex-wrap mt-4">
+                <div class="col-md-2 m-auto">
+                    <form action="{{ route('enquiries.index') }}" method="GET">
+                        @foreach (request()->except(['page', 'per_page']) as $k => $v)
+                            @if (is_array($v))
+                                @foreach ($v as $vv)
+                                    <input type="hidden" name="{{ $k }}[]" value="{{ $vv }}">
+                                @endforeach
+                            @else
+                                <input type="hidden" name="{{ $k }}" value="{{ $v }}">
+                            @endif
+                        @endforeach
+
+                        <div class="d-flex align-items-center ">
+                            <label class="mb-0 mr-2 text-muted fs-12" for="per_page">Per page</label>
+                            <select name="per_page" id="per_page" class="form-control form-control-sm w-auto" onchange="this.form.submit()">
+                                @foreach ([30, 50, 100, 200] as $pageLimit)
+                                    <option value="{{ $pageLimit }}" {{ (int) request('per_page', 30) === $pageLimit ? 'selected' : '' }}>
+                                        {{ $pageLimit }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="col-md-8 d-flex flex-wrap mt-4">
                     <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
-                        <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
+                        <span class="d-inline-block" style="width:25px; height:15px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
+                        <span class="ms-2 fs-11" style="margin-left: 5px;">Pending Followups</span>
                     </div>
                     <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
-                        <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
+                        <span class="d-inline-block" style="width:25px; height:15px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
+                        <span class="ms-2 fs-11" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
                     </div>
                     <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                        <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
-                        <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
+                        <span class="d-inline-block" style="width:25px; height:15px; background-color: #90ee903b; border:1px solid #ccc;"></span>
+                        <span class="ms-2 fs-11" style="margin-left: 5px;">Project Approved</span>
                     </div>
                 </div>
                 <div class="col-md-2 m-auto">
@@ -191,6 +232,7 @@
                         </select>
                     </form>
                 </div>
+                
             </div>
             <table class="table aiz-table table-bordered mb-0">
                 <thead>
@@ -203,7 +245,7 @@
                         <th>Source Mode</th>
                         <th class="text-center">Current Status</th>
                         @can('view_enquiries_list_project_cost')
-                            <th class="text-center">Approved Cost</th>
+                            <th class="text-center">Project Cost</th>
                         @endcan
                         <th class="text-center">Enquiry Date</th>
                         <th class="text-center">Enquiry Owner</th>
@@ -308,8 +350,25 @@
                                 </td>
                                 @can('view_enquiries_list_project_cost')
                                     <td class="text-center">
-                                        @if($enquiry->status === "project_approved")
-                                            <strong>AED {{ number_format((float) ($enquiry->approved_cost ?? 0), 2) }}</strong>
+                                        @php
+                                            $approvedCost = (float) ($enquiry->approved_cost ?? 0);
+                                            $submittedProposalCost = (float) ($enquiry->highest_submitted_proposal_cost ?? 0);
+                                            $displayApprovedCost = ($enquiry->approved_cost != 0)
+                                                ? $approvedCost
+                                                : $submittedProposalCost;
+                                        @endphp
+                                        
+                                    
+                                        @if($displayApprovedCost > 0)
+                                            @if($approvedCost > 0)
+                                                @if($enquiry->status == 'project_approved')
+                                                    <strong>AED {{ number_format($displayApprovedCost, 2) }}</strong>
+                                                @else
+                                                    <span class="text-info" title="Approved Cost">AED {{ number_format($displayApprovedCost, 2) }}</span>
+                                                @endif
+                                            @elseif($submittedProposalCost > 0)
+                                                <span class="text-info" title="Highest Submitted Proposal Cost">AED {{ number_format($submittedProposalCost, 2) }}</span>
+                                            @endif
                                         @endif
                                     </td>
                                 @endcan
@@ -320,7 +379,11 @@
                                 <td class="text-center">{{ $enquiry->owner->name ?? '' }}</td>
 
                                 <td class="text-center">
-                                    {{ date('d, M Y', strtotime($enquiry->updated_at)) }}
+                                    @php
+                                        $latestStatusHistory = $enquiry->statusHistories->sortByDesc('id')->first();
+                                        $displayDate = $latestStatusHistory ? date('d, M Y', strtotime($latestStatusHistory->status_date)) : '';
+                                    @endphp
+                                    {{ $displayDate }}
                                 </td>
 
                                 <td class="text-center">
@@ -398,16 +461,16 @@
 
             <div class="d-flex flex-wrap mt-4">
                 <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Pending Followups</span>
+                    <span class="d-inline-block" style="width:25px; height:15px; background-color: #ffdc2812; border:1px solid #ccc;"></span>
+                    <span class="ms-2 fs-11" style="margin-left: 5px;">Pending Followups</span>
                 </div>
                 <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
+                    <span class="d-inline-block" style="width:25px; height:15px; background-color: #d3d3d36e; border:1px solid #ccc;"></span>
+                    <span class="ms-2 fs-11" style="margin-left: 5px;">Project Rejected / Not Interested / Not Responding / Invalid / Spam</span>
                 </div>
                 <div class="d-flex align-items-center me-4 mb-1 ml-1">
-                    <span class="d-inline-block" style="width:40px; height:20px; background-color: #90ee903b; border:1px solid #ccc;"></span>
-                    <span class="ms-2" style="margin-left: 5px;">Project Approved</span>
+                    <span class="d-inline-block" style="width:25px; height:15px; background-color: #90ee903b; border:1px solid #ccc;"></span>
+                    <span class="ms-2 fs-11" style="margin-left: 5px;">Project Approved</span>
                 </div>
             </div>
         </div>
@@ -529,6 +592,19 @@
         .proposal-select-card.selected {
             border-color: #007bff;
             background-color: #e9f3ff;
+        }
+
+        .multi-value-filter .bootstrap-select .dropdown-toggle {
+            min-height: calc(1.5rem + 0.8rem + 2px);
+            height: auto;
+        }
+
+        .multi-value-filter .bootstrap-select .filter-option,
+        .multi-value-filter .bootstrap-select .filter-option-inner,
+        .multi-value-filter .bootstrap-select .filter-option-inner-inner {
+            white-space: normal;
+            overflow: visible;
+            text-overflow: clip;
         }
 
         /* Icon-only Change Status button */
