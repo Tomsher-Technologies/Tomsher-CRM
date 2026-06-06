@@ -12,58 +12,22 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Carbon\Carbon;
 
 class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithEvents, WithCustomStartCell
 {
     protected $request;
+    protected $customers;
+    protected $maxContacts = 1;
 
     public function __construct($request)
     {
         $this->request = $request;
+        $this->loadCustomers();
     }
 
-    public function startCell(): string
-    {
-        return 'A2'; // Headings will start from row 2
-    }
-
-    public function styles(Worksheet $sheet)
-    {
-        // $sheet->getDefaultRowDimension()->setRowHeight(-1);
-        return [
-            'K' => [ // Change column if needed
-                'alignment' => [
-                    'wrapText' => true,
-                ],
-            ],
-        ];
-    }
-
-    public function headings(): array
-    {
-        return [
-            'Customer Code',
-            'Company Name',
-            'Email',
-            'Industry',
-            'Website',
-            'Country',
-            'Emirate',
-            'Address',
-            'Google Location',
-            'New To Company',
-            'All Contacts',
-            // 'Primary Contact',
-            // 'Primary Mobile',
-            'Projects Count',
-            'Enquiries Count',
-            'Sales Person',
-            'Status',
-            'Created At',
-        ];
-    }
-    public function collection()
+    protected function loadCustomers()
     {
         $request = $this->request;
 
@@ -77,7 +41,7 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             'uae_emirate'
         ]);
 
-        // 🔍 Apply SAME filters as listing
+        // Apply SAME filters as listing
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
             $query->where(function($q) use ($keyword) {
@@ -106,29 +70,70 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             $query->where('is_active', $request->is_active);
         }
 
-        return $query->get()->map(function ($cust) {
+        $this->customers = $query->get();
 
-            // 🔹 Combine all contacts into one string
-           $contactDetails = $cust->contacts->map(function ($c) {
+        // Calculate maximum contact count across all matching customers
+        $max = 0;
+        foreach ($this->customers as $cust) {
+            $count = $cust->contacts->count();
+            if ($count > $max) {
+                $max = $count;
+            }
+        }
+        $this->maxContacts = $max > 0 ? $max : 1;
+    }
 
-                                return collect([
-                                    $c->name ? 'Name: ' . $c->name : null,
-                                    $c->email ? 'Email: ' . $c->email : null,
-                                    $c->mobile_number ? 'Mobile: ' . $c->mobile_number : null,
-                                    $c->landline_number ? 'Landline: ' . $c->landline_number : null,
-                                    $c->whatsapp_number ? 'WhatsApp: ' . $c->whatsapp_number : null,
-                                    $c->designation ? 'Designation: ' . $c->designation : null,
-                                    isset($c->is_primary) ? 'Primary: ' . ($c->is_primary ? 'Yes' : 'No') : null,
-                                ])
-                                ->filter()
-                                ->implode("\n");
+    public function startCell(): string
+    {
+        return 'A2'; // Headings will start from row 2
+    }
 
-                            })
-                            ->filter() // remove empty contacts
-                            ->map(fn($item) => trim($item)) // ✅ REMOVE extra spaces/newlines
-                            ->implode("\n------------------------------------------------------\n"); // join cleanly // separator between contacts
+    public function styles(Worksheet $sheet)
+    {
+        return [];
+    }
 
-            return [
+    public function headings(): array
+    {
+        $headers = [
+            'Customer Code',
+            'Company Name',
+            'Email',
+            'Industry',
+            'Website',
+            'Country',
+            'Emirate',
+            'Address',
+            'Google Location',
+            'New To Company',
+            'Projects Count',
+            'Enquiries Count',
+            'Sales Person',
+            'Status',
+            'Created At'
+        ];
+
+        // Add contact columns dynamically
+        for ($i = 1; $i <= $this->maxContacts; $i++) {
+            $prefix = $i === 1 ? 'Primary Contact' : 'Contact ' . $i;
+            $headers[] = $prefix . ' Name';
+            $headers[] = $prefix . ' Email';
+            $headers[] = $prefix . ' Mobile';
+            $headers[] = $prefix . ' Landline';
+            $headers[] = $prefix . ' WhatsApp';
+            $headers[] = $prefix . ' Designation';
+        }
+
+        return $headers;
+    }
+
+    public function collection()
+    {
+        return $this->customers->map(function ($cust) {
+            // Sort contacts to make primary contact first
+            $contacts = $cust->contacts->sortByDesc('is_primary')->values();
+
+            $row = [
                 'Customer Code' => $cust->customer_code,
                 'Company Name' => $cust->company_name,
                 'Email' => $cust->company_email,
@@ -139,18 +144,28 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
                 'Address' => $cust->company_address,
                 'Google Location' => $cust->google_location,
                 'New To Company' => $cust->ntc ? 'Yes' : 'No',
-
-                'All Contacts' => trim($contactDetails), // combined contacts info
-                // 'Primary Contact' => optional($cust->main_contact)->name,
-                // 'Primary Mobile' => optional($cust->main_contact)->mobile_number,
-
-                'Projects Count' => $cust->projects->count() ?? 0,
-                'Enquiries Count' => $cust->enquiries->count()  ?? 0,
-
-                'Sales Person' => optional($cust->sale_person)->name,
-                'Status' => $cust->is_active ? 'Active' : 'Inactive',
-                'Created At' => $cust->created_at,
             ];
+            // Fill remaining fields
+            $row['Projects Count'] = $cust->projects->count() ?? 0;
+            $row['Enquiries Count'] = $cust->enquiries->count() ?? 0;
+            $row['Sales Person'] = optional($cust->sale_person)->name;
+            $row['Status'] = $cust->is_active ? 'Active' : 'Inactive';
+            $row['Created At'] = $cust->created_at;
+
+            // Fill contact info
+            for ($i = 0; $i < $this->maxContacts; $i++) {
+                $prefix = $i === 0 ? 'Primary Contact' : 'Contact ' . ($i + 1);
+                $contact = $contacts->get($i);
+
+                $row[$prefix . ' Name'] = $contact ? $contact->name : '';
+                $row[$prefix . ' Email'] = $contact ? $contact->email : '';
+                $row[$prefix . ' Mobile'] = $contact ? $contact->mobile_number : '';
+                $row[$prefix . ' Landline'] = $contact ? $contact->landline_number : '';
+                $row[$prefix . ' WhatsApp'] = $contact ? $contact->whatsapp_number : '';
+                $row[$prefix . ' Designation'] = $contact ? $contact->designation : '';
+            }
+
+            return $row;
         });
     }
 
@@ -159,54 +174,63 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
+                $highestColumn = $sheet->getHighestColumn();
+                $highestRow = $sheet->getHighestRow();
 
                 // Add exported date/time in first row
-                $sheet->setCellValue('A1', 'Exported on: ' . Carbon::now()->format('d-M-Y H:i:s'));
-                $sheet->getStyle('A1')->getFont()->setItalic(true);
+                $sheet->setCellValue('A1', 'Exported on: ' . Carbon::now()->format('d-M-Y H:i A'));
+                $sheet->getStyle("A1:H1")->getFont()->setBold(true)->setSize(12);
+                
+                // Merge cells A1 to the last column
+                $sheet->mergeCells("A1:H1");
 
-                // Merge cells A1 to H1 (adjust H to the last column you need)
-                $sheet->mergeCells('A1:H1');
-
-                // Center the merged cell
+                // Center the merged cell and italicize
                 $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle('A1')->getFont()->setItalic(true);
+                // $sheet->getStyle('A1')->getFont()->setItalic(true);
 
                 // Enable word wrap for all columns
-                $highestRow = $sheet->getHighestRow();
-                $sheet->getStyle("A1:P$highestRow")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("A1:{$highestColumn}{$highestRow}")->getAlignment()->setWrapText(true);
 
-                // Make heading row bold
-                $sheet->getStyle('A2:P2')->getFont()->setBold(true)->setSize(11);
+                // Make heading row bold and italicized
+                $sheet->getStyle("A2:{$highestColumn}2")->getFont()->setBold(true)->setSize(11)->setItalic(true);
 
-                // Optional: italicize exported date
-                $sheet->getStyle('A2:P2')->getFont()->setItalic(true);
+                // Set column widths
+                // Base columns
+                $sheet->getColumnDimension('A')->setWidth(15); // Customer Code
+                $sheet->getColumnDimension('B')->setWidth(30); // Company Name
+                $sheet->getColumnDimension('C')->setWidth(25); // Email
+                $sheet->getColumnDimension('D')->setWidth(20); // Industry
+                $sheet->getColumnDimension('E')->setWidth(20); // Website
+                $sheet->getColumnDimension('F')->setWidth(20); // Country
+                $sheet->getColumnDimension('G')->setWidth(20); // Emirate
+                $sheet->getColumnDimension('H')->setWidth(30); // Address
+                $sheet->getColumnDimension('I')->setWidth(40); // Google Location
+                $sheet->getColumnDimension('J')->setWidth(20); // New To Company
+                $sheet->getColumnDimension('K')->setWidth(15); // Projects Count
+                $sheet->getColumnDimension('L')->setWidth(15); // Enquiries Count
+                $sheet->getColumnDimension('M')->setWidth(20); // Sales Person
+                $sheet->getColumnDimension('N')->setWidth(15); // Status
+                $sheet->getColumnDimension('O')->setWidth(20); // Created At
 
-                // Set fixed width for columns
-                $sheet->getColumnDimension('A')->setWidth(15);
-                $sheet->getColumnDimension('B')->setWidth(30);
-                $sheet->getColumnDimension('C')->setWidth(25);
-                $sheet->getColumnDimension('D')->setWidth(20);
-                $sheet->getColumnDimension('E')->setWidth(20);
-                $sheet->getColumnDimension('F')->setWidth(20);
-                $sheet->getColumnDimension('G')->setWidth(20);
-                $sheet->getColumnDimension('H')->setWidth(30);
-                $sheet->getColumnDimension('I')->setWidth(40);
-                $sheet->getColumnDimension('J')->setWidth(20);
-                $sheet->getColumnDimension('K')->setWidth(40);
-                $sheet->getColumnDimension('L')->setWidth(20);
-                $sheet->getColumnDimension('M')->setWidth(20);
-                $sheet->getColumnDimension('N')->setWidth(20);
-                $sheet->getColumnDimension('O')->setWidth(10);
-                $sheet->getColumnDimension('P')->setWidth(20);
+                // Dynamic contact columns (columns 11 to 10 + maxContacts * 6)
+                for ($col = 16; $col <= 15 + ($this->maxContacts * 6); $col++) {
+                    $letter = Coordinate::stringFromColumnIndex($col);
+                    $sheet->getColumnDimension($letter)->setWidth(25);
+                }
 
-                $sheet->getStyle('A2:A'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column A
-                $sheet->getStyle('L2:L'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column L
-                $sheet->getStyle('J2:J'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column J
-                $sheet->getStyle('M2:M'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column M
-                $sheet->getStyle('N2:N'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column N
-                $sheet->getStyle('O2:O'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column O
-                $sheet->getStyle('P2:P'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column P
+                // Remaining columns
+                $remainingStart = 16 + ($this->maxContacts * 6);
+                
 
+                // Center align specific columns
+                $sheet->getStyle('A2:A'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column A (Customer Code)
+                $sheet->getStyle('J2:J'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column J (New To Company)
+
+                // Align remaining count and status columns to center
+                for ($i = 0; $i < 5; $i++) {
+                    $colLetter = Coordinate::stringFromColumnIndex($remainingStart + $i);
+                    $sheet->getStyle($colLetter.'2:'.$colLetter.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
             },
         ];
     }
