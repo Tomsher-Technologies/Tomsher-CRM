@@ -223,7 +223,7 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
                 $sheet->getStyle("A1:H1")->getFont()->setBold(true)->setSize(12)->getColor()->setARGB('FF0F172A');
 
                 // Add exported date/time in second row
-                $sheet->setCellValue('A2', 'Exported on: ' . Carbon::now()->format('d-M-Y H:i A'));
+                $sheet->setCellValue('A2', 'Exported on: ' . Carbon::now()->format('d-M-Y h:i A'));
                 $sheet->mergeCells("A2:H2");
                 $sheet->getStyle('A2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
                 $sheet->getStyle("A2:H2")->getFont()->setItalic(true)->setSize(10);
