@@ -12,58 +12,55 @@ use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Concerns\WithCustomStartCell;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 use Carbon\Carbon;
+use PhpOffice\PhpSpreadsheet\RichText\RichText;
 
 class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithEvents, WithCustomStartCell
 {
     protected $request;
+    protected $customers;
+    protected $maxContacts = 1;
 
     public function __construct($request)
     {
         $this->request = $request;
+        $this->loadCustomers();
     }
 
-    public function startCell(): string
+    protected function getFiltersString()
     {
-        return 'A2'; // Headings will start from row 2
+        $request = $this->request;
+        $filters = [];
+
+        if ($request->filled('keyword')) {
+            $filters[] = "Keyword: " . $request->keyword;
+        }
+
+        if ($request->filled('industry')) {
+            $industry = Industry::find($request->industry);
+            if ($industry) {
+                $filters[] = "Industry: " . $industry->name;
+            }
+        }
+
+        if ($request->filled('user_id')) {
+            $user = \App\Models\User::find($request->user_id);
+            if ($user) {
+                $filters[] = "Sales Person: " . $user->name;
+            }
+        }
+
+        if ($request->filled('is_active')) {
+            $filters[] = "Status: " . ($request->is_active == '1' ? 'Active' : 'Inactive');
+        }
+
+        return count($filters) > 0 ? "Filters: " . implode('  •  ', $filters) : "Filters: All Customers";
     }
 
-    public function styles(Worksheet $sheet)
-    {
-        // $sheet->getDefaultRowDimension()->setRowHeight(-1);
-        return [
-            'K' => [ // Change column if needed
-                'alignment' => [
-                    'wrapText' => true,
-                ],
-            ],
-        ];
-    }
-
-    public function headings(): array
-    {
-        return [
-            'Customer Code',
-            'Company Name',
-            'Email',
-            'Industry',
-            'Website',
-            'Country',
-            'Emirate',
-            'Address',
-            'Google Location',
-            'New To Company',
-            'All Contacts',
-            // 'Primary Contact',
-            // 'Primary Mobile',
-            'Projects Count',
-            'Enquiries Count',
-            'Sales Person',
-            'Status',
-            'Created At',
-        ];
-    }
-    public function collection()
+    protected function loadCustomers()
     {
         $request = $this->request;
 
@@ -77,7 +74,7 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             'uae_emirate'
         ]);
 
-        // 🔍 Apply SAME filters as listing
+        // Apply SAME filters as listing
         if ($request->filled('keyword')) {
             $keyword = $request->keyword;
             $query->where(function($q) use ($keyword) {
@@ -106,29 +103,70 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             $query->where('is_active', $request->is_active);
         }
 
-        return $query->get()->map(function ($cust) {
+        $this->customers = $query->get();
 
-            // 🔹 Combine all contacts into one string
-           $contactDetails = $cust->contacts->map(function ($c) {
+        // Calculate maximum contact count across all matching customers
+        $max = 0;
+        foreach ($this->customers as $cust) {
+            $count = $cust->contacts->count();
+            if ($count > $max) {
+                $max = $count;
+            }
+        }
+        $this->maxContacts = $max > 0 ? $max : 1;
+    }
 
-                                return collect([
-                                    $c->name ? 'Name: ' . $c->name : null,
-                                    $c->email ? 'Email: ' . $c->email : null,
-                                    $c->mobile_number ? 'Mobile: ' . $c->mobile_number : null,
-                                    $c->landline_number ? 'Landline: ' . $c->landline_number : null,
-                                    $c->whatsapp_number ? 'WhatsApp: ' . $c->whatsapp_number : null,
-                                    $c->designation ? 'Designation: ' . $c->designation : null,
-                                    isset($c->is_primary) ? 'Primary: ' . ($c->is_primary ? 'Yes' : 'No') : null,
-                                ])
-                                ->filter()
-                                ->implode("\n");
+    public function startCell(): string
+    {
+        return 'A4'; // Headings will start from row 4
+    }
 
-                            })
-                            ->filter() // remove empty contacts
-                            ->map(fn($item) => trim($item)) // ✅ REMOVE extra spaces/newlines
-                            ->implode("\n------------------------------------------------------\n"); // join cleanly // separator between contacts
+    public function styles(Worksheet $sheet)
+    {
+        return [];
+    }
 
-            return [
+    public function headings(): array
+    {
+        $headers = [
+            'Customer Code',
+            'Company Name',
+            'Email',
+            'Industry',
+            'Website',
+            'Country',
+            'Emirate',
+            'Address',
+            'Google Location',
+            'New To Company',
+            'Projects Count',
+            'Enquiries Count',
+            'Sales Person',
+            'Status',
+            'Created At'
+        ];
+
+        // Add contact columns dynamically
+        for ($i = 1; $i <= $this->maxContacts; $i++) {
+            $prefix = $i === 1 ? 'Primary Contact' : 'Contact ' . $i;
+            $headers[] = $prefix . ' Name';
+            $headers[] = $prefix . ' Email';
+            $headers[] = $prefix . ' Mobile';
+            $headers[] = $prefix . ' Landline';
+            $headers[] = $prefix . ' WhatsApp';
+            $headers[] = $prefix . ' Designation';
+        }
+
+        return $headers;
+    }
+
+    public function collection()
+    {
+        return $this->customers->map(function ($cust) {
+            // Sort contacts to make primary contact first
+            $contacts = $cust->contacts->sortByDesc('is_primary')->values();
+
+            $row = [
                 'Customer Code' => $cust->customer_code,
                 'Company Name' => $cust->company_name,
                 'Email' => $cust->company_email,
@@ -139,18 +177,28 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
                 'Address' => $cust->company_address,
                 'Google Location' => $cust->google_location,
                 'New To Company' => $cust->ntc ? 'Yes' : 'No',
-
-                'All Contacts' => trim($contactDetails), // combined contacts info
-                // 'Primary Contact' => optional($cust->main_contact)->name,
-                // 'Primary Mobile' => optional($cust->main_contact)->mobile_number,
-
-                'Projects Count' => $cust->projects->count() ?? 0,
-                'Enquiries Count' => $cust->enquiries->count()  ?? 0,
-
-                'Sales Person' => optional($cust->sale_person)->name,
-                'Status' => $cust->is_active ? 'Active' : 'Inactive',
-                'Created At' => $cust->created_at,
             ];
+            // Fill remaining fields
+            $row['Projects Count'] = $cust->projects->count() ?? 0;
+            $row['Enquiries Count'] = $cust->enquiries->count() ?? 0;
+            $row['Sales Person'] = optional($cust->sale_person)->name;
+            $row['Status'] = $cust->is_active ? 'Active' : 'Inactive';
+            $row['Created At'] = $cust->created_at;
+
+            // Fill contact info
+            for ($i = 0; $i < $this->maxContacts; $i++) {
+                $prefix = $i === 0 ? 'Primary Contact' : 'Contact ' . ($i + 1);
+                $contact = $contacts->get($i);
+
+                $row[$prefix . ' Name'] = $contact ? $contact->name : '';
+                $row[$prefix . ' Email'] = $contact ? $contact->email : '';
+                $row[$prefix . ' Mobile'] = $contact ? $contact->mobile_number : '';
+                $row[$prefix . ' Landline'] = $contact ? $contact->landline_number : '';
+                $row[$prefix . ' WhatsApp'] = $contact ? $contact->whatsapp_number : '';
+                $row[$prefix . ' Designation'] = $contact ? $contact->designation : '';
+            }
+
+            return $row;
         });
     }
 
@@ -159,54 +207,134 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
+                $highestColumn = $sheet->getHighestColumn();
+                $highestRow = $sheet->getHighestRow();
 
-                // Add exported date/time in first row
-                $sheet->setCellValue('A1', 'Exported on: ' . Carbon::now()->format('d-M-Y H:i:s'));
-                $sheet->getStyle('A1')->getFont()->setItalic(true);
+                // Set row heights
+                $sheet->getRowDimension(1)->setRowHeight(30);
+                $sheet->getRowDimension(2)->setRowHeight(22);
+                $sheet->getRowDimension(3)->setRowHeight(22);
+                $sheet->getRowDimension(4)->setRowHeight(28);
 
-                // Merge cells A1 to H1 (adjust H to the last column you need)
-                $sheet->mergeCells('A1:H1');
+                // Add report name in first row
+                $sheet->setCellValue('A1', 'Customer Report');
+                $sheet->mergeCells("A1:H1");
+                $sheet->getStyle('A1')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $sheet->getStyle("A1:H1")->getFont()->setBold(true)->setSize(12)->getColor()->setARGB('FF0F172A');
 
-                // Center the merged cell
-                $sheet->getStyle('A1')->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $sheet->getStyle('A1')->getFont()->setItalic(true);
+                // Add exported date/time in second row
+                $sheet->setCellValue('A2', 'Exported on: ' . Carbon::now()->format('d-M-Y H:i A'));
+                $sheet->mergeCells("A2:H2");
+                $sheet->getStyle('A2')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $sheet->getStyle("A2:H2")->getFont()->setItalic(true)->setSize(10);
+                
+                // Add applied filters in third row with RichText to bold filter values
+                $richText = new RichText();
+                // $richText->createText('Filters-> ');
+                
+                $filtersCount = 0;
+                $request = $this->request;
+
+                if ($request->filled('keyword')) {
+                    if ($filtersCount > 0) $richText->createText('  •  ');
+                    $richText->createText('Keyword: ');
+                    $run = $richText->createTextRun($request->keyword);
+                    $run->getFont()->setBold(true)->setItalic(true)->getColor()->setARGB('FF64748B');
+                    $filtersCount++;
+                }
+
+                if ($request->filled('industry')) {
+                    $industry = Industry::find($request->industry);
+                    if ($industry) {
+                        if ($filtersCount > 0) $richText->createText('  •  ');
+                        $richText->createText('Industry: ');
+                        $run = $richText->createTextRun($industry->name);
+                        $run->getFont()->setBold(true)->setItalic(true)->getColor()->setARGB('FF64748B');
+                        $filtersCount++;
+                    }
+                }
+
+                if ($request->filled('user_id')) {
+                    $user = \App\Models\User::find($request->user_id);
+                    if ($user) {
+                        if ($filtersCount > 0) $richText->createText('  •  ');
+                        $richText->createText('Sales Person: ');
+                        $run = $richText->createTextRun($user->name);
+                        $run->getFont()->setBold(true)->setItalic(true)->getColor()->setARGB('FF64748B');
+                        $filtersCount++;
+                    }
+                }
+
+                if ($request->filled('is_active')) {
+                    if ($filtersCount > 0) $richText->createText('  •  ');
+                    $richText->createText('Status: ');
+                    $run = $richText->createTextRun($request->is_active == '1' ? 'Active' : 'Inactive');
+                    $run->getFont()->setBold(true)->setItalic(true)->getColor()->setARGB('FF64748B');
+                    $filtersCount++;
+                }
+
+                if ($filtersCount === 0) {
+                    $run = $richText->createTextRun('All Customers');
+                    $run->getFont()->setBold(true)->setItalic(true)->getColor()->setARGB('FF64748B');
+                }
+
+                $sheet->setCellValue('A3', $richText);
+                $sheet->mergeCells("A3:H3");
+                $sheet->getStyle('A3')->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $sheet->getStyle("A3:H3")->getFont()->setItalic(false)->setSize(10)->getColor()->setARGB('FF000000');
+
+                // Apply soft background fill to metadata rows (1 to 3)
+                $sheet->getStyle("A1:H3")->getFill()
+                    ->setFillType(Fill::FILL_SOLID)
+                    ->getStartColor()->setARGB('FFF8FAFC');
+
+                // Add thin bottom border to Row 3
+                $sheet->getStyle("A3:H3")->getBorders()->getBottom()
+                    ->setBorderStyle(Border::BORDER_THIN)
+                    ->getColor()->setARGB('FFCBD5E1');
 
                 // Enable word wrap for all columns
-                $highestRow = $sheet->getHighestRow();
-                $sheet->getStyle("A1:P$highestRow")->getAlignment()->setWrapText(true);
+                $sheet->getStyle("A1:{$highestColumn}{$highestRow}")->getAlignment()->setWrapText(true);
 
-                // Make heading row bold
-                $sheet->getStyle('A2:P2')->getFont()->setBold(true)->setSize(11);
+                // Make heading row bold and italicized (Row 4)
+                $sheet->getStyle("A4:{$highestColumn}4")->getFont()->setBold(true)->setSize(11)->setItalic(true);
 
-                // Optional: italicize exported date
-                $sheet->getStyle('A2:P2')->getFont()->setItalic(true);
+                // Enable interactive AutoFilter on header row (Row 4)
+                // $sheet->setAutoFilter("A4:{$highestColumn}4");
 
-                // Set fixed width for columns
-                $sheet->getColumnDimension('A')->setWidth(15);
-                $sheet->getColumnDimension('B')->setWidth(30);
-                $sheet->getColumnDimension('C')->setWidth(25);
-                $sheet->getColumnDimension('D')->setWidth(20);
-                $sheet->getColumnDimension('E')->setWidth(20);
-                $sheet->getColumnDimension('F')->setWidth(20);
-                $sheet->getColumnDimension('G')->setWidth(20);
-                $sheet->getColumnDimension('H')->setWidth(30);
-                $sheet->getColumnDimension('I')->setWidth(40);
-                $sheet->getColumnDimension('J')->setWidth(20);
-                $sheet->getColumnDimension('K')->setWidth(40);
-                $sheet->getColumnDimension('L')->setWidth(20);
-                $sheet->getColumnDimension('M')->setWidth(20);
-                $sheet->getColumnDimension('N')->setWidth(20);
-                $sheet->getColumnDimension('O')->setWidth(10);
-                $sheet->getColumnDimension('P')->setWidth(20);
+                // Set column widths
+                // Base columns
+                $sheet->getColumnDimension('A')->setWidth(15); // Customer Code
+                $sheet->getColumnDimension('B')->setWidth(30); // Company Name
+                $sheet->getColumnDimension('C')->setWidth(25); // Email
+                $sheet->getColumnDimension('D')->setWidth(20); // Industry
+                $sheet->getColumnDimension('E')->setWidth(20); // Website
+                $sheet->getColumnDimension('F')->setWidth(20); // Country
+                $sheet->getColumnDimension('G')->setWidth(20); // Emirate
+                $sheet->getColumnDimension('H')->setWidth(30); // Address
+                $sheet->getColumnDimension('I')->setWidth(40); // Google Location
+                $sheet->getColumnDimension('J')->setWidth(20); // New To Company
+                $sheet->getColumnDimension('K')->setWidth(15); // Projects Count
+                $sheet->getColumnDimension('L')->setWidth(15); // Enquiries Count
+                $sheet->getColumnDimension('M')->setWidth(20); // Sales Person
+                $sheet->getColumnDimension('N')->setWidth(15); // Status
+                $sheet->getColumnDimension('O')->setWidth(20); // Created At
 
-                $sheet->getStyle('A2:A'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column A
-                $sheet->getStyle('L2:L'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column L
-                $sheet->getStyle('J2:J'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column J
-                $sheet->getStyle('M2:M'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column M
-                $sheet->getStyle('N2:N'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column N
-                $sheet->getStyle('O2:O'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column O
-                $sheet->getStyle('P2:P'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column P
+                // Dynamic contact columns (columns 16 onwards)
+                for ($col = 16; $col <= 15 + ($this->maxContacts * 6); $col++) {
+                    $letter = Coordinate::stringFromColumnIndex($col);
+                    $sheet->getColumnDimension($letter)->setWidth(25);
+                }
 
+                // Center align specific columns
+                $sheet->getStyle('A4:A'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column A (Customer Code)
+                $sheet->getStyle('J4:J'.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER); // Column J (New To Company)
+
+                // Align count and status columns (K to O -> columns 11 to 15) to center
+                for ($col = 11; $col <= 15; $col++) {
+                    $colLetter = Coordinate::stringFromColumnIndex($col);
+                    $sheet->getStyle($colLetter.'4:'.$colLetter.$highestRow)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
+                }
             },
         ];
     }
