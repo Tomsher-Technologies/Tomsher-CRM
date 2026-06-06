@@ -85,43 +85,63 @@
                     @can('view_total_counts')
                         <div class="dashboard-metrics-grid">
                             {{-- Total Customers Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-customers">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-users"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Customers</span>
-                                    <strong>{{ $totalCustomers }}</strong>
+                            <div class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-customers-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_customers.png') }}" class="dashboard-metric-3d-icon" alt="Total Customers">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Customer</span>
+                                        <strong class="dashboard-metric-value">{{ $totalCustomers }}</strong>
+                                    </div>
                                 </div>
                             </div>
                             {{-- Total Enquiries Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-enquiries">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Enquiries</span>
-                                    <strong>{{ $totalEnquiries }}</strong>
+                            <div class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-data-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Total Enquiries">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Enquiries</span>
+                                        <strong class="dashboard-metric-value">{{ $totalEnquiries }}</strong>
+                                    </div>
                                 </div>
                             </div>
                             {{-- Total Data Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-data">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-database"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Data</span>
-                                    <strong>{{ $totalData }}</strong>
+                            {{-- <div class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-data-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_data.png') }}" class="dashboard-metric-3d-icon" alt="Total Data">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Data</span>
+                                        <strong class="dashboard-metric-value">{{ $totalData }}</strong>
+                                    </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             {{-- Total Followups Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-followups">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-phone-volume"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Followups</span>
-                                    <strong>{{ $totalFollowups }}</strong>
+                            <div class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-followups-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_followups.png') }}" class="dashboard-metric-3d-icon" alt="Total Followups">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Followups</span>
+                                        <strong class="dashboard-metric-value">{{ $totalFollowups }}</strong>
+                                    </div>
                                 </div>
                             </div>
                             {{-- Total Projects Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-projects">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-diagram-project"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Projects</span>
-                                    <strong>{{ $totalProjects }}</strong>
+                            <div class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-projects-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_projects.png') }}" class="dashboard-metric-3d-icon" alt="Total Projects">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Projects</span>
+                                        <strong class="dashboard-metric-value">{{ $totalProjects }}</strong>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -467,128 +487,108 @@
 
     .dashboard-metrics-grid {
         display: grid;
-        gap: 14px;
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
     .dashboard-metric-card {
-        align-items: center;
         background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        display: flex;
-        gap: 14px;
-        min-height: 112px;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 6px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        min-height: 110px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         overflow: hidden;
-        padding: 18px;
-        position: relative;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
     }
 
-    .dashboard-metric-card::before {
-        bottom: 0;
-        content: "";
-        left: 0;
-        position: absolute;
-        top: 0;
-        width: 4px;
-    }
-
+    .dashboard-metric-card::before,
     .dashboard-metric-card::after {
         content: none;
     }
 
-    .dashboard-metric-card:hover,
+    .dashboard-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+    }
+
     .dashboard-status-tile:hover {
         border-color: #cbd5e1;
         box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
     }
 
-    .dashboard-metric-icon {
-        align-items: center;
+    .dashboard-metric-inner {
         border-radius: 8px;
+        padding: 16px 20px;
         display: flex;
-        flex: 0 0 46px;
-        height: 46px;
-        justify-content: center;
-        position: relative;
-        width: 46px;
-        z-index: 1;
+        align-items: center;
+        gap: 16px;
+        height: 100%;
     }
 
-    .dashboard-metric-icon i {
-        font-size: 19px;
+    .dashboard-metric-customers-inner {
+        background: #e8f7ff;
+    }
+
+    .dashboard-metric-enquiries-inner {
+        background: #e6f9f0;
+    }
+
+    .dashboard-metric-data-inner {
+        background: #f0ebff;
+    }
+
+    .dashboard-metric-followups-inner {
+        background: #ffece3;
+    }
+
+    .dashboard-metric-projects-inner {
+        background: #e3fbf5;
+    }
+
+    .dashboard-metric-icon-wrap {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dashboard-metric-3d-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: multiply;
     }
 
     .dashboard-metric-copy {
         min-width: 0;
         position: relative;
         z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
-    .dashboard-metric-copy span,
-    .dashboard-status-content span {
-        color: #6b7280;
+    .dashboard-metric-title {
+        color: #4a5568;
         display: block;
-        font-size: 13px;
+        font-size: 13.5px;
         font-weight: 600;
         letter-spacing: 0;
-        line-height: 1.3;
+        line-height: 1.25;
+        margin: 0;
     }
 
-    .dashboard-metric-copy strong {
-        color: #111827;
+    .dashboard-metric-value {
+        color: #4f46e5;
         display: block;
-        font-size: 26px;
+        font-size: 30px;
         font-weight: 700;
         letter-spacing: 0;
         line-height: 1;
-        margin-top: 8px;
-    }
-
-    .dashboard-metric-customers::before {
-        background: #0f766e;
-    }
-
-    .dashboard-metric-enquiries::before {
-        background: #2563eb;
-    }
-
-    .dashboard-metric-data::before {
-        background: #9333ea;
-    }
-
-    .dashboard-metric-followups::before {
-        background: #f59e0b;
-    }
-
-    .dashboard-metric-projects::before {
-        background: #0f172a;
-    }
-
-    .dashboard-metric-customers .dashboard-metric-icon {
-        background: #d1fae5;
-        color: #0f766e;
-    }
-
-    .dashboard-metric-enquiries .dashboard-metric-icon {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .dashboard-metric-data .dashboard-metric-icon {
-        background: #f3e8ff;
-        color: #7e22ce;
-    }
-
-    .dashboard-metric-followups .dashboard-metric-icon {
-        background: #fef3c7;
-        color: #b45309;
-    }
-
-    .dashboard-metric-projects .dashboard-metric-icon {
-        background: #e2e8f0;
-        color: #0f172a;
+        margin-top: 4px;
     }
 
     .dashboard-status-content span {
