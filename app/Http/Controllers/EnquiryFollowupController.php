@@ -34,6 +34,15 @@ class EnquiryFollowupController extends Controller
         $date_range = $request->has('date_range') ? $request->date_range : '';
         $query = EnquiryFollowup::query()->with(['enquiry.customer']);
 
+        if($request->filled('source_mode')){
+            $source_mode = $request->source_mode;
+            $query->when($source_mode, function ($q) use ($source_mode) {
+                    $q->whereHas('enquiry', function ($enquiryQ) use ($source_mode) {
+                        $enquiryQ->where('source_mode', $source_mode);
+                    });
+                });
+        }
+
         if ($request->filled('enquiry_id')) {
             $query->where('enquiry_id', $request->enquiry_id);
         }

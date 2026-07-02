@@ -85,7 +85,10 @@
                     @can('view_total_counts')
                         <div class="dashboard-metrics-grid">
                             {{-- Total Customers Block --}}
-                            <div class="dashboard-metric-card">
+                            <a href="{{ route('customers.index', array_filter([
+                                'user_id' => request('user_id') ?: null,
+                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y')
+                            ])) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-customers-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_customers.png') }}" class="dashboard-metric-3d-icon" alt="Total Customers">
@@ -95,9 +98,13 @@
                                         <strong class="dashboard-metric-value">{{ $totalCustomers }}</strong>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                             {{-- Total Enquiries Block --}}
-                            <div class="dashboard-metric-card">
+                            <a href="{{ route('enquiries.index', array_filter([
+                                'enquiry_date' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'added_by' => request('user_id') ? [request('user_id')] : null,
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ])) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-data-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Total Enquiries">
@@ -107,7 +114,7 @@
                                         <strong class="dashboard-metric-value">{{ $totalEnquiries }}</strong>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                             {{-- Total Data Block --}}
                             {{-- <div class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-data-inner">
@@ -121,7 +128,11 @@
                                 </div>
                             </div> --}}
                             {{-- Total Followups Block --}}
-                            <div class="dashboard-metric-card">
+                            <a href="{{ route('followups.index', array_filter([
+                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'created_by' => request('user_id'),
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ])) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-followups-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_followups.png') }}" class="dashboard-metric-3d-icon" alt="Total Followups">
@@ -131,9 +142,13 @@
                                         <strong class="dashboard-metric-value">{{ $totalFollowups }}</strong>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                             {{-- Total Projects Block --}}
-                            <div class="dashboard-metric-card">
+                            <a href="{{ route('projects.index', array_filter([
+                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'created_by' => request('user_id'),
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ])) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-projects-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_projects.png') }}" class="dashboard-metric-3d-icon" alt="Total Projects">
@@ -143,7 +158,7 @@
                                         <strong class="dashboard-metric-value">{{ $totalProjects }}</strong>
                                     </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     @endcan
                 </div>
@@ -511,6 +526,8 @@
         min-height: 110px;
         transition: transform 0.2s ease, box-shadow 0.2s ease;
         overflow: hidden;
+        display: block;
+        text-decoration: none !important;
     }
 
     .dashboard-metric-card::before,
@@ -521,6 +538,7 @@
     .dashboard-metric-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        text-decoration: none !important;
     }
 
     .dashboard-status-tile:hover {
