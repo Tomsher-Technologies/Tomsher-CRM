@@ -151,36 +151,60 @@
         </div>
     </div>
     
-    @can('view_enquiries_by_current_status')
-        <div class="row d-flex align-items-stretch dashboard-status-row">
-            <div class="col-md-12 d-flex">
-                <div class="card w-100 dashboard-status-card">
-                    <div class="card-header dashboard-section-header">
-                        <div>
-                            <span class="dashboard-kicker">Live Pipeline</span>
-                            <h6>Enquiries by Current Status</h6>
-                        </div>
+    <div class="row d-flex">
+        @can('view_enquiries_by_current_status')
+            @php
+                $currentStatusChartData = [];
+                foreach ($statusDetails as $key => $status) {
+                    $count = $statusCounts[$key] ?? 0;
+                    if ($count > 0) {
+                        $currentStatusChartData[] = [
+                            'label' => $status['label'],
+                            'value' => $count,
+                            'bg' => $status['bg'] ?: '#eef2f6',
+                            'color' => $status['list_color'] ?: '#111827'
+                        ];
+                    }
+                }
+            @endphp
+           
+            <div class="col-md-6 d-flex">
+                <div class="card w-100">
+                    <div class="card-header  dashboard-section-header">
+                        <h6>Enquiries by Current Status</h6>
                     </div>
-                    <div class="card-body dashboard-status-body">
-                        <div class="dashboard-status-grid">
-                            {{-- Status Wise Blocks --}}
-                            @foreach($statusDetails as $key => $status)
-                                <div class="dashboard-status-tile" style="--status-bg: {{ $status['bg'] ?: '#eef2f6' }}; --status-color: {{ $status['list_color'] ?: '#111827' }};">
-                                    <div class="dashboard-status-content">
-                                        <span class="dashboard-status-marker"></span>
-                                        <span>{{ $status['label'] }}</span>
-                                    </div>
-                                    <div class="dashboard-status-count">
-                                        <strong>{{ $statusCounts[$key] ?? 0 }}</strong>
-                                    </div>
-                                </div>
-                            @endforeach
+                    <div class="card-body d-flex justify-content-center align-items-center" style="padding: 12px;">
+                        @if (count($currentStatusChartData) > 0)
+                            <div style="width: 100%; max-width: 380px; margin: 0 auto;">
+                                <canvas id="enquiryCurrentStatusChart" style=""></canvas>
+                            </div>
+                        @else
+                            <div class="d-flex justify-content-center align-items-center" style="">
+                                <p class="text-muted mb-0">No Enquiry Data Available</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endcan
+
+        @can('view_enquiries_by_milestone')
+            <div class="col-md-6 d-flex">
+                <div class="card w-100">
+                    <div class="card-header  dashboard-section-header">
+                        <h6>
+                            Enquiries By Milestone 
+                        </h6>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center" style="padding: 12px;">
+                        <div style="width: 100%; max-width: 380px; margin: 0 auto;">
+                            <canvas id="enquiryStatusChart" style=""></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    @endcan
+        @endcan
+    </div>
 
     <!-- Month-Year Filter -->
         @php
@@ -218,7 +242,7 @@
                             Enquiries by Source Chart
                         </h6>
                     </div>
-                    <div class="card-body d-flex justify-content-center align-items-center">
+                    <div class="card-body d-flex justify-content-center align-items-center" style="padding: 12px;">
                         @if (count($filteredSourceNames) > 0)
                             <canvas id="enquirySourcePieChart" style="max-height: 400px;"></canvas>
                         @else
@@ -261,20 +285,7 @@
             </div>
         @endcan
     
-        @can('view_enquiries_by_milestone')
-            <div class="col-md-12 d-flex">
-                <div class="card w-100">
-                    <div class="card-header  dashboard-section-header">
-                        <h6>
-                            Enquiries By Milestone 
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="enquiryStatusChart" style="max-height: 400px;min-height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        @endcan
+       
     </div>
 
     @can('view_enquiries_total')
@@ -362,7 +373,7 @@
 <style>
     .dashboard-overview-row,
     .dashboard-status-row {
-        margin-bottom: 18px;
+        /* margin-bottom: 18px; */
     }
 
     .dashboard-overview-card,
@@ -868,8 +879,60 @@
             return colors;
         }
 
-        // In your script
         document.addEventListener('DOMContentLoaded', function () {
+
+            const canvascurrentStatus = document.getElementById('enquiryCurrentStatusChart'); 
+            if (canvascurrentStatus) { 
+                const ctx = canvascurrentStatus.getContext('2d');
+                if (ctx) {
+                    const currentStatusLabels = {!! json_encode(array_column($currentStatusChartData ?? [], 'label')) !!};
+                    const currentStatusData = {!! json_encode(array_column($currentStatusChartData ?? [], 'value')) !!};
+                    const currentStatusBgs = {!! json_encode(array_column($currentStatusChartData ?? [], 'bg')) !!};
+                    const currentStatusTextColors = {!! json_encode(array_column($currentStatusChartData ?? [], 'color')) !!};
+
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: currentStatusLabels,
+                            datasets: [{
+                                data: currentStatusData,
+                                backgroundColor: currentStatusBgs,
+                                borderColor: '#fff',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                datalabels: {
+                                    color: (context) => {
+                                        const index = context.dataIndex;
+                                        return currentStatusTextColors[index] || '#111827';
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 12
+                                    },
+                                    formatter: (value) => {
+                                        return value;
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.label + ': ' + context.raw;
+                                        }
+                                    }
+                                }
+                            },
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+                }
+            }
 
             const canvasenquirySource = document.getElementById('enquirySourcePieChart'); 
             if (canvasenquirySource) { 
@@ -1043,8 +1106,30 @@
                                 text: 'Number of Enquiries'
                             }
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            enabled: true
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#475569',
+                            font: {
+                                weight: 'bold',
+                                size: 9
+                            },
+                            formatter: (value) => {
+                                return value === 0 ? '' : value; // hide 0 values to avoid clutter
+                            }
+                        }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
         
@@ -1129,7 +1214,7 @@
                                     size: 12
                                 }
                             }
-                        }
+                        },
                     },
                     plugins: [ChartDataLabels]
                 });
@@ -1199,13 +1284,26 @@
                     },
                     plugins: {
                         legend: {
-                            position: 'top'
+                            position: 'bottom',
                         },
                         tooltip: {
                             enabled: true
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#475569',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            formatter: (value) => {
+                                return value;
+                            }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
     </script>
