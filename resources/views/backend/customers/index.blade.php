@@ -44,7 +44,9 @@
                 </select>
             </div>
 
-            
+            <div class="col-md-3 mt-2">
+                <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('date_range') }}" name="date_range" placeholder="Filter by Created Date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
+            </div>
 
             <div class="col-md-3  gap-2 mt-2">
                 <button type="submit" class="btn btn-primary btn-sm">Filter</button>
@@ -65,6 +67,7 @@
                     <th style="width:20%;">Primary Contact</th>
                     <th class="text-center">Total Projects</th>
                     <th class="text-center">Total Enquiries</th>
+                    <th class="text-center">Created At</th>
                     <th class="text-center">Salesperson</th>
                     <th class="text-center">{{trans('messages.status')}}</th>
                     <th class="text-center">{{trans('messages.options')}}</th>
@@ -173,6 +176,10 @@
                                 <a href="{{ route('enquiries.index',['customer_id' => $cust->id]) }}">
                                     {{ $cust->enquiries->count() ?? 0 }}
                                 </a>
+                            </td>
+
+                            <td class="text-center">
+                                {{ $cust->created_at ? $cust->created_at->format('d, M Y') : '' }}
                             </td>
 
                             <td class="text-center">

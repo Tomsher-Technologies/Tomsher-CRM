@@ -82,6 +82,15 @@ class CustomerController extends Controller
             $query->where('is_active', $request->is_active);
         }
 
+        // Filter by Created Date Range
+        if ($request->filled('date_range')) {
+            $date = $request->date_range;
+            [$fromRaw, $toRaw] = explode(" to ", $date);
+            $from = \Carbon\Carbon::createFromFormat('d-m-Y', trim($fromRaw))->startOfDay();
+            $to   = \Carbon\Carbon::createFromFormat('d-m-Y', trim($toRaw))->endOfDay();
+            $query->whereBetween('created_at', [$from, $to]);
+        }
+
         $customers = $query->with('contacts')->latest()->paginate(20);
 
         $industries = $industries = Industry::where('status',1)->orderBy('name','ASC')->get();

@@ -57,6 +57,10 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             $filters[] = "Status: " . ($request->is_active == '1' ? 'Active' : 'Inactive');
         }
 
+        if ($request->filled('date_range')) {
+            $filters[] = "Created Date: " . $request->date_range;
+        }
+
         return count($filters) > 0 ? "Filters: " . implode('  •  ', $filters) : "Filters: All Customers";
     }
 
@@ -101,6 +105,14 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
 
         if ($request->filled('is_active')) {
             $query->where('is_active', $request->is_active);
+        }
+
+        if ($request->filled('date_range')) {
+            $date = $request->date_range;
+            [$fromRaw, $toRaw] = explode(" to ", $date);
+            $from = Carbon::createFromFormat('d-m-Y', trim($fromRaw))->startOfDay();
+            $to   = Carbon::createFromFormat('d-m-Y', trim($toRaw))->endOfDay();
+            $query->whereBetween('created_at', [$from, $to]);
         }
 
         $this->customers = $query->get();
