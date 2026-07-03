@@ -153,7 +153,7 @@
                     @endcan
 
                     @can('add_followups')
-                        <a href="{{ route('followups.create', $enquiry->id) }}" class="btn btn-secondary btn-sm"><i
+                        <a href="javascript:void(0)" class="btn btn-secondary btn-sm" data-toggle="modal" data-target="#addFollowupModal"><i
                                 class="las la-calendar-plus fs-16" style="margin-top: 2px;"></i> Add Followup</a>
                     @endcan
 
@@ -508,6 +508,113 @@
             </div>
         @endif
 
+        <div class="modal fade" id="addFollowupModal" tabindex="-1" aria-labelledby="addFollowupModalLabel" role="dialog"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+                <div class="modal-content">
+                    <form action="{{ route('followups.store') }}" method="POST">
+                        @csrf
+                        <input type="hidden" name="enquiry_id" value="{{ $enquiry->id }}">
+
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addModalTitle"><i class="las la-calendar-plus mr-1 text-primary"></i> Add Follow-up</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body text-left">
+                            <div class="row">
+                                <!-- Follow-up Type -->
+                                <div class="form-group col-md-6 mb-3">
+                                    <label class="font-weight-700">Follow-up Type <span class="text-danger">*</span></label>
+                                    <select name="followup_type" id="add_followup_type" class="form-control form-control-sm" onchange="handleAddTypeChange()" required>
+                                        <option value="">Select</option>
+                                        <option value="call">Call</option>
+                                        <option value="email">Email</option>
+                                        <option value="whatsapp">WhatsApp</option>
+                                        <option value="meeting">Meeting</option>
+                                    </select>
+                                </div>
+
+                                <!-- Sub-Type -->
+                                <div class="form-group col-md-6 mb-3">
+                                    <label class="font-weight-700">Sub-Type <span class="text-danger">*</span></label>
+                                    <select name="sub_type" id="add_sub_type" class="form-control form-control-sm" required>
+                                    </select>
+                                </div>
+
+                                <!-- Time -->
+                                <div class="form-group col-12 mb-3" id="add-followup-time-group">
+                                    <label class="font-weight-700">Time <span class="text-danger">*</span></label>
+                                    <input type="text" name="followup_time" id="add_followup_time" class="form-control form-control-sm">
+                                </div>
+
+                                <!-- Meeting From -->
+                                <div class="form-group col-md-6 mb-3" id="add-meeting-from-group" style="display: none;">
+                                    <label class="font-weight-700">Meeting From <span class="text-danger">*</span></label>
+                                    <input type="text" name="followup_from" id="add_followup_from" class="form-control form-control-sm">
+                                </div>
+
+                                <!-- Meeting To -->
+                                <div class="form-group col-md-6 mb-3" id="add-meeting-to-group" style="display: none;">
+                                    <label class="font-weight-700">Meeting To <span class="text-danger">*</span></label>
+                                    <input type="text" name="followup_to" id="add_followup_to" class="form-control form-control-sm">
+                                </div>
+
+                                <!-- Pre-Follow-up Comment -->
+                                <div class="form-group col-12 mb-3">
+                                    <label class="font-weight-700">Pre-Follow-up Comment <span class="text-danger">*</span></label>
+                                    <textarea name="comment" class="form-control form-control-sm" rows="3" required></textarea>
+                                </div>
+
+                                <!-- Location -->
+                                <div class="form-group col-12 mb-3" id="add-location-group" style="display: none;">
+                                    <label class="font-weight-700">Location <span class="text-danger">*</span></label>
+                                    <input type="text" name="location" id="add_location" class="form-control form-control-sm">
+                                </div>
+
+                                <!-- Meeting Participants -->
+                                <div class="form-group col-12 mb-3" id="add-participants-group" style="display: none;">
+                                    <label class="font-weight-700" for="add_participants">Meeting Participants (excluding yourself)</label>
+                                    @php
+                                        $users = \App\Models\User::where('banned', 0)->where('id', '!=', auth()->id())->orderBy('name', 'asc')->get();
+                                    @endphp
+                                    <select name="participants[]" id="add_participants" class="form-control form-control-sm aiz-selectpicker" multiple data-live-search="true">
+                                        @foreach($users as $user)
+                                            <option value="{{ $user->id }}">
+                                                {{ $user->name }}
+                                            </option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Status -->
+                                <div class="form-group col-12 mb-3">
+                                    <label class="font-weight-700">Status</label>
+                                    <select name="status" class="form-control form-control-sm">
+                                        <option value="pending">Pending</option>
+                                        <option value="completed">Completed</option>
+                                        <option value="canceled">Canceled</option>
+                                        <option value="rescheduled">Rescheduled</option>
+                                    </select>
+                                </div>
+
+                                <!-- Post-Follow-up Comment -->
+                                <div class="form-group col-12 mb-3">
+                                    <label class="font-weight-700">Post-Follow-up Comment</label>
+                                    <textarea name="post_comment" class="form-control form-control-sm" rows="3"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="submit" class="btn btn-success">💾 Save Follow-up</button>
+                            <button type="button" class="btn btn-danger" data-dismiss="modal">Cancel</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
         <div class="modal fade" id="followupModal" tabindex="-1" aria-labelledby="followupModalLabel" role="dialog"
             aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
@@ -764,6 +871,37 @@
             }
         }
 
+        function handleAddTypeChange() {
+            const type = $('#add_followup_type').val();
+            const subType = $('#add_sub_type');
+            const locationGroup = $('#add-location-group');
+            const participantsGroup = $('#add-participants-group');
+
+            subType.empty();
+            participantsGroup.hide();
+            $('#add-followup-time-group').show();
+            $('#add-meeting-from-group, #add-meeting-to-group').hide();
+
+            if (type === 'call' || type === 'email' || type === 'whatsapp') {
+                subType.append(`
+                    <option value="incoming">Incoming</option>
+                    <option value="outgoing">Outgoing</option>
+                `);
+                locationGroup.hide();
+            } else if (type === 'meeting') {
+                subType.append(`
+                    <option value="online">Online</option>
+                    <option value="in-person">In-Person</option>
+                `);
+                locationGroup.show();
+                participantsGroup.show();
+                $('#add-followup-time-group').hide();
+                $('#add-meeting-from-group, #add-meeting-to-group').show();
+            } else {
+                locationGroup.hide();
+            }
+        }
+
         $(document).ready(function() {
             // Initialize flatpickr on edit modal inputs
             flatpickr("#edit_followup_time", {
@@ -780,6 +918,44 @@
                 enableTime: true,
                 dateFormat: "Y-m-d H:i:S",
                 time_24hr: false
+            });
+
+            $('#followup-edit-form').on('submit', function(e) {
+                const status = $('#edit_status').val();
+                if (status === 'rescheduled') {
+                    e.preventDefault();
+                    const form = $(this);
+                    const url = form.attr('action');
+                    const data = form.serialize();
+
+                    $.ajax({
+                        type: 'POST',
+                        url: url,
+                        data: data,
+                        success: function(res) {
+                            // Close the edit modal
+                            $('#followupModal').modal('hide');
+                            // Open the add modal
+                            $('#addFollowupModal').modal('show');
+                        },
+                        error: function(xhr) {
+                            const errors = xhr.responseJSON ? xhr.responseJSON.errors : null;
+                            let errorHtml = 'An error occurred while updating the follow-up.';
+                            if (errors) {
+                                errorHtml = '<ul>';
+                                $.each(errors, function(key, value) {
+                                    errorHtml += '<li>' + value[0] + '</li>';
+                                });
+                                errorHtml += '</ul>';
+                            }
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Validation Error',
+                                html: errorHtml
+                            });
+                        }
+                    });
+                }
             });
 
             $(document).on('click', '.view-followup', function() {
@@ -1104,6 +1280,40 @@
                 $('#submitted-cost-field').addClass('d-none');
                 $('#approved-cost-field').addClass('d-none');
             });
+
+            // Initialize flatpickr on add modal inputs
+            flatpickr("#add_followup_time", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i:S",
+                time_24hr: false
+            });
+            flatpickr("#add_followup_from", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i:S",
+                time_24hr: false
+            });
+            flatpickr("#add_followup_to", {
+                enableTime: true,
+                dateFormat: "Y-m-d H:i:S",
+                time_24hr: false
+            });
+
+            // Reset add modal on close
+            $('#addFollowupModal').on('hidden.bs.modal', function() {
+                $(this).find('form')[0].reset();
+                $('#add_sub_type').empty();
+                $('#add-location-group').hide();
+                $('#add-participants-group').hide();
+                $('#add-followup-time-group').show();
+                $('#add-meeting-from-group, #add-meeting-to-group').hide();
+                if (window.selectpicker || $.fn.selectpicker) {
+                    $('#add_participants').val([]).selectpicker('refresh');
+                }
+            });
+
+            @if (session('open_add_followup'))
+                $('#addFollowupModal').modal('show');
+            @endif
 
         });
     </script>

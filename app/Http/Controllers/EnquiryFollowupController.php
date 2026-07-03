@@ -302,6 +302,13 @@ class EnquiryFollowupController extends Controller
         }
 
         flash( 'Follow-up updated successfully.')->success();
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Follow-up updated successfully.',
+                'status' => $request->status
+            ]);
+        }
         if($request->status == 'rescheduled'){
             return redirect()->route('followups.create',['enquiry_id' => $request->enquiry_id]);
         }else{
