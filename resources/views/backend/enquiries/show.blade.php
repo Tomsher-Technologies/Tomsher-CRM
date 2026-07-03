@@ -374,10 +374,10 @@
             <div class="card-body">
                 <ul class="timeline">
                     @php
-                        $timeline = $enquiry->statusHistories()->orderBy('status_date', 'asc')->get();
+                        $timeline = $enquiry->statusHistories()->orderBy('status_date', 'asc')->orderBy('id', 'asc')->get()->values();
                         $followupsByStatus = $enquiry->followups->groupBy('enquiry_status');
                     @endphp
-                    @foreach ($timeline as $history)
+                    @foreach ($timeline as $index => $history)
                         <li class="mt-3 mb-2">
                             <h6 class="fs-17">
                                 <strong class="text-info ">{{ ucwords(str_replace('_', ' ', $history->status)) }}</strong>
@@ -446,7 +446,27 @@
                             @endif
 
                             @php
-                                $milestoneFollowups = $followupsByStatus->get($history->status, collect());
+                                $historyStatusDate = \Carbon\Carbon::parse($history->status_date)->startOfDay();
+                                $nextHistoryOfSameStatus = $timeline->slice($index + 1)->first(function($item) use ($history) {
+                                    return $item->status === $history->status;
+                                });
+                                $nextStatusDate = $nextHistoryOfSameStatus ? \Carbon\Carbon::parse($nextHistoryOfSameStatus->status_date)->startOfDay() : null;
+
+                                $milestoneFollowups = $followupsByStatus->get($history->status, collect())->filter(function($followup) use ($historyStatusDate, $nextStatusDate) {
+                                    $followupAddedDate = \Carbon\Carbon::parse($followup->created_at)->startOfDay();
+                                    
+                                    // Check if the followup was added on or after the milestone status date
+                                    if ($followupAddedDate->lt($historyStatusDate)) {
+                                        return false;
+                                    }
+                                    
+                                    // If there is a next milestone status of the same type, check if the followup was added before that next milestone status date
+                                    if ($nextStatusDate && $followupAddedDate->gte($nextStatusDate)) {
+                                        return false;
+                                    }
+                                    
+                                    return true;
+                                });
                             @endphp
                             @if ($milestoneFollowups->isNotEmpty())
                                 @include('backend.enquiries.partials.followup-table', [
