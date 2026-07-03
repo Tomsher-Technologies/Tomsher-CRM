@@ -102,17 +102,27 @@
                                 ->pluck('name')
                                 ->join(', ');
                         @endphp
-                        <button type="button" class="btn btn-soft-warning btn-sm btn-icon btn-circle view-followup"
+                        @php
+                            $participantIds = $followup->participants
+                                ->where('pivot.is_main', false)
+                                ->pluck('id')
+                                ->join(',');
+                        @endphp
+                        <button type="button" class="btn btn-soft-info btn-sm btn-icon btn-circle view-followup"
                             data-toggle="modal" data-target="#followupModal"
                             data-enquiry="{{ $followup->enquiry->enquiry_code ?? '' }} - {{ $followup->enquiry->customer->company_name ?? '' }}"
                             data-type="{{ ucfirst($followup->followup_type) }}"
-                            data-subtype="{{ ucfirst($followup->sub_type) }}" data-followup-status="{{ $followup->status }}"
+                            data-subtype="{{ ucfirst($followup->sub_type) }}" 
+                            data-followup-status="{{ $followup->status }}"
                             @if ($followup->followup_type === 'meeting')
                                 data-time-from="{{ \Carbon\Carbon::parse($followup->followup_from)->format('d, M Y h:i A') }}"
                                 data-time-to="{{ \Carbon\Carbon::parse($followup->followup_to)->format('d, M Y h:i A') }}"
                             @else
                                 data-time="{{ \Carbon\Carbon::parse($followup->followup_time)->format('d, M Y h:i A') }}"
                             @endif
+                            data-raw-time="{{ $followup->followup_time ? \Carbon\Carbon::parse($followup->followup_time)->format('Y-m-d H:i:s') : '' }}"
+                            data-raw-from="{{ $followup->followup_from ? \Carbon\Carbon::parse($followup->followup_from)->format('Y-m-d H:i:s') : '' }}"
+                            data-raw-to="{{ $followup->followup_to ? \Carbon\Carbon::parse($followup->followup_to)->format('Y-m-d H:i:s') : '' }}"
                             data-subject="{{ $followup->subject }}"
                             data-post-comment="{{ $followup->post_comment }}"
                             data-location="{{ $followup->location }}"
@@ -120,9 +130,10 @@
                             data-statusclass="{{$statusClass}}"
                             data-createdby="{{ $followup->added_by->name ?? '' }}"
                             data-participants="{{ $participantNames }}"
+                            data-participant-ids="{{ $participantIds }}"
                             data-followup-id="{{ $followup->id }}"
                         >   
-                            <i class="las la-eye"></i>
+                            <i class="las la-edit"></i>
                         </button>
                     </td>
                 </tr>
