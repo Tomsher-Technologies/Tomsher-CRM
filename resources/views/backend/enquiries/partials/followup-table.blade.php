@@ -7,6 +7,9 @@
                 <th class="text-center">Follow-up</th>
                 <th class="text-center">Type</th>
                 <th class="text-center">Time</th>
+                <th class="text-start" style="width:20%;">Pre Comment</th>
+                <th class="text-start" style="width:20%;">Post Comment</th>
+                <th class="text-center">Created By</th>
                 {{-- <th>Location</th> --}}
                 <th class="text-center">Followup Status</th>
                 <th class="text-center">Actions</th>
@@ -35,6 +38,9 @@
                             <div>{{ \Carbon\Carbon::parse($followup->followup_time)->format('d, M Y h:i A') }}</div>
                         @endif
                     </td>
+                    <td class="text-start">{{ $followup->subject ?? '-' }}</td>
+                    <td class="text-start">{{ $followup->post_comment ?? '-' }}</td>
+                    <td class="text-center">{{ $followup->added_by->name ?? 'System' }}</td>
                     {{-- <td>{{ $followup->location ?? '-' }}</td> --}}
                     <td class="text-center">
                         @php

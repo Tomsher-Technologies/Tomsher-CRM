@@ -446,22 +446,22 @@
                             @endif
 
                             @php
-                                $historyStatusDate = \Carbon\Carbon::parse($history->status_date)->startOfDay();
+                                $historyCreatedAt = $history->created_at;
                                 $nextHistoryOfSameStatus = $timeline->slice($index + 1)->first(function($item) use ($history) {
                                     return $item->status === $history->status;
                                 });
-                                $nextStatusDate = $nextHistoryOfSameStatus ? \Carbon\Carbon::parse($nextHistoryOfSameStatus->status_date)->startOfDay() : null;
+                                $nextCreatedAt = $nextHistoryOfSameStatus ? $nextHistoryOfSameStatus->created_at : null;
 
-                                $milestoneFollowups = $followupsByStatus->get($history->status, collect())->filter(function($followup) use ($historyStatusDate, $nextStatusDate) {
-                                    $followupAddedDate = \Carbon\Carbon::parse($followup->created_at)->startOfDay();
+                                $milestoneFollowups = $followupsByStatus->get($history->status, collect())->filter(function($followup) use ($historyCreatedAt, $nextCreatedAt) {
+                                    $followupCreatedAt = $followup->created_at;
                                     
-                                    // Check if the followup was added on or after the milestone status date
-                                    if ($followupAddedDate->lt($historyStatusDate)) {
+                                    // Check if the followup was added on or after the milestone status creation time
+                                    if ($followupCreatedAt->lt($historyCreatedAt)) {
                                         return false;
                                     }
                                     
-                                    // If there is a next milestone status of the same type, check if the followup was added before that next milestone status date
-                                    if ($nextStatusDate && $followupAddedDate->gte($nextStatusDate)) {
+                                    // If there is a next milestone status of the same type, check if the followup was added before that next milestone status creation time
+                                    if ($nextCreatedAt && $followupCreatedAt->gte($nextCreatedAt)) {
                                         return false;
                                     }
                                     
