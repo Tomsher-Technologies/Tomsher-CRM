@@ -29,7 +29,12 @@
                 <tr>
                     <td class="text-center">{{ $key+1 }}</td>
                     <td class="text-center">{!! $icon !!} {{ ucfirst($followup->followup_type) }}</td>
-                    <td class="text-center">{{ ucfirst($followup->sub_type) }}</td>
+                    <td class="text-center">
+                        {{ ucfirst($followup->sub_type) }}
+                        @if ($followup->followup_type === 'meeting' && $followup->location)
+                            <br><small class="text-muted"><i class="las la-map-marker-alt"></i> {{ $followup->location }}</small>
+                        @endif
+                    </td>
                     <td class="text-center">
                         @if ($followup->followup_type === 'meeting')
                             <div><strong>From:</strong> {{ \Carbon\Carbon::parse($followup->followup_from)->format('d, M Y h:i A') }}</div>
