@@ -181,7 +181,7 @@ class AdminController extends Controller
                                         }
                                     })->count();
 
-        $customerQuery = Customer::query();
+        $customerQuery = Customer::query()->where('ntc', 1);
 
         if (!empty($from_date) && !empty($to_date)) {
             $customerQuery->whereBetween('created_at', [
@@ -259,7 +259,7 @@ class AdminController extends Controller
                         ->when($source_mode, function ($q) use ($source_mode) {
                             $q->where('enquiries.source_mode', $source_mode);
                         })
-                        ->groupBy('project_type');
+                        ->groupBy('project_type')->orderBy('project_type', 'asc');
 
         if (!empty($from_date) && !empty($to_date)) {
             $queryProjectType->whereBetween('enquiry_date', [

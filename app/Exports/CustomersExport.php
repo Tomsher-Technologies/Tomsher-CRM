@@ -57,6 +57,10 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             $filters[] = "Status: " . ($request->is_active == '1' ? 'Active' : 'Inactive');
         }
 
+        if ($request->filled('ntc')) {
+            $filters[] = "New To Company: " . ($request->ntc == '1' ? 'Yes' : 'No');
+        }
+
         if ($request->filled('date_range')) {
             $filters[] = "Created Date: " . $request->date_range;
         }
@@ -105,6 +109,10 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
 
         if ($request->filled('is_active')) {
             $query->where('is_active', $request->is_active);
+        }
+
+        if ($request->filled('ntc')) {
+            $query->where('ntc', $request->ntc);
         }
 
         if ($request->filled('date_range')) {

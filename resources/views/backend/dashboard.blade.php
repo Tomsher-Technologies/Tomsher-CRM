@@ -87,14 +87,15 @@
                             {{-- Total Customers Block --}}
                             <a href="{{ route('customers.index', array_filter([
                                 'user_id' => request('user_id') ?: null,
-                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y')
+                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'ntc' => 1
                             ])) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-customers-inner">
                                     <div class="dashboard-metric-icon-wrap">
-                                        <img src="{{ asset('assets/img/3d_customers.png') }}" class="dashboard-metric-3d-icon" alt="Total Customers">
+                                        <img src="{{ asset('assets/img/3d_customers.png') }}" class="dashboard-metric-3d-icon" alt="New Customers">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">Total Customer</span>
+                                        <span class="dashboard-metric-title">New Customer</span>
                                         <strong class="dashboard-metric-value">{{ $totalCustomers }}</strong>
                                     </div>
                                 </div>
@@ -1287,7 +1288,8 @@
                         data: projectTypeCounts, // Enquiry counts for each project type
                         backgroundColor: colors.slice(0, projectTypeCounts.length), // Limit the number of colors to match data count
                         borderColor: colors.slice(0, projectTypeCounts.length),
-                        borderWidth: 1
+                        borderWidth: 1,
+                        maxBarThickness: 30
                     }]
                 },
                 options: {

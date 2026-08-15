@@ -82,6 +82,11 @@ class CustomerController extends Controller
             $query->where('is_active', $request->is_active);
         }
 
+        // Filter by New to Company status
+        if ($request->filled('ntc')) {
+            $query->where('ntc', $request->ntc);
+        }
+
         // Filter by Created Date Range
         if ($request->filled('date_range')) {
             $date = $request->date_range;

@@ -45,6 +45,14 @@
             </div>
 
             <div class="col-md-3 mt-2">
+                <select name="ntc" class="form-control form-control-sm aiz-selectpicker">
+                    <option value="">New To Company</option>
+                    <option value="1" {{ request('ntc') === '1' ? 'selected' : '' }}>Yes</option>
+                    <option value="0" {{ request('ntc') === '0' ? 'selected' : '' }}>No</option>
+                </select>
+            </div>
+
+            <div class="col-md-3 mt-2">
                 <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ request('date_range') }}" name="date_range" placeholder="Filter by Created Date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
             </div>
 
@@ -84,6 +92,9 @@
                                     
                                 <div>
                                     {{ $cust->company_name }}
+                                    @if($cust->ntc)
+                                        <span class="badge badge-inline bg-success text-white ml-1" style="font-size: 10px; padding: 2px 5px;">NTC</span>
+                                    @endif
                                     <a href="javascript:void(0)" class="show-popup-company" data-id="{{ $key }}">
                                         <i class="las la-info-circle fs-16 text-primary" style="cursor: pointer;"></i>
                                     </a>
