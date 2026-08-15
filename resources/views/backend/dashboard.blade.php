@@ -95,7 +95,7 @@
                                         <img src="{{ asset('assets/img/3d_customers.png') }}" class="dashboard-metric-3d-icon" alt="New Customers">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">New Customer</span>
+                                        <span class="dashboard-metric-title">New Customers</span>
                                         <strong class="dashboard-metric-value">{{ $totalCustomers }}</strong>
                                     </div>
                                 </div>
