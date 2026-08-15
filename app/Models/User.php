@@ -26,6 +26,8 @@ class User extends Authenticatable
         'followup_mail_status',
         'followup_cc',
         'password',
+        'reporting_to_id',
+        'manager_id',
     ];
 
     /**
@@ -61,6 +63,64 @@ class User extends Authenticatable
     public function followupParticipations()
     {
         return $this->belongsToMany(EnquiryFollowup::class, 'enquiry_followup_participants', 'user_id', 'followup_id');
+    }
+
+    public function reportingTo()
+    {
+        return $this->belongsTo(User::class, 'reporting_to_id');
+    }
+
+    public function manager()
+    {
+        return $this->belongsTo(User::class, 'manager_id');
+    }
+
+    public function subordinates()
+    {
+        return $this->hasMany(User::class, 'reporting_to_id');
+    }
+
+    public function managedUsers()
+    {
+        return $this->hasMany(User::class, 'manager_id');
+    }
+
+    /**
+     * Recursively fetch all subordinate IDs for this user.
+     */
+    public function getSubordinateIds($visited = [])
+    {
+        $visited[] = $this->id;
+
+        $subordinates = User::where(function($query) {
+            $query->where('reporting_to_id', $this->id)
+                  ->orWhere('manager_id', $this->id);
+        })
+        ->whereNotIn('id', $visited)
+        ->pluck('id')
+        ->toArray();
+
+        $allSubordinates = $subordinates;
+        foreach ($subordinates as $subId) {
+            $subUser = User::find($subId);
+            if ($subUser) {
+                $allSubordinates = array_merge($allSubordinates, $subUser->getSubordinateIds(array_merge($visited, $allSubordinates)));
+            }
+        }
+
+        return array_unique($allSubordinates);
+    }
+
+    /**
+     * Get list of user IDs that this user is allowed to view.
+     */
+    public function getAllowedUserIds()
+    {
+        if ($this->user_type === 'admin') {
+            return User::pluck('id')->toArray();
+        }
+
+        return array_merge([$this->id], $this->getSubordinateIds());
     }
 
 }

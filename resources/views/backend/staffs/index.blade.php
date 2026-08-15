@@ -44,6 +44,8 @@
                     
                     <th >{{trans('messages.phone')}}</th>
                     <th>{{trans('messages.role')}}</th>
+                    <th>Reporting To</th>
+                    <th>Manager</th>
                     <th class="text-center">Follow-up Mail Status</th>
                     <th class="text-center">Active Status</th>
                     <th class="text-center">{{trans('messages.options')}}</th>
@@ -61,6 +63,8 @@
                             <td>
                                 {{ $staff->roles->pluck('name')->join(', ') }}
                             </td>
+                            <td>{{ $staff->reportingTo->name ?? '-' }}</td>
+                            <td>{{ $staff->manager->name ?? '-' }}</td>
                             <td class="text-center">
                                 @can('edit_staff')
                                     <label class="aiz-switch aiz-switch-success mb-0">

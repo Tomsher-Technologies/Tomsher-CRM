@@ -25,46 +25,58 @@ class EnquiryScopeOfWorkController extends Controller
     {
         $request->session()->put('enquiry_scopes_last_url', url()->full());
 
-        $users = User::orderBy('name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::orderBy('name', 'asc')->get();
+        } else {
+            $users = User::whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         $projectTypes = ProjectType::orderBy('name', 'asc')->get();
 
         $scopes = EnquiryScopeOfWork::with([
                                         'enquiry.customer',
                                         'enquiry.projectTypes',
                                         'enquiry.owner'
-                                    ])
-                                    ->when($request->filled('keyword'), function ($q) use ($request) {
-                                        $keyword = $request->keyword;
-                                        $q->where(function ($query) use ($keyword) {
-                                            $query->where('title', 'like', "%{$keyword}%")
-                                                ->orWhereHas('enquiry', function ($enquiry) use ($keyword) {
-                                                    $enquiry->where('enquiry_code', 'like', "%{$keyword}%")
-                                                        ->orWhereHas('customer', function ($customer) use ($keyword) {
-                                                            $customer->where('company_name', 'like', "%{$keyword}%");
-                                                        });
-                                                });
-                                        });
-                                    })
-                                    ->when($request->filled('project_type_id') || $request->filled('added_by'), function ($q) use ($request) {
-                                        $q->whereHas('enquiry', function ($query) use ($request) {
+                                    ]);
 
-                                            if ($request->filled('project_type_id')) {
-                                                $query->whereHas('projectTypes', function ($p) use ($request) {
-                                                    $p->where('project_type_id', $request->project_type_id);
-                                                });
-                                            }
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $scopes->whereHas('enquiry', function ($query) use ($allowedIds) {
+                $query->whereIn('owner_id', $allowedIds);
+            });
+        }
 
-                                            if ($request->filled('added_by')) {
-                                                $query->where('owner_id', $request->added_by);
-                                            }
+        $scopes = $scopes->when($request->filled('keyword'), function ($q) use ($request) {
+                                         $keyword = $request->keyword;
+                                         $q->where(function ($query) use ($keyword) {
+                                             $query->where('title', 'like', "%{$keyword}%")
+                                                 ->orWhereHas('enquiry', function ($enquiry) use ($keyword) {
+                                                     $enquiry->where('enquiry_code', 'like', "%{$keyword}%")
+                                                         ->orWhereHas('customer', function ($customer) use ($keyword) {
+                                                             $customer->where('company_name', 'like', "%{$keyword}%");
+                                                         });
+                                                 });
+                                         });
+                                     })
+                                     ->when($request->filled('project_type_id') || $request->filled('added_by'), function ($q) use ($request) {
+                                         $q->whereHas('enquiry', function ($query) use ($request) {
 
-                                        });
-                                    })
-                                    ->when($request->filled('status'), function ($q) use ($request) {
-                                        $q->where('status', $request->status);
-                                    })
-                                    ->latest()
-                                    ->paginate(20);
+                                             if ($request->filled('project_type_id')) {
+                                                 $query->whereHas('projectTypes', function ($p) use ($request) {
+                                                     $p->where('project_type_id', $request->project_type_id);
+                                                 });
+                                             }
+
+                                             if ($request->filled('added_by')) {
+                                                 $query->where('owner_id', $request->added_by);
+                                             }
+
+                                         });
+                                     })
+                                     ->when($request->filled('status'), function ($q) use ($request) {
+                                         $q->where('status', $request->status);
+                                     })
+                                     ->latest()
+                                     ->paginate(20);
 
         return view('backend.enquiry_scopes.index', compact('scopes', 'users', 'projectTypes'));
     }
@@ -78,6 +90,12 @@ class EnquiryScopeOfWorkController extends Controller
                                         'comments.commenter'
                                     ])->findOrFail($id);
 
+        if (auth()->user()->user_type !== 'admin') {
+            if ($scope->enquiry && !in_array($scope->enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
+
         return view('backend.enquiry_scopes.show', compact('scope'));
     }
 
@@ -88,6 +106,11 @@ class EnquiryScopeOfWorkController extends Controller
         ]);
 
         $scope = EnquiryScopeOfWork::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if ($scope->enquiry && !in_array($scope->enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
 
         // Only save history if content has changed
         if ($scope->scope_content !== $request->scope_content) {
@@ -113,6 +136,11 @@ class EnquiryScopeOfWorkController extends Controller
 
     public function storeComment(Request $request, EnquiryScopeOfWork $scope)
     {
+        if (auth()->user()->user_type !== 'admin') {
+            if ($scope->enquiry && !in_array($scope->enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         $request->validate([
             'comment' => 'required|string',
         ]);

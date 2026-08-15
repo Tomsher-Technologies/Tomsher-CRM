@@ -73,8 +73,18 @@ class CustomerController extends Controller
             $query->whereIn('industry_id',  $childIds);
         }
 
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $query->whereIn('sales_person', $allowedIds);
+        }
+
         if ($request->filled('user_id')) {
-            $query->where('sales_person', $request->user_id);
+            $userId = $request->user_id;
+            if (auth()->user()->user_type === 'admin' || in_array($userId, auth()->user()->getAllowedUserIds())) {
+                $query->where('sales_person', $userId);
+            } else {
+                $query->where('sales_person', 0);
+            }
         }
 
         // Filter by Active Status (Assuming you have a boolean `is_active`)
@@ -84,8 +94,12 @@ class CustomerController extends Controller
 
         $customers = $query->with('contacts')->latest()->paginate(20);
 
-        $industries = $industries = Industry::where('status',1)->orderBy('name','ASC')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        $industries = Industry::where('status',1)->orderBy('name','ASC')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        } else {
+            $users = User::where('banned',0)->whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         return view('backend.customers.index', compact('customers','industries','users'));
     }
 
@@ -99,7 +113,11 @@ class CustomerController extends Controller
         $industries = Industry::where('status',1)->orderBy('name','ASC')->get();
         $countries = Country::orderBy('name','ASC')->get();
         $emirates = Emirate::orderBy('name','ASC')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        } else {
+            $users = User::where('banned',0)->whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         return view('backend.customers.create', compact('customerCode','industries','countries','emirates','users'));
     }
 
@@ -166,28 +184,48 @@ class CustomerController extends Controller
     public function show($id)
     {
         $customer = Customer::with(['contacts', 'industry'])->findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($customer->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         return view('backend.customers.show', compact('customer'));
     }
 
     public function edit($id)
     {
         $customer = Customer::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($customer->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         $industries = Industry::where('status',1)->orderBy('name','ASC')->get();
         $countries = Country::orderBy('name','ASC')->get();
         $emirates = Emirate::orderBy('name','ASC')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        } else {
+            $users = User::where('banned',0)->whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         return view('backend.customers.edit', compact('customer', 'industries','countries','emirates','users'));
     }
 
     public function update(Request $request, $id)
     {
+        $customer = Customer::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($customer->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         $validated = $request->validate([
             'customer_code'         => 'required|unique:customers,customer_code,' . $id,
             'company_name'          => 'required',
             'user_id'          => 'required'
         ]);
 
-        DB::transaction(function () use ($request, $validated, $id) {
+        DB::transaction(function () use ($request, $id) {
             $customer = Customer::findOrFail($id);
 
             $old_sale_person = $customer->sales_person;
@@ -242,6 +280,11 @@ class CustomerController extends Controller
     public function updateStatus(Request $request)
     {
         $customer = Customer::findOrFail($request->id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($customer->sales_person, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
         $customer->is_active = $request->status;
         $customer->save();
      
