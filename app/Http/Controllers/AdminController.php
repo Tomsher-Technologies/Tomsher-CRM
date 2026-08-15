@@ -175,7 +175,20 @@ class AdminController extends Controller
 
         // Enquiry Sources
         $enquirySources = EnquirySource::all();
-        $totalEnquiries = (clone $query)->when($user_id, function ($q) use ($user_id) {
+        $totalEnquiries = (clone $query)
+                                    ->whereDoesntHave('source', function ($q) {
+                                        $q->where('name', 'like', '%zoho%');
+                                    })
+                                    ->when($user_id, function ($q) use ($user_id) {
+                                        if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                            $q->where('owner_id', $user_id);
+                                        }
+                                    })->count();
+
+        $zohoSourceIds = EnquirySource::where('name', 'like', '%zoho%')->pluck('id')->toArray();
+        $zohoEnquiries = (clone $query)
+                                    ->whereIn('enquiry_source_id', $zohoSourceIds)
+                                    ->when($user_id, function ($q) use ($user_id) {
                                         if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
                                             $q->where('owner_id', $user_id);
                                         }
@@ -456,7 +469,7 @@ class AdminController extends Controller
             $chartType = 'daywise';
         }
 
-        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','totalCustomers','totalData','totalFollowups','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
+        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','zohoEnquiries','zohoSourceIds','totalCustomers','totalData','totalFollowups','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
     }
 
     function clearCache(Request $request)

@@ -116,6 +116,22 @@
                                     </div>
                                 </div>
                             </a>
+                            {{-- Zoho Enquiries Block --}}
+                            <a href="{{ route('enquiries.index', array_filter([
+                                'enquiry_date' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'added_by' => request('user_id') ? [request('user_id')] : null,
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ]) + ['enquiry_source_id' => $zohoSourceIds]) }}" class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-enquiries-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Zoho Enquiries">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Zoho Enquiries</span>
+                                        <strong class="dashboard-metric-value">{{ $zohoEnquiries }}</strong>
+                                    </div>
+                                </div>
+                            </a>
                             {{-- Total Data Block --}}
                             {{-- <div class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-data-inner">
