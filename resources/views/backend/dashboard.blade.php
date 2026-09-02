@@ -101,11 +101,11 @@
                                 </div>
                             </a>
                             {{-- Total Enquiries Block --}}
-                            <a href="{{ route('enquiries.index', array_filter([
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('enquiries.index', array_filter([
                                 'enquiry_date' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
                                 'added_by' => request('user_id') ? [request('user_id')] : null,
                                 'source_mode' => request('source_mode') ? [request('source_mode')] : null
-                            ])) }}" class="dashboard-metric-card">
+                            ]))) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-data-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Total Enquiries">
@@ -117,11 +117,11 @@
                                 </div>
                             </a>
                             {{-- Zoho Enquiries Block --}}
-                            <a href="{{ route('enquiries.index', array_filter([
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('enquiries.index', array_filter([
                                 'enquiry_date' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
                                 'added_by' => request('user_id') ? [request('user_id')] : null,
                                 'source_mode' => request('source_mode') ? [request('source_mode')] : null
-                            ]) + ['enquiry_source_id' => $zohoSourceIds]) }}" class="dashboard-metric-card">
+                            ]) + ['enquiry_source_id' => $zohoSourceIds])) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-enquiries-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Zoho Enquiries">
@@ -145,11 +145,11 @@
                                 </div>
                             </div> --}}
                             {{-- Total Followups Block --}}
-                            <a href="{{ route('followups.index', array_filter([
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('followups.index', array_filter([
                                 'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
                                 'created_by' => request('user_id'),
                                 'source_mode' => request('source_mode') ? [request('source_mode')] : null
-                            ])) }}" class="dashboard-metric-card">
+                            ]))) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-followups-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_followups.png') }}" class="dashboard-metric-3d-icon" alt="Total Followups">
@@ -161,11 +161,11 @@
                                 </div>
                             </a>
                             {{-- Total Projects Block --}}
-                            <a href="{{ route('projects.index', array_filter([
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('projects.index', array_filter([
                                 'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
                                 'created_by' => request('user_id'),
                                 'source_mode' => request('source_mode') ? [request('source_mode')] : null
-                            ])) }}" class="dashboard-metric-card">
+                            ]))) }}" class="dashboard-metric-card">
                                 <div class="dashboard-metric-inner dashboard-metric-projects-inner">
                                     <div class="dashboard-metric-icon-wrap">
                                         <img src="{{ asset('assets/img/3d_projects.png') }}" class="dashboard-metric-3d-icon" alt="Total Projects">
