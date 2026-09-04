@@ -490,6 +490,16 @@ class EnquiryFollowupController extends Controller
         ]);
 
         $followup = EnquiryFollowup::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $hasAccess = in_array($followup->created_by, $allowedIds) ||
+                         $followup->participants()->whereIn('user_id', $allowedIds)->exists() ||
+                         ($followup->enquiry && in_array($followup->enquiry->owner_id, $allowedIds));
+            if (!$hasAccess) {
+                return response()->json(['error' => 'Unauthorized access'], 403);
+            }
+        }
+
         $followup->status = $request->status;
         $followup->post_comment = $request->post_comment ?? NULL;
         $followup->save();

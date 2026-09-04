@@ -583,6 +583,13 @@ class EnquiryController extends Controller
 
     public function getProposalItems($id, $status)
     {
+        $enquiryObj = Enquiry::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($enquiryObj->owner_id, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized access'], 403);
+            }
+        }
+
         $enquiry = [];
         if($status == 'proposal_submitted' || $status == 'project_approved'){
             $enquiry = Enquiry::with(['proposalItems' => function ($query) {

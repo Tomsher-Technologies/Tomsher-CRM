@@ -292,6 +292,13 @@ class ProjectController extends Controller
 
     public function getEnquiries($customerId)
     {
+        $customer = Customer::findOrFail($customerId);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($customer->sales_person, auth()->user()->getAllowedUserIds())) {
+                return response()->json([], 403);
+            }
+        }
+
         $enquiries = Enquiry::where('customer_id', $customerId)->get();
 
         return response()->json($enquiries);

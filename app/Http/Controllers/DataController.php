@@ -423,6 +423,13 @@ class DataController extends Controller
 
     public function getStatusData($id, $status)
     {
+        $data = Data::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized access'], 403);
+            }
+        }
+
         $statusData = DataStatusHistory::where('data_id', $id)->where('status', $status)->orderBy('id','desc')->first();
         return response()->json([
             'comment' => $statusData->comment ?? '',
