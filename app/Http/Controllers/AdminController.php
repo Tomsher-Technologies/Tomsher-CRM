@@ -168,9 +168,26 @@ class AdminController extends Controller
 
         // Enquiry Sources
         $enquirySources = EnquirySource::all();
-        $totalEnquiries = (clone $query)->count();
+        $totalEnquiries = (clone $query)
+                                    ->whereDoesntHave('source', function ($q) {
+                                        $q->where('name', 'like', '%zoho%');
+                                    })
+                                    ->when($user_id, function ($q) use ($user_id) {
+                                        if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                            $q->where('owner_id', $user_id);
+                                        }
+                                    })->count();
 
-        $customerQuery = Customer::query()->whereIn('sales_person', $filteredUserIds);
+        $zohoSourceIds = EnquirySource::where('name', 'like', '%zoho%')->pluck('id')->toArray();
+        $zohoEnquiries = (clone $query)
+                                    ->whereIn('enquiry_source_id', $zohoSourceIds)
+                                    ->when($user_id, function ($q) use ($user_id) {
+                                        if (auth()->user()->can('view_all_users_filter') || $user_id == auth()->id()) {
+                                            $q->where('owner_id', $user_id);
+                                        }
+                                    })->count();
+
+        $customerQuery = Customer::query()->whereIn('sales_person', $filteredUserIds)->where('ntc', 1);
 
         if (!empty($from_date) && !empty($to_date)) {
             $customerQuery->whereBetween('created_at', [
@@ -230,7 +247,7 @@ class AdminController extends Controller
                         ->when($source_mode, function ($q) use ($source_mode) {
                             $q->where('enquiries.source_mode', $source_mode);
                         })
-                        ->groupBy('project_type');
+                        ->groupBy('project_type')->orderBy('project_type', 'asc');
 
         if (!empty($from_date) && !empty($to_date)) {
             $queryProjectType->whereBetween('enquiry_date', [
@@ -416,7 +433,7 @@ class AdminController extends Controller
             $chartType = 'daywise';
         }
 
-        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','totalCustomers','totalData','totalFollowups','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
+        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','zohoEnquiries','zohoSourceIds','totalCustomers','totalData','totalFollowups','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
     }
 
     function clearCache(Request $request)

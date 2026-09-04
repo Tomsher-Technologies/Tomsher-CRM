@@ -85,45 +85,97 @@
                     @can('view_total_counts')
                         <div class="dashboard-metrics-grid">
                             {{-- Total Customers Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-customers">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-users"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Customers</span>
-                                    <strong>{{ $totalCustomers }}</strong>
+                            <a href="{{ route('customers.index', array_filter([
+                                'user_id' => request('user_id') ?: null,
+                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'ntc' => 1
+                            ])) }}" class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-customers-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_customers.png') }}" class="dashboard-metric-3d-icon" alt="New Customers">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">New Customers</span>
+                                        <strong class="dashboard-metric-value">{{ $totalCustomers }}</strong>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                             {{-- Total Enquiries Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-enquiries">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-clipboard-list"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Enquiries</span>
-                                    <strong>{{ $totalEnquiries }}</strong>
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('enquiries.index', array_filter([
+                                'enquiry_date' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'added_by' => request('user_id') ? [request('user_id')] : null,
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ]))) }}" class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-data-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Total Enquiries">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Enquiries</span>
+                                        <strong class="dashboard-metric-value">{{ $totalEnquiries }}</strong>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
+                            {{-- Zoho Enquiries Block --}}
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('enquiries.index', array_filter([
+                                'enquiry_date' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'added_by' => request('user_id') ? [request('user_id')] : null,
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ]) + ['enquiry_source_id' => $zohoSourceIds])) }}" class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-enquiries-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Zoho Enquiries">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Zoho Enquiries</span>
+                                        <strong class="dashboard-metric-value">{{ $zohoEnquiries }}</strong>
+                                    </div>
+                                </div>
+                            </a>
                             {{-- Total Data Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-data">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-database"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Data</span>
-                                    <strong>{{ $totalData }}</strong>
+                            {{-- <div class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-data-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_data.png') }}" class="dashboard-metric-3d-icon" alt="Total Data">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Data</span>
+                                        <strong class="dashboard-metric-value">{{ $totalData }}</strong>
+                                    </div>
                                 </div>
-                            </div>
+                            </div> --}}
                             {{-- Total Followups Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-followups">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-phone-volume"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Followups</span>
-                                    <strong>{{ $totalFollowups }}</strong>
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('followups.index', array_filter([
+                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'created_by' => request('user_id'),
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ]))) }}" class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-followups-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_followups.png') }}" class="dashboard-metric-3d-icon" alt="Total Followups">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Followups</span>
+                                        <strong class="dashboard-metric-value">{{ $totalFollowups }}</strong>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                             {{-- Total Projects Block --}}
-                            <div class="dashboard-metric-card dashboard-metric-projects">
-                                <div class="dashboard-metric-icon"><i class="fa-solid fa-diagram-project"></i></div>
-                                <div class="dashboard-metric-copy">
-                                    <span>Total Projects</span>
-                                    <strong>{{ $totalProjects }}</strong>
+                            <a href="{{ preg_replace('/(%5B|\[)\d+(%5D|\])/i', '$1$2', route('projects.index', array_filter([
+                                'date_range' => request('date_range') ?: now()->startOfMonth()->format('d-m-Y').' to '.now()->endOfMonth()->format('d-m-Y'),
+                                'created_by' => request('user_id'),
+                                'source_mode' => request('source_mode') ? [request('source_mode')] : null
+                            ]))) }}" class="dashboard-metric-card">
+                                <div class="dashboard-metric-inner dashboard-metric-projects-inner">
+                                    <div class="dashboard-metric-icon-wrap">
+                                        <img src="{{ asset('assets/img/3d_projects.png') }}" class="dashboard-metric-3d-icon" alt="Total Projects">
+                                    </div>
+                                    <div class="dashboard-metric-copy">
+                                        <span class="dashboard-metric-title">Total Projects</span>
+                                        <strong class="dashboard-metric-value">{{ $totalProjects }}</strong>
+                                    </div>
                                 </div>
-                            </div>
+                            </a>
                         </div>
                     @endcan
                 </div>
@@ -131,36 +183,60 @@
         </div>
     </div>
     
-    @can('view_enquiries_by_current_status')
-        <div class="row d-flex align-items-stretch dashboard-status-row">
-            <div class="col-md-12 d-flex">
-                <div class="card w-100 dashboard-status-card">
-                    <div class="card-header dashboard-section-header">
-                        <div>
-                            <span class="dashboard-kicker">Live Pipeline</span>
-                            <h6>Enquiries by Current Status</h6>
-                        </div>
+    <div class="row d-flex">
+        @can('view_enquiries_by_current_status')
+            @php
+                $currentStatusChartData = [];
+                foreach ($statusDetails as $key => $status) {
+                    $count = $statusCounts[$key] ?? 0;
+                    if ($count > 0) {
+                        $currentStatusChartData[] = [
+                            'label' => $status['label'],
+                            'value' => $count,
+                            'bg' => $status['bg'] ?: '#eef2f6',
+                            'color' => $status['list_color'] ?: '#111827'
+                        ];
+                    }
+                }
+            @endphp
+           
+            <div class="col-md-6 d-flex">
+                <div class="card w-100">
+                    <div class="card-header  dashboard-section-header">
+                        <h6>Enquiries by Current Status</h6>
                     </div>
-                    <div class="card-body dashboard-status-body">
-                        <div class="dashboard-status-grid">
-                            {{-- Status Wise Blocks --}}
-                            @foreach($statusDetails as $key => $status)
-                                <div class="dashboard-status-tile" style="--status-bg: {{ $status['bg'] ?: '#eef2f6' }}; --status-color: {{ $status['list_color'] ?: '#111827' }};">
-                                    <div class="dashboard-status-content">
-                                        <span class="dashboard-status-marker"></span>
-                                        <span>{{ $status['label'] }}</span>
-                                    </div>
-                                    <div class="dashboard-status-count">
-                                        <strong>{{ $statusCounts[$key] ?? 0 }}</strong>
-                                    </div>
-                                </div>
-                            @endforeach
+                    <div class="card-body d-flex justify-content-center align-items-center" style="padding: 12px;">
+                        @if (count($currentStatusChartData) > 0)
+                            <div style="width: 100%; max-width: 380px; margin: 0 auto;">
+                                <canvas id="enquiryCurrentStatusChart" style=""></canvas>
+                            </div>
+                        @else
+                            <div class="d-flex justify-content-center align-items-center" style="">
+                                <p class="text-muted mb-0">No Enquiry Data Available</p>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endcan
+
+        @can('view_enquiries_by_milestone')
+            <div class="col-md-6 d-flex">
+                <div class="card w-100">
+                    <div class="card-header  dashboard-section-header">
+                        <h6>
+                            Enquiries By Milestone 
+                        </h6>
+                    </div>
+                    <div class="card-body d-flex justify-content-center align-items-center" style="padding: 12px;">
+                        <div style="width: 100%; max-width: 380px; margin: 0 auto;">
+                            <canvas id="enquiryStatusChart" style=""></canvas>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
-    @endcan
+        @endcan
+    </div>
 
     <!-- Month-Year Filter -->
         @php
@@ -198,7 +274,7 @@
                             Enquiries by Source Chart
                         </h6>
                     </div>
-                    <div class="card-body d-flex justify-content-center align-items-center">
+                    <div class="card-body d-flex justify-content-center align-items-center" style="padding: 12px;">
                         @if (count($filteredSourceNames) > 0)
                             <canvas id="enquirySourcePieChart" style="max-height: 400px;"></canvas>
                         @else
@@ -241,20 +317,7 @@
             </div>
         @endcan
     
-        @can('view_enquiries_by_milestone')
-            <div class="col-md-12 d-flex">
-                <div class="card w-100">
-                    <div class="card-header  dashboard-section-header">
-                        <h6>
-                            Enquiries By Milestone 
-                        </h6>
-                    </div>
-                    <div class="card-body">
-                        <canvas id="enquiryStatusChart" style="max-height: 400px;min-height: 400px;"></canvas>
-                    </div>
-                </div>
-            </div>
-        @endcan
+       
     </div>
 
     @can('view_enquiries_total')
@@ -342,7 +405,7 @@
 <style>
     .dashboard-overview-row,
     .dashboard-status-row {
-        margin-bottom: 18px;
+        /* margin-bottom: 18px; */
     }
 
     .dashboard-overview-card,
@@ -467,128 +530,111 @@
 
     .dashboard-metrics-grid {
         display: grid;
-        gap: 14px;
-        grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+        gap: 16px;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     }
 
     .dashboard-metric-card {
-        align-items: center;
         background: #ffffff;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        display: flex;
-        gap: 14px;
-        min-height: 112px;
+        border: 1px solid #f1f5f9;
+        border-radius: 12px;
+        padding: 6px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.04);
+        min-height: 110px;
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
         overflow: hidden;
-        padding: 18px;
-        position: relative;
-        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        display: block;
+        text-decoration: none !important;
     }
 
-    .dashboard-metric-card::before {
-        bottom: 0;
-        content: "";
-        left: 0;
-        position: absolute;
-        top: 0;
-        width: 4px;
-    }
-
+    .dashboard-metric-card::before,
     .dashboard-metric-card::after {
         content: none;
     }
 
-    .dashboard-metric-card:hover,
+    .dashboard-metric-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+        text-decoration: none !important;
+    }
+
     .dashboard-status-tile:hover {
         border-color: #cbd5e1;
         box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
     }
 
-    .dashboard-metric-icon {
-        align-items: center;
+    .dashboard-metric-inner {
         border-radius: 8px;
+        padding: 16px 20px;
         display: flex;
-        flex: 0 0 46px;
-        height: 46px;
-        justify-content: center;
-        position: relative;
-        width: 46px;
-        z-index: 1;
+        align-items: center;
+        gap: 16px;
+        height: 100%;
     }
 
-    .dashboard-metric-icon i {
-        font-size: 19px;
+    .dashboard-metric-customers-inner {
+        background: #e8f7ff;
+    }
+
+    .dashboard-metric-enquiries-inner {
+        background: #e6f9f0;
+    }
+
+    .dashboard-metric-data-inner {
+        background: #f0ebff;
+    }
+
+    .dashboard-metric-followups-inner {
+        background: #ffece3;
+    }
+
+    .dashboard-metric-projects-inner {
+        background: #e3fbf5;
+    }
+
+    .dashboard-metric-icon-wrap {
+        width: 52px;
+        height: 52px;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .dashboard-metric-3d-icon {
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+        mix-blend-mode: multiply;
     }
 
     .dashboard-metric-copy {
         min-width: 0;
         position: relative;
         z-index: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
     }
 
-    .dashboard-metric-copy span,
-    .dashboard-status-content span {
-        color: #6b7280;
+    .dashboard-metric-title {
+        color: #4a5568;
         display: block;
-        font-size: 13px;
+        font-size: 13.5px;
         font-weight: 600;
         letter-spacing: 0;
-        line-height: 1.3;
+        line-height: 1.25;
+        margin: 0;
     }
 
-    .dashboard-metric-copy strong {
-        color: #111827;
+    .dashboard-metric-value {
+        color: #4f46e5;
         display: block;
-        font-size: 26px;
+        font-size: 30px;
         font-weight: 700;
         letter-spacing: 0;
         line-height: 1;
-        margin-top: 8px;
-    }
-
-    .dashboard-metric-customers::before {
-        background: #0f766e;
-    }
-
-    .dashboard-metric-enquiries::before {
-        background: #2563eb;
-    }
-
-    .dashboard-metric-data::before {
-        background: #9333ea;
-    }
-
-    .dashboard-metric-followups::before {
-        background: #f59e0b;
-    }
-
-    .dashboard-metric-projects::before {
-        background: #0f172a;
-    }
-
-    .dashboard-metric-customers .dashboard-metric-icon {
-        background: #d1fae5;
-        color: #0f766e;
-    }
-
-    .dashboard-metric-enquiries .dashboard-metric-icon {
-        background: #dbeafe;
-        color: #1d4ed8;
-    }
-
-    .dashboard-metric-data .dashboard-metric-icon {
-        background: #f3e8ff;
-        color: #7e22ce;
-    }
-
-    .dashboard-metric-followups .dashboard-metric-icon {
-        background: #fef3c7;
-        color: #b45309;
-    }
-
-    .dashboard-metric-projects .dashboard-metric-icon {
-        background: #e2e8f0;
-        color: #0f172a;
+        margin-top: 4px;
     }
 
     .dashboard-status-content span {
@@ -868,8 +914,60 @@
             return colors;
         }
 
-        // In your script
         document.addEventListener('DOMContentLoaded', function () {
+
+            const canvascurrentStatus = document.getElementById('enquiryCurrentStatusChart'); 
+            if (canvascurrentStatus) { 
+                const ctx = canvascurrentStatus.getContext('2d');
+                if (ctx) {
+                    const currentStatusLabels = {!! json_encode(array_column($currentStatusChartData ?? [], 'label')) !!};
+                    const currentStatusData = {!! json_encode(array_column($currentStatusChartData ?? [], 'value')) !!};
+                    const currentStatusBgs = {!! json_encode(array_column($currentStatusChartData ?? [], 'bg')) !!};
+                    const currentStatusTextColors = {!! json_encode(array_column($currentStatusChartData ?? [], 'color')) !!};
+
+                    new Chart(ctx, {
+                        type: 'doughnut',
+                        data: {
+                            labels: currentStatusLabels,
+                            datasets: [{
+                                data: currentStatusData,
+                                backgroundColor: currentStatusBgs,
+                                borderColor: '#fff',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            plugins: {
+                                legend: {
+                                    position: 'bottom',
+                                },
+                                datalabels: {
+                                    color: (context) => {
+                                        const index = context.dataIndex;
+                                        return currentStatusTextColors[index] || '#111827';
+                                    },
+                                    font: {
+                                        weight: 'bold',
+                                        size: 12
+                                    },
+                                    formatter: (value) => {
+                                        return value;
+                                    }
+                                },
+                                tooltip: {
+                                    callbacks: {
+                                        label: function(context) {
+                                            return context.label + ': ' + context.raw;
+                                        }
+                                    }
+                                }
+                            },
+                        },
+                        plugins: [ChartDataLabels]
+                    });
+                }
+            }
 
             const canvasenquirySource = document.getElementById('enquirySourcePieChart'); 
             if (canvasenquirySource) { 
@@ -1043,8 +1141,30 @@
                                 text: 'Number of Enquiries'
                             }
                         }
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            position: 'bottom',
+                        },
+                        tooltip: {
+                            enabled: true
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#475569',
+                            font: {
+                                weight: 'bold',
+                                size: 9
+                            },
+                            formatter: (value) => {
+                                return value === 0 ? '' : value; // hide 0 values to avoid clutter
+                            }
+                        }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
         
@@ -1129,7 +1249,7 @@
                                     size: 12
                                 }
                             }
-                        }
+                        },
                     },
                     plugins: [ChartDataLabels]
                 });
@@ -1184,7 +1304,8 @@
                         data: projectTypeCounts, // Enquiry counts for each project type
                         backgroundColor: colors.slice(0, projectTypeCounts.length), // Limit the number of colors to match data count
                         borderColor: colors.slice(0, projectTypeCounts.length),
-                        borderWidth: 1
+                        borderWidth: 1,
+                        maxBarThickness: 30
                     }]
                 },
                 options: {
@@ -1199,13 +1320,26 @@
                     },
                     plugins: {
                         legend: {
-                            position: 'top'
+                            position: 'bottom',
                         },
                         tooltip: {
                             enabled: true
+                        },
+                        datalabels: {
+                            anchor: 'end',
+                            align: 'top',
+                            color: '#475569',
+                            font: {
+                                weight: 'bold',
+                                size: 11
+                            },
+                            formatter: (value) => {
+                                return value;
+                            }
                         }
                     }
-                }
+                },
+                plugins: [ChartDataLabels]
             });
         }
     </script>

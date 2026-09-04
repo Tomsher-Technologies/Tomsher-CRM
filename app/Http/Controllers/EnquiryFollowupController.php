@@ -38,6 +38,15 @@ class EnquiryFollowupController extends Controller
         $date_range = $request->has('date_range') ? $request->date_range : '';
         $query = EnquiryFollowup::query()->with(['enquiry.customer']);
 
+        if($request->filled('source_mode')){
+            $source_mode = $request->source_mode;
+            $query->when($source_mode, function ($q) use ($source_mode) {
+                    $q->whereHas('enquiry', function ($enquiryQ) use ($source_mode) {
+                        $enquiryQ->where('source_mode', $source_mode);
+                    });
+                });
+        }
+
         if ($request->filled('enquiry_id')) {
             $query->where('enquiry_id', $request->enquiry_id);
         }
@@ -329,6 +338,13 @@ class EnquiryFollowupController extends Controller
         }
 
         flash( 'Follow-up updated successfully.')->success();
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Follow-up updated successfully.',
+                'status' => $request->status
+            ]);
+        }
         if($request->status == 'rescheduled'){
             return redirect()->route('followups.create',['enquiry_id' => $request->enquiry_id]);
         }else{

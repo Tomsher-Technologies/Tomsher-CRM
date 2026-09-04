@@ -413,9 +413,18 @@ class EnquiryController extends Controller
         $request->session()->put('previous_section', 'enquiry_view');
         $request->session()->put('enquiry_view_last_url', url()->full());
         $request->session()->put('enquiry_scopes_last_url', url()->full());
+        $request->session()->put('followups_last_url', url()->full());
 
         $enquiry = Enquiry::with(['followups' => function($query) {
-            $query->orderBy('followup_time', 'asc');
+            $query->orderByRaw("
+                                COALESCE(
+                                    CASE 
+                                        WHEN followup_type = 'meeting' THEN followup_from
+                                        ELSE followup_time
+                                    END,
+                                    created_at
+                                ) ASC
+                            ");
         }])->findOrFail($enquiry->id);
         return view('backend.enquiries.show', compact('enquiry'));
     }

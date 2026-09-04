@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Enquiry;
 use App\Models\Technologies;
 use App\Models\ProjectStatusHistory;
+use Carbon\Carbon;
 
 class ProjectController extends Controller
 {
@@ -20,7 +21,21 @@ class ProjectController extends Controller
             $customers = Customer::where('is_active', 1)->whereIn('sales_person', auth()->user()->getAllowedUserIds())->orderBy('company_name', 'asc')->get();
         }
 
+        $from_date = $to_date ='';
+        $date_range = $request->filled('date_range') ? $request->date_range : now()->startOfMonth()->format('d-m-Y'). ' to ' .now()->endOfMonth()->format('d-m-Y');
+
+        if (!empty($date_range) && str_contains($date_range, ' to ')) {
+            [$from_date, $to_date] = array_map('trim', explode(' to ', $date_range));
+        }
+
         $query = Project::with('customer');
+
+        if (!empty($from_date) && !empty($to_date)) {
+            $query->whereBetween('created_at', [
+                Carbon::createFromFormat('d-m-Y', $from_date)->startOfDay(),
+                Carbon::createFromFormat('d-m-Y', $to_date)->endOfDay(),
+            ]);
+        }
 
         if (auth()->user()->user_type !== 'admin') {
             $allowedIds = auth()->user()->getAllowedUserIds();
@@ -28,6 +43,18 @@ class ProjectController extends Controller
                 $q->whereIn('sales_person', $allowedIds);
             });
         }
+
+
+        $source_mode = $request->input('source_mode') ?? NULL;
+
+        if($source_mode){
+            $query->when($source_mode, function ($q) use ($source_mode) {
+                    $q->whereHas('enquiry', function ($q2) use ($source_mode) {
+                        $q2->where('source_mode', $source_mode);
+                    });
+                });
+        }
+        
 
         if ($request->filled('customer_id')) {
             $query->where('customer_id', $request->customer_id);
