@@ -82,6 +82,7 @@
                         <th class="text-center">#</th>
                         <th style="width:20%;">Project Name</th>
                         <th>Customer</th>
+                        <th class="text-center">Sales Person</th>
                         <th class="text-center">Enquiry</th>
                         <th class="text-center">Project Status</th>
                         <th class="text-center">Internal Deadline</th>
@@ -98,6 +99,7 @@
                                 </td>
                                 <td>{{ $pro->project_name ?? '' }}</td>
                                 <td>{{ $pro->customer->company_name . ' [' . $pro->customer->customer_code . ']' }}</td>
+                                <td class="text-center">{{ $pro->customer->sale_person->name ?? 'N/A' }}</td>
                                 <td class="text-center">
                                     @if ($pro->enquiry != NULL)
                                         <a href="{{ route('enquiries.show', $pro->enquiry) }}" target="_blank">{{ $pro->enquiry->enquiry_code ?? '' }}</a>

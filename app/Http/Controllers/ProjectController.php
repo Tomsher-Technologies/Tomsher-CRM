@@ -28,7 +28,7 @@ class ProjectController extends Controller
             [$from_date, $to_date] = array_map('trim', explode(' to ', $date_range));
         }
 
-        $query = Project::with('customer');
+        $query = Project::with(['customer.sale_person', 'enquiry']);
 
         if (!empty($from_date) && !empty($to_date)) {
             $query->whereBetween('created_at', [
@@ -100,7 +100,7 @@ class ProjectController extends Controller
 
     public function show($id)
     {
-        $project = Project::with(['customer', 'payments'])->findOrFail($id);
+        $project = Project::with(['customer.sale_person', 'payments', 'enquiry'])->findOrFail($id);
         if (auth()->user()->user_type !== 'admin') {
             if (!in_array($project->customer->sales_person, auth()->user()->getAllowedUserIds())) {
                 abort(403);
