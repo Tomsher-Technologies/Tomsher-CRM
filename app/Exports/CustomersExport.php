@@ -57,6 +57,14 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             $filters[] = "Status: " . ($request->is_active == '1' ? 'Active' : 'Inactive');
         }
 
+        if ($request->filled('ntc')) {
+            $filters[] = "New To Company: " . ($request->ntc == '1' ? 'Yes' : 'No');
+        }
+
+        if ($request->filled('date_range')) {
+            $filters[] = "Created Date: " . $request->date_range;
+        }
+
         return count($filters) > 0 ? "Filters: " . implode('  •  ', $filters) : "Filters: All Customers";
     }
 
@@ -95,12 +103,34 @@ class CustomersExport implements FromCollection, WithHeadings, WithStyles, WithE
             $query->whereIn('industry_id', $childIds);
         }
 
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $query->whereIn('sales_person', $allowedIds);
+        }
+
         if ($request->filled('user_id')) {
-            $query->where('sales_person', $request->user_id);
+            $userId = $request->user_id;
+            if (auth()->user()->user_type === 'admin' || in_array($userId, auth()->user()->getAllowedUserIds())) {
+                $query->where('sales_person', $userId);
+            } else {
+                $query->where('sales_person', 0);
+            }
         }
 
         if ($request->filled('is_active')) {
             $query->where('is_active', $request->is_active);
+        }
+
+        if ($request->filled('ntc')) {
+            $query->where('ntc', $request->ntc);
+        }
+
+        if ($request->filled('date_range')) {
+            $date = $request->date_range;
+            [$fromRaw, $toRaw] = explode(" to ", $date);
+            $from = Carbon::createFromFormat('d-m-Y', trim($fromRaw))->startOfDay();
+            $to   = Carbon::createFromFormat('d-m-Y', trim($toRaw))->endOfDay();
+            $query->whereBetween('created_at', [$from, $to]);
         }
 
         $this->customers = $query->get();

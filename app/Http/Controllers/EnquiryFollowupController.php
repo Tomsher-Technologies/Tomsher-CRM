@@ -30,9 +30,22 @@ class EnquiryFollowupController extends Controller
         $request->session()->put('followups_last_url', url()->full());
         $request->session()->put('previous_section', 'followup');
         // DB::enableQueryLog();
-        $users = User::orderBy('name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::orderBy('name', 'asc')->get();
+        } else {
+            $users = User::whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         $date_range = $request->has('date_range') ? $request->date_range : '';
-        $query = EnquiryFollowup::query()->with(['enquiry.customer']);
+        $query = EnquiryFollowup::query()->with(['enquiry.customer', 'added_by', 'participants']);
+
+        if ($request->filled('source_mode')) {
+            $sourceModes = array_filter((array) $request->input('source_mode'));
+            if (!empty($sourceModes)) {
+                $query->whereHas('enquiry', function ($enquiryQ) use ($sourceModes) {
+                    $enquiryQ->whereIn('source_mode', $sourceModes);
+                });
+            }
+        }
 
         if ($request->filled('enquiry_id')) {
             $query->where('enquiry_id', $request->enquiry_id);
@@ -46,25 +59,40 @@ class EnquiryFollowupController extends Controller
             $query->where('sub_type', $request->sub_type);
         }
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $statuses = array_filter((array) $request->input('status'));
+            if (!empty($statuses)) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
         if ($request->filled('created_by')) {
             $userId = $request->created_by;
+            if (auth()->user()->user_type !== 'admin') {
+                $allowedIds = auth()->user()->getAllowedUserIds();
+                if (!in_array($userId, $allowedIds)) {
+                    $userId = 0;
+                }
+            }
             $query->where(function ($q) use ($userId) {
                         $q->where('created_by', $userId)
                         ->orWhereHas('participants', function ($subQ) use ($userId) {
                             $subQ->where('user_id', $userId);
+                        })
+                        ->orWhereHas('enquiry', function ($enquiryQ) use ($userId) {
+                            $enquiryQ->where('owner_id', $userId);
                         });
                     });
         }
 
-        if (!auth()->user()->can('view_all_users_followups')) {
-            $userId = auth()->user()->id;
-            $query->where(function ($q) use ($userId) {
-                        $q->where('created_by', $userId)
-                        ->orWhereHas('participants', function ($subQ) use ($userId) {
-                            $subQ->where('user_id', $userId);
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $query->where(function ($q) use ($allowedIds) {
+                        $q->whereIn('created_by', $allowedIds)
+                        ->orWhereHas('participants', function ($subQ) use ($allowedIds) {
+                            $subQ->whereIn('user_id', $allowedIds);
+                        })
+                        ->orWhereHas('enquiry', function ($enquiryQ) use ($allowedIds) {
+                            $enquiryQ->whereIn('owner_id', $allowedIds);
                         });
                     });
         } 
@@ -102,10 +130,19 @@ class EnquiryFollowupController extends Controller
                             ")->paginate(15);
         // dd(DB::getQueryLog());
         $allQuery = Enquiry::with('customer');
-        if (!auth()->user()->can('view_all_users_followups')) {
-            $allQuery->where('owner_id', auth()->user()->id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $allQuery->where(function ($q) use ($allowedIds) {
+                $q->whereIn('owner_id', $allowedIds)
+                  ->orWhereHas('followups', function ($fQ) use ($allowedIds) {
+                      $fQ->whereIn('created_by', $allowedIds)
+                         ->orWhereHas('participants', function ($pQ) use ($allowedIds) {
+                             $pQ->whereIn('user_id', $allowedIds);
+                         });
+                  });
+            });
         } 
-        $enquiries = $allQuery->get();
+        $enquiries = $allQuery->orderBy('id', 'desc')->get();
 
         return view('backend.followups.index', compact('followups', 'enquiries','date_range','users'));
     }
@@ -113,12 +150,16 @@ class EnquiryFollowupController extends Controller
     public function create($enquiry_id = NULL)
     {
         $allQuery = Enquiry::with('customer');
-        if (!auth()->user()->can('view_all_users_followups')) {
-            $allQuery->where('owner_id', auth()->user()->id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allQuery->whereIn('owner_id', auth()->user()->getAllowedUserIds());
         } 
         $enquiries = $allQuery->get();
 
-        $users = User::where('banned',0)->whereNotIn('id', [auth()->user()->id])->orderBy('name','asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned',0)->whereNotIn('id', [auth()->user()->id])->orderBy('name','asc')->get();
+        } else {
+            $users = User::where('banned',0)->whereIn('id', auth()->user()->getAllowedUserIds())->whereNotIn('id', [auth()->user()->id])->orderBy('name','asc')->get();
+        }
 
         return view('backend.followups.create', compact('enquiries','enquiry_id','users'));
     }
@@ -207,18 +248,31 @@ class EnquiryFollowupController extends Controller
     public function edit($id)
     {
         $followup = EnquiryFollowup::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $hasAccess = in_array($followup->created_by, $allowedIds) ||
+                         $followup->participants()->whereIn('user_id', $allowedIds)->exists() ||
+                         ($followup->enquiry && in_array($followup->enquiry->owner_id, $allowedIds));
+            if (!$hasAccess) {
+                abort(403);
+            }
+        }
 
         $followup->load('participants'); // eager load participants
         $participantIds = $followup->participants->pluck('id')->toArray();
         $mainParticipantId = $followup->participants->firstWhere('pivot.is_main', 1)?->id;
 
         $allQuery = Enquiry::with('customer');
-        if (!auth()->user()->can('view_all_users_followups')) {
-            $allQuery->where('owner_id', auth()->user()->id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allQuery->whereIn('owner_id', auth()->user()->getAllowedUserIds());
         } 
         $enquiries = $allQuery->get();
 
-        $users = User::where('banned',0)->whereNotIn('id', [auth()->user()->id])->orderBy('name','asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned',0)->whereNotIn('id', [auth()->user()->id])->orderBy('name','asc')->get();
+        } else {
+            $users = User::where('banned',0)->whereIn('id', auth()->user()->getAllowedUserIds())->whereNotIn('id', [auth()->user()->id])->orderBy('name','asc')->get();
+        }
         return view('backend.followups.edit', compact('followup', 'enquiries','participantIds','mainParticipantId','users'));
     }
 
@@ -255,6 +309,15 @@ class EnquiryFollowupController extends Controller
         }
 
         $followup = EnquiryFollowup::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $hasAccess = in_array($followup->created_by, $allowedIds) ||
+                         $followup->participants()->whereIn('user_id', $allowedIds)->exists() ||
+                         ($followup->enquiry && in_array($followup->enquiry->owner_id, $allowedIds));
+            if (!$hasAccess) {
+                abort(403);
+            }
+        }
 
         $enquiry = Enquiry::find($request->enquiry_id);
 
@@ -293,6 +356,13 @@ class EnquiryFollowupController extends Controller
         }
 
         flash( 'Follow-up updated successfully.')->success();
+        if ($request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Follow-up updated successfully.',
+                'status' => $request->status
+            ]);
+        }
         if($request->status == 'rescheduled'){
             return redirect()->route('followups.create',['enquiry_id' => $request->enquiry_id]);
         }else{
@@ -304,14 +374,21 @@ class EnquiryFollowupController extends Controller
     public function calendar()
     {
         $allQuery = Enquiry::with('customer');
-        if (!auth()->user()->can('view_all_users_followups')) {
-            $allQuery->where('owner_id', auth()->user()->id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allQuery->whereIn('owner_id', auth()->user()->getAllowedUserIds());
         } 
         $enquiries = $allQuery->orderBy('id', 'desc')->get();
 
-        $users = User::orderBy('name', 'asc')->get();
+        $subordinateIds = auth()->user()->getSubordinateIds();
+        $subordinates = User::whereIn('id', $subordinateIds)->orderBy('name', 'asc')->get();
 
-        return view('backend.followups.calendar', compact('enquiries','users'));
+        if (auth()->user()->user_type === 'admin' || auth()->user()->bypass_hierarchy == 1) {
+            $users = User::orderBy('name', 'asc')->get();
+        } else {
+            $users = User::whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
+
+        return view('backend.followups.calendar', compact('enquiries', 'users', 'subordinates'));
     }
 
     public function calendarEvents(Request $request)
@@ -326,34 +403,67 @@ class EnquiryFollowupController extends Controller
             $query->where('followup_type', $request->type);
         }
 
-        if ($request->filled('created_by')) {
-            $userId = $request->created_by;
-            $query->where(function ($q) use ($userId) {
-                        $q->where('created_by', $userId)
-                        ->orWhereHas('participants', function ($subQ) use ($userId) {
-                            $subQ->where('user_id', $userId);
-                        });
-                    });
+        $filterUser = $request->input('created_by', 'mine');
+        if (empty($filterUser)) {
+            $filterUser = 'mine';
         }
-        
-        if (!auth()->user()->can('view_all_users_followups')) {
-            $userId = auth()->user()->id;
-            // $query->where(function ($q) use ($userId) {
-            //             $q->where('created_by', $userId)
-            //             ->orWhereHas('participants', function ($subQ) use ($userId) {
-            //                 $subQ->where('user_id', $userId);
-            //             });
-            //         });
 
+        $user = auth()->user();
+        $allowedIds = $user->getAllowedUserIds();
+        $subordinateIds = $user->getSubordinateIds();
+
+        if ($filterUser === 'mine') {
+            $userId = $user->id;
             $query->where(function ($q) use ($userId) {
-                $q->where('followup_type', 'meeting') // show all meetings
-                ->orWhere(function ($q2) use ($userId) {
-                    $q2->where('created_by', $userId)
-                        ->orWhereHas('participants', function ($subQ) use ($userId) {
-                            $subQ->where('user_id', $userId);
-                        });
-                });
+                $q->where('created_by', $userId)
+                  ->orWhereHas('participants', function ($subQ) use ($userId) {
+                      $subQ->where('user_id', $userId);
+                  })
+                  ->orWhereHas('enquiry', function ($enquiryQ) use ($userId) {
+                      $enquiryQ->where('owner_id', $userId);
+                  });
             });
+        } elseif ($filterUser === 'subordinates') {
+            if (!empty($subordinateIds)) {
+                $query->where(function ($q) use ($subordinateIds) {
+                    $q->whereIn('created_by', $subordinateIds)
+                      ->orWhereHas('participants', function ($subQ) use ($subordinateIds) {
+                          $subQ->whereIn('user_id', $subordinateIds);
+                      })
+                      ->orWhereHas('enquiry', function ($enquiryQ) use ($subordinateIds) {
+                          $enquiryQ->whereIn('owner_id', $subordinateIds);
+                      });
+                });
+            } else {
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($filterUser === 'all') {
+            if ($user->user_type !== 'admin') {
+                $query->where(function ($q) use ($allowedIds) {
+                    $q->whereIn('created_by', $allowedIds)
+                       ->orWhereHas('participants', function ($subQ) use ($allowedIds) {
+                           $subQ->whereIn('user_id', $allowedIds);
+                       })
+                       ->orWhereHas('enquiry', function ($enquiryQ) use ($allowedIds) {
+                           $enquiryQ->whereIn('owner_id', $allowedIds);
+                       });
+                });
+            }
+        } else {
+            $targetUserId = (int) $filterUser;
+            if ($user->user_type !== 'admin' && !in_array($targetUserId, $allowedIds)) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->where(function ($q) use ($targetUserId) {
+                    $q->where('created_by', $targetUserId)
+                      ->orWhereHas('participants', function ($subQ) use ($targetUserId) {
+                          $subQ->where('user_id', $targetUserId);
+                      })
+                      ->orWhereHas('enquiry', function ($enquiryQ) use ($targetUserId) {
+                          $enquiryQ->where('owner_id', $targetUserId);
+                      });
+                });
+            }
         } 
     
         if ($request->filled('status')) {
@@ -443,6 +553,16 @@ class EnquiryFollowupController extends Controller
         ]);
 
         $followup = EnquiryFollowup::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $hasAccess = in_array($followup->created_by, $allowedIds) ||
+                         $followup->participants()->whereIn('user_id', $allowedIds)->exists() ||
+                         ($followup->enquiry && in_array($followup->enquiry->owner_id, $allowedIds));
+            if (!$hasAccess) {
+                return response()->json(['error' => 'Unauthorized access'], 403);
+            }
+        }
+
         $followup->status = $request->status;
         $followup->post_comment = $request->post_comment ?? NULL;
         $followup->save();

@@ -59,8 +59,18 @@ class DataController extends Controller
             $query->where('source_id',  $request->source);
         }
 
+        if (auth()->user()->user_type !== 'admin') {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $query->whereIn('sales_person', $allowedIds);
+        }
+
         if ($request->filled('user_id')) {
-            $query->where('sales_person', $request->user_id);
+            $userId = $request->user_id;
+            if (auth()->user()->user_type === 'admin' || in_array($userId, auth()->user()->getAllowedUserIds())) {
+                $query->where('sales_person', $userId);
+            } else {
+                $query->where('sales_person', 0);
+            }
         }
 
         // Filter by Active Status (Assuming you have a boolean `is_active`)
@@ -120,7 +130,11 @@ class DataController extends Controller
         $data = $query->with('contacts')->paginate(20);
 
         $sources = EnquirySource::where('status', 1)->orderBy('name', 'asc')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned', 0)->orderBy('name', 'asc')->get();
+        } else {
+            $users = User::where('banned', 0)->whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         return view('backend.data.index', compact('data','users','sources'));
     }
 
@@ -135,7 +149,11 @@ class DataController extends Controller
         $countries = Country::orderBy('name','ASC')->get();
         $emirates = Emirate::orderBy('name','ASC')->get();
         $sources = EnquirySource::where('status', 1)->orderBy('name', 'asc')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned', 0)->orderBy('name', 'asc')->get();
+        } else {
+            $users = User::where('banned', 0)->whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         $status = DataStatus::where('is_active', 1)->orderBy('sort_order', 'asc')->get();
         return view('backend.data.create', compact('dataCode','industries','countries','emirates','users','sources','status'));
     }
@@ -197,19 +215,30 @@ class DataController extends Controller
     public function show($id)
     {
         $data = Data::with(['contacts', 'industry'])->findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         return view('backend.data.show', compact('data'));
     }
 
     public function edit($id)
     {
         $data = Data::findOrFail($id);
-        if (auth()->user()->cannot('edit_all_data') && auth()->id() !== $data->sales_person) {
-            abort(403, 'Unauthorized access');
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403, 'Unauthorized access');
+            }
         }
         $industries = Industry::where('status',1)->orderBy('name','ASC')->get();
         $countries = Country::orderBy('name','ASC')->get();
         $emirates = Emirate::orderBy('name','ASC')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('banned', 0)->orderBy('name', 'asc')->get();
+        } else {
+            $users = User::where('banned', 0)->whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
+        }
         $sources = EnquirySource::where('status', 1)->orderBy('name', 'asc')->get();
         $status = DataStatus::where('is_active', 1)->orderBy('sort_order', 'asc')->get();
         return view('backend.data.edit', compact('data', 'industries','countries','emirates','users','sources','status'));
@@ -223,11 +252,13 @@ class DataController extends Controller
             'user_id'          => 'required'
         ]);
 
-        DB::transaction(function () use ($request, $validated, $id) {
+        DB::transaction(function () use ($request, $id) {
             $data = Data::findOrFail($id);
 
-            if (auth()->user()->cannot('edit_all_data') && auth()->id() !== $data->sales_person) {
-                abort(403, 'Unauthorized access');
+            if (auth()->user()->user_type !== 'admin') {
+                if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                    abort(403, 'Unauthorized access');
+                }
             }
 
             $old_sale_person = $data->sales_person;
@@ -281,6 +312,11 @@ class DataController extends Controller
         ]);
 
         $data = Data::findOrFail($request->data_id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
 
         $data->update([
             'status' => $request->status,
@@ -387,6 +423,13 @@ class DataController extends Controller
 
     public function getStatusData($id, $status)
     {
+        $data = Data::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized access'], 403);
+            }
+        }
+
         $statusData = DataStatusHistory::where('data_id', $id)->where('status', $status)->orderBy('id','desc')->first();
         return response()->json([
             'comment' => $statusData->comment ?? '',
@@ -425,6 +468,11 @@ class DataController extends Controller
     public function timeline($id)
     {
         $data = Data::with(['statusHistories.changedBy'])->findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         return view('backend.data.timeline', compact('data'));
     }
 

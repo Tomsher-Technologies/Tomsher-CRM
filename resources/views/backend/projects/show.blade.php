@@ -23,6 +23,9 @@
                 <strong>Customer:</strong> {{ $project->customer->customer_code }} - {{ $project->customer->company_name }}
             </div>
             <div class="col-md-6 mt-3">
+                <strong>Sales Person:</strong> {{ $project->customer->sale_person->name ?? 'N/A' }}
+            </div>
+            <div class="col-md-6 mt-3">
                 <strong>Enquiry:</strong> {{ $project->enquiry ? $project->enquiry->enquiry_code : 'N/A' }}
             </div>
             <div class="col-md-6 mt-3">
