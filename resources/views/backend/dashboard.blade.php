@@ -158,7 +158,7 @@
                                         <img src="{{ asset('assets/img/3d_followups.png') }}" class="dashboard-metric-3d-icon" alt="Total Followups">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">Total Followups</span>
+                                        <span class="dashboard-metric-title">Pending Followups</span>
                                         <strong class="dashboard-metric-value">{{ $totalFollowups }}</strong>
                                     </div>
                                 </div>
