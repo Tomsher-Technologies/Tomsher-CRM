@@ -447,7 +447,7 @@ class EnquiryController extends Controller
     {
         $request->validate([
             'enquiry_id' => 'required|exists:enquiries,id',
-            'status' => 'required|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,signed_payment_pending,ongoing_discussion,preparing_scope,pipeline,ready_to_start',
+            'status' => 'required|in:new_enquiry,started_discussion,proposal_submitted,project_approved,project_rejected,not_interested,not_responding,invalid_spam,signed_payment_pending,ongoing_discussion,preparing_scope,pipeline,ready_to_sign',
             'status_date' => 'required|date',
             'comment' => 'nullable|string',
             // 'submitted_cost' => 'required_if:status,proposal_submitted|nullable|numeric',
