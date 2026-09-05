@@ -25,8 +25,8 @@ class ProjectController extends Controller
             $users = User::where('banned', 0)->whereIn('id', $allowedIds)->orderBy('name', 'asc')->get();
         }
 
-        $from_date = $to_date ='';
-        $date_range = $request->filled('date_range') ? $request->date_range : now()->startOfMonth()->format('d-m-Y'). ' to ' .now()->endOfMonth()->format('d-m-Y');
+        $from_date = $to_date = '';
+        $date_range = $request->filled('date_range') ? $request->date_range : '';
 
         if (!empty($date_range) && str_contains($date_range, ' to ')) {
             [$from_date, $to_date] = array_map('trim', explode(' to ', $date_range));
