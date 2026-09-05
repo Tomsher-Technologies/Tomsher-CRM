@@ -387,10 +387,12 @@
                                 </td>
 
                                 <td class="text-center">
+                                    @can('view_detailed_enquiries')
                                     <a href="{{ route('enquiries.show', $enquiry) }}"
                                         class="btn btn-soft-warning btn-sm btn-icon btn-circle m-auto" title="View enquiry details">
                                         <i class="las la-eye" style="margin-top: 3px;"></i>
                                     </a>
+                                    @endcan
 
                                     @can('edit_enquiries')
                                         <a href="{{ route('enquiries.edit', $enquiry) }}"

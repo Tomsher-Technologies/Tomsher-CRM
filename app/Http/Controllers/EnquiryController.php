@@ -38,10 +38,16 @@ class EnquiryController extends Controller
         $request->session()->put('previous_section', 'enquiry');
         $request->session()->put('enquiry_scopes_last_url', url()->full());
 
-        $customers = Customer::orderBy('company_name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $customers = Customer::orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->orderBy('name', 'asc')->get();
+        } else {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $customers = Customer::whereIn('sales_person', $allowedIds)->orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->whereIn('id', $allowedIds)->orderBy('name', 'asc')->get();
+        }
         $sources = EnquirySource::orderBy('name', 'asc')->get();
         $projectTypes = ProjectType::orderBy('name', 'asc')->get();
-        $users = User::orderBy('name', 'asc')->get();
 
         $date = $request->enquiry_date;
 
@@ -52,7 +58,7 @@ class EnquiryController extends Controller
         }
     
         if ($request->filled('enquiry_source_id')) {
-            $sourceIds = array_filter((array) $request->input('enquiry_source_id'));
+            $sourceIds = array_filter((array) $request->input('enquiry_source_id'), fn($val) => $val !== null && $val !== '');
             if (!empty($sourceIds)) {
                 $query->whereIn('enquiry_source_id', $sourceIds);
             }
@@ -140,14 +146,17 @@ class EnquiryController extends Controller
             }
         }
         
-        if ($date != null) {
-            $query->whereDate('enquiry_date', '>=', date('Y-m-d', strtotime(explode(" to ", $date)[0])))->whereDate('enquiry_date', '<=', date('Y-m-d', strtotime(explode(" to ", $date)[1])));
+        if (!empty($date) && str_contains($date, ' to ')) {
+            [$fromRaw, $toRaw] = array_map('trim', explode(' to ', $date));
+            $from = Carbon::createFromFormat('d-m-Y', $fromRaw)->startOfDay();
+            $to   = Carbon::createFromFormat('d-m-Y', $toRaw)->endOfDay();
+            $query->whereBetween('enquiry_date', [$from, $to]);
         }
 
         
 
-        if (!auth()->user()->can('view_all_users_enquiries')) {
-            $query->where('owner_id', auth()->user()->id);
+        if (auth()->user()->user_type !== 'admin') {
+            $query->whereIn('owner_id', auth()->user()->getAllowedUserIds());
         } 
 
         $sortBy = $request->get('sort_by');
@@ -205,10 +214,16 @@ class EnquiryController extends Controller
     public function create(Request $request)
     {
         $customer_id = $request->customer_id ?? '';
-        $customers = Customer::where('is_active', 1)->orderBy('company_name', 'asc')->get();
+        if (auth()->user()->user_type === 'admin') {
+            $customers = Customer::where('is_active', 1)->orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->orderBy('name', 'asc')->get();
+        } else {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $customers = Customer::where('is_active', 1)->whereIn('sales_person', $allowedIds)->orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->whereIn('id', $allowedIds)->orderBy('name', 'asc')->get();
+        }
         $sources = EnquirySource::where('status', 1)->orderBy('name', 'asc')->get();
         $projectTypes = ProjectType::where('status', 1)->orderBy('name', 'asc')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
         return view('backend.enquiries.create', compact('customers', 'sources', 'projectTypes','users','customer_id'));
     }
 
@@ -304,15 +319,31 @@ class EnquiryController extends Controller
 
     public function edit(Enquiry $enquiry)
     {
-        $customers = Customer::where('is_active', 1)->orderBy('company_name', 'asc')->get();
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
+        if (auth()->user()->user_type === 'admin') {
+            $customers = Customer::where('is_active', 1)->orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->orderBy('name', 'asc')->get();
+        } else {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $customers = Customer::where('is_active', 1)->whereIn('sales_person', $allowedIds)->orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->whereIn('id', $allowedIds)->orderBy('name', 'asc')->get();
+        }
         $sources = EnquirySource::where('status', 1)->orderBy('name', 'asc')->get();
         $projectTypes = ProjectType::where('status', 1)->orderBy('name', 'asc')->get();
-        $users = User::where('banned',0)->orderBy('name', 'asc')->get();
         return view('backend.enquiries.edit', compact('enquiry', 'customers', 'sources', 'projectTypes','users'));
     }
 
     public function update(Request $request, Enquiry $enquiry)
     {
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         $validated = $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'enquiry_date' => 'nullable|date',
@@ -377,18 +408,37 @@ class EnquiryController extends Controller
 
     public function show(Request $request, Enquiry $enquiry)
     {
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         $request->session()->put('previous_section', 'enquiry_view');
         $request->session()->put('enquiry_view_last_url', url()->full());
         $request->session()->put('enquiry_scopes_last_url', url()->full());
+        $request->session()->put('followups_last_url', url()->full());
 
         $enquiry = Enquiry::with(['followups' => function($query) {
-            $query->orderBy('followup_time', 'asc');
+            $query->orderByRaw("
+                                COALESCE(
+                                    CASE 
+                                        WHEN followup_type = 'meeting' THEN followup_from
+                                        ELSE followup_time
+                                    END,
+                                    created_at
+                                ) ASC
+                            ");
         }])->findOrFail($enquiry->id);
         return view('backend.enquiries.show', compact('enquiry'));
     }
 
     public function destroy(Enquiry $enquiry)
     {
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         $enquiry->delete();
         return redirect()->route('enquiries.index')->with('success', 'Enquiry deleted.');
     }
@@ -408,6 +458,11 @@ class EnquiryController extends Controller
         ]);
 
         $enquiry = Enquiry::findOrFail($request->enquiry_id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($enquiry->owner_id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
 
         if($enquiry->status == 'preparing_scope' && $request->status != 'preparing_scope'){
             $scope = EnquiryScopeOfWork::where('enquiry_id', $enquiry->id)->first();
@@ -540,6 +595,13 @@ class EnquiryController extends Controller
 
     public function getProposalItems($id, $status)
     {
+        $enquiryObj = Enquiry::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($enquiryObj->owner_id, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized access'], 403);
+            }
+        }
+
         $enquiry = [];
         if($status == 'proposal_submitted' || $status == 'project_approved'){
             $enquiry = Enquiry::with(['proposalItems' => function ($query) {

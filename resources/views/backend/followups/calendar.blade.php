@@ -23,19 +23,29 @@
                     </select>
                 </div>
 
-                @can('view_all_users_followups')
-                    <div class="col-md-3">
-                        <label>Users</label>
-                        <select name="created_by" id="created_by" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
-                            <option value="">All Users</option>
-                            @foreach ($users as $user)
-                                <option value="{{ $user->id }}" {{ request('created_by') == $user->id ? 'selected' : '' }}>
-                                    {{ $user->name }}
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-                @endcan
+                <div class="col-md-3">
+                    <label>Users / Follow-ups</label>
+                    <select name="created_by" id="created_by" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
+                        <option value="mine" {{ request('created_by', 'mine') == 'mine' ? 'selected' : '' }}>My Follow-ups</option>
+                        @if(count($subordinates) > 0)
+                            <option value="subordinates" {{ request('created_by') == 'subordinates' ? 'selected' : '' }}>All Subordinates</option>
+                        @endif
+                        @if(auth()->user()->user_type === 'admin' || auth()->user()->bypass_hierarchy == 1)
+                            <option value="all" {{ request('created_by') == 'all' ? 'selected' : '' }}>All Users</option>
+                        @endif
+                        @if(count($users->where('id', '!=', auth()->id())) > 0)
+                            <optgroup label="Staff Members">
+                                @foreach ($users as $user)
+                                    @if($user->id !== auth()->id())
+                                        <option value="{{ $user->id }}" {{ request('created_by') == $user->id ? 'selected' : '' }}>
+                                            {{ $user->name }}
+                                        </option>
+                                    @endif
+                                @endforeach
+                            </optgroup>
+                        @endif
+                    </select>
+                </div>
 
                 <div class="col-md-3">
                     <label>Follow-up Type</label>
@@ -325,19 +335,23 @@
     }
 
     document.addEventListener('DOMContentLoaded', function () {
-        loadCalendar();
-
-        ['#filter-enquiry', '#filter-type', '#filter-status','#created_by'].forEach(id => {
-            document.querySelector(id).addEventListener('change', function () {
-                loadCalendar({
-                    enquiry_id: document.getElementById('filter-enquiry').value,
-                    type: document.getElementById('filter-type').value,
-                    status: document.getElementById('filter-status').value,
-                    created_by :  document.getElementById('created_by').value,
-                });
-            });
+        const getFilters = () => ({
+            enquiry_id: document.getElementById('filter-enquiry')?.value || '',
+            type: document.getElementById('filter-type')?.value || '',
+            status: document.getElementById('filter-status')?.value || '',
+            created_by: document.getElementById('created_by')?.value || 'mine',
         });
 
+        loadCalendar(getFilters());
+
+        ['#filter-enquiry', '#filter-type', '#filter-status', '#created_by'].forEach(id => {
+            const el = document.querySelector(id);
+            if (el) {
+                el.addEventListener('change', function () {
+                    loadCalendar(getFilters());
+                });
+            }
+        });
     });
 
    

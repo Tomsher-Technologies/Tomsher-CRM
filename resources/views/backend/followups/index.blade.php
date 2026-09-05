@@ -23,7 +23,7 @@
                     @endforeach
                 </select>
             </div>
-            @can('view_all_users_followups')
+            @if(auth()->user()->user_type === 'admin' || count($users) > 1 || auth()->user()->can('view_all_users_followups'))
                 <div class="col-md-3  mb-1">
                     <label>Users</label>
                     <select name="created_by" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
@@ -35,7 +35,7 @@
                         @endforeach
                     </select>
                 </div>
-            @endcan
+            @endif
         
             
             <!-- Time Range -->
@@ -72,12 +72,14 @@
             <!-- Status Filter -->
             <div class="col-md-2 mb-1">
                 <label>Status</label>
-                <select name="status" class="form-control form-control-sm">
-                    <option value="">All</option>
-                    <option value="pending" {{ request('status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                    <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>Completed</option>
-                    <option value="canceled" {{ request('status') == 'canceled' ? 'selected' : '' }}>Canceled</option>
-                    <option value="rescheduled" {{ request('status') == 'rescheduled' ? 'selected' : '' }}>Rescheduled</option>
+                @php
+                    $selectedStatuses = array_filter((array) request('status', []));
+                @endphp
+                <select name="status[]" id="status" class="form-control form-control-sm aiz-selectpicker" multiple title="All Statuses" data-actions-box="true" data-selected-text-format="count > 2">
+                    <option value="pending" {{ in_array('pending', $selectedStatuses) ? 'selected' : '' }}>Pending</option>
+                    <option value="rescheduled" {{ in_array('rescheduled', $selectedStatuses) ? 'selected' : '' }}>Rescheduled</option>
+                    <option value="completed" {{ in_array('completed', $selectedStatuses) ? 'selected' : '' }}>Completed</option>
+                    <option value="canceled" {{ in_array('canceled', $selectedStatuses) ? 'selected' : '' }}>Canceled</option>
                 </select>
             </div>
         

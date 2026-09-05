@@ -27,7 +27,14 @@ class StaffController extends Controller
     {
         $sort_search = $request->has('search') ? $request->search : '';
         $role_id = $request->has('role_id') ? $request->role_id : '';
-        $users = User::where('user_type','staff')->orderBy('id','desc');
+        
+        if (auth()->user()->user_type === 'admin') {
+            $users = User::where('user_type','staff')->orderBy('id','desc');
+        } else {
+            $users = User::where('user_type','staff')
+                         ->whereIn('id', auth()->user()->getAllowedUserIds())
+                         ->orderBy('id','desc');
+        }
         
         if($sort_search){
             $users = $users->where(function ($query) use ($sort_search){
@@ -55,7 +62,8 @@ class StaffController extends Controller
     public function create()
     {
         $roles = Role::where('is_active', 1)->get();
-        return view('backend.staffs.create', compact('roles'));
+        $staffs = User::where('user_type', 'staff')->where('banned', 0)->orderBy('name', 'asc')->get();
+        return view('backend.staffs.create', compact('roles', 'staffs'));
     }
 
     /**
@@ -73,6 +81,8 @@ class StaffController extends Controller
             'password' => 'required|min:6|confirmed',
             'role' => 'required',
             'cc_emails.*' => 'nullable|email',
+            'reporting_to_id' => 'nullable|exists:users,id',
+            'manager_id' => 'nullable|exists:users,id',
         ]);
 
         if(User::where('email', $request->email)->first() == null){
@@ -83,6 +93,13 @@ class StaffController extends Controller
             $user->user_type = "staff";
             $user->password = Hash::make($request->password);
             $user->followup_mail_status = $request->followup_mail_status;
+            $user->reporting_to_id = $request->reporting_to_id;
+            $user->manager_id = $request->manager_id;
+            if (auth()->user()->user_type === 'admin') {
+                $user->bypass_hierarchy = $request->has('bypass_hierarchy') ? 1 : 0;
+            } else {
+                $user->bypass_hierarchy = 0;
+            }
 
             if(!empty($request->cc_emails)) {
                 $user->followup_cc = json_encode(array_values(array_filter($request->cc_emails)));
@@ -108,8 +125,14 @@ class StaffController extends Controller
     public function edit($id)
     {
         $staff = User::findOrFail(decrypt($id));
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($staff->id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         $roles = Role::where('is_active', 1)->get();
-        return view('backend.staffs.edit', compact('staff', 'roles'));
+        $staffs = User::where('user_type', 'staff')->where('banned', 0)->where('id', '!=', $staff->id)->orderBy('name', 'asc')->get();
+        return view('backend.staffs.edit', compact('staff', 'roles', 'staffs'));
     }
 
     /**
@@ -122,6 +145,11 @@ class StaffController extends Controller
     public function update(Request $request, $id)
     {
         $user = User::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($user->id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
         
         $request->validate([
             'name' => 'required|string|max:255',
@@ -130,6 +158,8 @@ class StaffController extends Controller
             'password' => 'nullable|min:6|confirmed',
             'role_id' => 'required',
             'cc_emails.*' => 'nullable|email',
+            'reporting_to_id' => 'nullable|exists:users,id',
+            'manager_id' => 'nullable|exists:users,id',
         ]);
 
         $user->name = $request->name;
@@ -141,6 +171,12 @@ class StaffController extends Controller
 
         $user->followup_mail_status = $request->followup_mail_status;
         $user->followup_cc = json_encode(array_filter($request->cc_emails ?? []));
+        $user->reporting_to_id = $request->reporting_to_id;
+        $user->manager_id = $request->manager_id;
+        if (auth()->user()->user_type === 'admin') {
+            $user->bypass_hierarchy = $request->has('bypass_hierarchy') ? 1 : 0;
+        }
+        
         if($user->save()){
 
             $user->syncRoles([$request->role_id]);
@@ -161,7 +197,13 @@ class StaffController extends Controller
      */
     public function destroy($id)
     {
-        User::destroy($id);
+        $user = User::findOrFail($id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($user->id, auth()->user()->getAllowedUserIds())) {
+                abort(403);
+            }
+        }
+        $user->delete();
         flash(trans('messages.staff_delete_msg'))->success();
         return redirect()->route('staffs.index');
     }
@@ -169,6 +211,11 @@ class StaffController extends Controller
     public function updateStatus(Request $request)
     {
         $user = User::findOrFail($request->id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($user->id, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
         
         $user->banned = $request->status;
         $user->save();
@@ -179,8 +226,26 @@ class StaffController extends Controller
     public function updateFollowupMailStatus(Request $request)
     {
         $user = User::findOrFail($request->id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($user->id, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
         
         $user->followup_mail_status = $request->status;
+        $user->save();
+       
+        return 1;
+    }
+
+    public function updateBypassHierarchy(Request $request)
+    {
+        if (auth()->user()->user_type !== 'admin') {
+            return response()->json(['error' => 'Unauthorized'], 403);
+        }
+
+        $user = User::findOrFail($request->id);
+        $user->bypass_hierarchy = $request->status;
         $user->save();
        
         return 1;
