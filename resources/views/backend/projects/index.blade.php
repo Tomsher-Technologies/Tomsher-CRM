@@ -11,8 +11,8 @@
         <div class="card-body">
             <!-- Filter Form -->
             <form method="GET" class="row g-3">
-                <div class="col-md-4 mb-1">
-                    <select name="customer_id" class="form-control form-control-sm  aiz-selectpicker" data-live-search="true">
+                <div class="col-md-3 mb-1">
+                    <select name="customer_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                         <option value="">All Customers</option>
                         @foreach ($customers as $customer)
                             <option value="{{ $customer->id }}"
@@ -23,7 +23,22 @@
                     </select>
                 </div>
 
-              
+                <div class="col-md-3 mb-1">
+                    <select name="user_id" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
+                        <option value="">All Users</option>
+                        @foreach ($users as $user)
+                            <option value="{{ $user->id }}"
+                                {{ request('user_id') == $user->id ? 'selected' : '' }}>
+                                {{ $user->name }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="col-md-3 mb-1">
+                    <input type="text" class="aiz-date-range form-control form-control-sm" value="{{ $date_range }}" name="date_range" placeholder="Filter by date" data-format="DD-MM-Y" data-separator=" to " data-advanced-range="true" autocomplete="off">
+                </div>
+
                 <div class="col-md-3 mb-1">
                     @php
                         $statuses = [
@@ -57,21 +72,20 @@
                     </select>
                 </div>
 
-               
-                
-                <div class="col-md-4 mb-1">
-                    <input type="text" class="form-control form-control-sm" value="{{ request('keyword') }}" name="keyword" placeholder="Search by Project name/Enquiry code" >
-                </div>
-
                 <div class="col-md-3 mb-1">
-                    <select name="payment_status" class="form-control form-control-sm  aiz-selectpicker" data-live-search="true">
+                    <select name="payment_status" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
                         <option value="">All Payment Status</option>
                         <option value="completed" {{ request('payment_status') == 'completed' ? 'selected' : '' }}>Completed</option>
                         <option value="not_completed" {{ request('payment_status') == 'not_completed' ? 'selected' : '' }}>Not Completed</option>
                     </select>
                 </div>
-                <div class="col-md-2 gap-2 mb-1">
-                    <button type="submit" class="btn btn-primary btn-sm ">Filter</button>
+
+                <div class="col-md-4 mb-1">
+                    <input type="text" class="form-control form-control-sm" value="{{ request('keyword') }}" name="keyword" placeholder="Search by Project name/Enquiry code">
+                </div>
+
+                <div class="col-md-2 gap-2 mb-1 d-flex align-items-center">
+                    <button type="submit" class="btn btn-primary btn-sm">Filter</button>
                     <a href="{{ route('projects.index') }}" class="btn btn-secondary btn-sm ml-1">Reset</a>
                 </div>
             </form>

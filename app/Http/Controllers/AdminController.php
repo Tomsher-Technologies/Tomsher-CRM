@@ -179,6 +179,7 @@ class AdminController extends Controller
                                     })->count();
 
         $zohoSourceIds = EnquirySource::where('name', 'like', '%zoho%')->pluck('id')->toArray();
+        $nonZohoSourceIds = EnquirySource::where('name', 'not like', '%zoho%')->pluck('id')->toArray();
         $zohoEnquiries = (clone $query)
                                     ->whereIn('enquiry_source_id', $zohoSourceIds)
                                     ->when($user_id, function ($q) use ($user_id) {
@@ -209,7 +210,7 @@ class AdminController extends Controller
 
         $totalData = $dataQuery->count();
 
-        $followupsQuery = EnquiryFollowup::query();
+        $followupsQuery = EnquiryFollowup::query()->whereIn('status', ['pending']);
 
         if (!empty($from_date) && !empty($to_date)) {
             $followupsQuery->where(function ($q) use ($from_date, $to_date) {
@@ -226,18 +227,37 @@ class AdminController extends Controller
             });
         }
 
-        $totalFollowups = $followupsQuery->where(function ($q) use ($filteredUserIds) {
-                                            $q->whereIn('created_by', $filteredUserIds)
-                                              ->orWhereHas('participants', function ($participantQ) use ($filteredUserIds) {
-                                                  $participantQ->whereIn('user_id', $filteredUserIds);
-                                              });
-                                        })
-                                        ->when($source_mode, function ($q) use ($source_mode) {
-                                            $q->whereHas('enquiry', function ($enquiryQ) use ($source_mode) {
-                                                $enquiryQ->where('source_mode', $source_mode);
-                                            });
-                                        })
-                                        ->count();
+        if (auth()->user()->user_type !== 'admin') {
+            $followupsQuery->where(function ($q) use ($allowedIds) {
+                $q->whereIn('created_by', $allowedIds)
+                  ->orWhereHas('participants', function ($participantQ) use ($allowedIds) {
+                      $participantQ->whereIn('user_id', $allowedIds);
+                  })
+                  ->orWhereHas('enquiry', function ($enquiryQ) use ($allowedIds) {
+                      $enquiryQ->whereIn('owner_id', $allowedIds);
+                  });
+            });
+        }
+
+        if ($user_id) {
+            $followupsQuery->where(function ($q) use ($user_id) {
+                $q->where('created_by', $user_id)
+                  ->orWhereHas('participants', function ($participantQ) use ($user_id) {
+                      $participantQ->where('user_id', $user_id);
+                  })
+                  ->orWhereHas('enquiry', function ($enquiryQ) use ($user_id) {
+                      $enquiryQ->where('owner_id', $user_id);
+                  });
+            });
+        }
+
+        if ($source_mode) {
+            $followupsQuery->whereHas('enquiry', function ($enquiryQ) use ($source_mode) {
+                $enquiryQ->where('source_mode', $source_mode);
+            });
+        }
+
+        $totalFollowups = $followupsQuery->count();
     
         $queryProjectType = Enquiry::query()
                         ->whereIn('enquiries.owner_id', $filteredUserIds)
@@ -270,15 +290,25 @@ class AdminController extends Controller
             ]);
         }
 
-        $totalProjects = $projectsQuery->whereHas('enquiry', function ($q2) use ($filteredUserIds) {
-                                            $q2->whereIn('owner_id', $filteredUserIds);
-                                        })
-                                        ->when($source_mode, function ($q) use ($source_mode) {
-                                            $q->whereHas('enquiry', function ($q2) use ($source_mode) {
-                                                $q2->where('source_mode', $source_mode);
-                                            });
-                                        })
-                                        ->count();
+        if (auth()->user()->user_type !== 'admin') {
+            $projectsQuery->whereHas('enquiry', function ($q2) use ($allowedIds) {
+                $q2->whereIn('owner_id', $allowedIds);
+            });
+        }
+
+        if ($user_id) {
+            $projectsQuery->whereHas('enquiry', function ($q2) use ($user_id) {
+                $q2->where('owner_id', $user_id);
+            });
+        }
+
+        if ($source_mode) {
+            $projectsQuery->whereHas('enquiry', function ($q2) use ($source_mode) {
+                $q2->where('source_mode', $source_mode);
+            });
+        }
+
+        $totalProjects = $projectsQuery->count();
 
 
         // Enquiries - Total, Pending & Contacted 
@@ -433,7 +463,7 @@ class AdminController extends Controller
             $chartType = 'daywise';
         }
 
-        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','zohoEnquiries','zohoSourceIds','totalCustomers','totalData','totalFollowups','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
+        return view('backend.dashboard', compact('filter','statusCounts', 'totalEnquiries','zohoEnquiries','zohoSourceIds','nonZohoSourceIds','totalCustomers','totalData','totalFollowups','enquiriesBySource','enquirySources', 'currentMonth', 'currentYear','selectedMonth','selectedYear','chartData','chartType', 'totalProjects','enquiriesByProjectType','projectTypes','users','statusCountsMilestone','enquiriesBySourceMode'));
     }
 
     function clearCache(Request $request)

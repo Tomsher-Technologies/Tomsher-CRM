@@ -67,7 +67,7 @@
                             <td>{{ $staff->reportingTo->name ?? '-' }}</td>
                             <td>{{ $staff->manager->name ?? '-' }}</td>
                             <td class="text-center">
-                                @can('edit_staff')
+                                @if(auth()->user()->user_type === 'admin')
                                     <label class="aiz-switch aiz-switch-success mb-0" title="Bypass Hierarchy Bounds">
                                         <input type="checkbox" onchange="update_bypass_hierarchy(this)" value="{{ $staff->id }}"
                                             <?php if ($staff->bypass_hierarchy == 1) {
@@ -81,7 +81,7 @@
                                     @else
                                         <span class="badge badge-inline badge-secondary">No</span>
                                     @endif
-                                @endcan  
+                                @endif  
                             </td>
                             <td class="text-center">
                                 @can('edit_staff')

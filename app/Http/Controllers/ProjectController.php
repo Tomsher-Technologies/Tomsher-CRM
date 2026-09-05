@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Project;
 use App\Models\Customer;
 use App\Models\Enquiry;
+use App\Models\User;
 use App\Models\Technologies;
 use App\Models\ProjectStatusHistory;
 use Carbon\Carbon;
@@ -17,8 +18,11 @@ class ProjectController extends Controller
         $request->session()->put('projects_last_url', url()->full());
         if (auth()->user()->user_type === 'admin') {
             $customers = Customer::where('is_active', 1)->orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->orderBy('name', 'asc')->get();
         } else {
-            $customers = Customer::where('is_active', 1)->whereIn('sales_person', auth()->user()->getAllowedUserIds())->orderBy('company_name', 'asc')->get();
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $customers = Customer::where('is_active', 1)->whereIn('sales_person', $allowedIds)->orderBy('company_name', 'asc')->get();
+            $users = User::where('banned', 0)->whereIn('id', $allowedIds)->orderBy('name', 'asc')->get();
         }
 
         $from_date = $to_date ='';
@@ -39,20 +43,28 @@ class ProjectController extends Controller
 
         if (auth()->user()->user_type !== 'admin') {
             $allowedIds = auth()->user()->getAllowedUserIds();
-            $query->whereHas('customer', function($q) use ($allowedIds) {
-                $q->whereIn('sales_person', $allowedIds);
+            $query->whereHas('enquiry', function ($eq) use ($allowedIds) {
+                $eq->whereIn('owner_id', $allowedIds);
             });
         }
 
 
-        $source_mode = $request->input('source_mode') ?? NULL;
-
-        if($source_mode){
-            $query->when($source_mode, function ($q) use ($source_mode) {
-                    $q->whereHas('enquiry', function ($q2) use ($source_mode) {
-                        $q2->where('source_mode', $source_mode);
-                    });
+        if ($request->filled('user_id') || $request->filled('created_by')) {
+            $userId = $request->input('user_id') ?? $request->input('created_by');
+            if (auth()->user()->user_type === 'admin' || in_array($userId, auth()->user()->getAllowedUserIds())) {
+                $query->whereHas('enquiry', function ($eq) use ($userId) {
+                    $eq->where('owner_id', $userId);
                 });
+            }
+        }
+
+        if ($request->filled('source_mode')) {
+            $sourceModes = array_filter((array) $request->input('source_mode'));
+            if (!empty($sourceModes)) {
+                $query->whereHas('enquiry', function ($q2) use ($sourceModes) {
+                    $q2->whereIn('source_mode', $sourceModes);
+                });
+            }
         }
         
 
@@ -84,7 +96,7 @@ class ProjectController extends Controller
 
         $projects = $query->orderBy('created_at','desc')->paginate(15);
 
-        return view('backend.projects.index', compact('projects','customers'));
+        return view('backend.projects.index', compact('projects','customers','users','date_range'));
     }
 
     public function create()
@@ -100,9 +112,11 @@ class ProjectController extends Controller
 
     public function show($id)
     {
-        $project = Project::with(['customer.sale_person', 'payments', 'enquiry'])->findOrFail($id);
+        $project = Project::with(['customer.sale_person', 'payments', 'enquiry.owner'])->findOrFail($id);
         if (auth()->user()->user_type !== 'admin') {
-            if (!in_array($project->customer->sales_person, auth()->user()->getAllowedUserIds())) {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $ownerId = $project->enquiry->owner_id ?? $project->customer->sales_person ?? 0;
+            if (!in_array($ownerId, $allowedIds)) {
                 abort(403);
             }
         }
@@ -111,9 +125,11 @@ class ProjectController extends Controller
 
     public function edit($id)
     {
-        $project = Project::with('payments', 'customer', 'enquiry')->findOrFail($id);
+        $project = Project::with('payments', 'customer', 'enquiry.owner')->findOrFail($id);
         if (auth()->user()->user_type !== 'admin') {
-            if (!in_array($project->customer->sales_person, auth()->user()->getAllowedUserIds())) {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $ownerId = $project->enquiry->owner_id ?? $project->customer->sales_person ?? 0;
+            if (!in_array($ownerId, $allowedIds)) {
                 abort(403);
             }
         }
@@ -220,9 +236,11 @@ class ProjectController extends Controller
 
     public function update(Request $request, $id)
     {
-        $project = Project::findOrFail($id);
+        $project = Project::with('enquiry')->findOrFail($id);
         if (auth()->user()->user_type !== 'admin') {
-            if (!in_array($project->customer->sales_person, auth()->user()->getAllowedUserIds())) {
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $ownerId = $project->enquiry->owner_id ?? $project->customer->sales_person ?? 0;
+            if (!in_array($ownerId, $allowedIds)) {
                 abort(403);
             }
         }

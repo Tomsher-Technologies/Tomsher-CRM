@@ -38,13 +38,13 @@ class EnquiryFollowupController extends Controller
         $date_range = $request->has('date_range') ? $request->date_range : '';
         $query = EnquiryFollowup::query()->with(['enquiry.customer', 'added_by', 'participants']);
 
-        if($request->filled('source_mode')){
-            $source_mode = $request->source_mode;
-            $query->when($source_mode, function ($q) use ($source_mode) {
-                    $q->whereHas('enquiry', function ($enquiryQ) use ($source_mode) {
-                        $enquiryQ->where('source_mode', $source_mode);
-                    });
+        if ($request->filled('source_mode')) {
+            $sourceModes = array_filter((array) $request->input('source_mode'));
+            if (!empty($sourceModes)) {
+                $query->whereHas('enquiry', function ($enquiryQ) use ($sourceModes) {
+                    $enquiryQ->whereIn('source_mode', $sourceModes);
                 });
+            }
         }
 
         if ($request->filled('enquiry_id')) {
@@ -59,7 +59,10 @@ class EnquiryFollowupController extends Controller
             $query->where('sub_type', $request->sub_type);
         }
         if ($request->filled('status')) {
-            $query->where('status', $request->status);
+            $statuses = array_filter((array) $request->input('status'));
+            if (!empty($statuses)) {
+                $query->whereIn('status', $statuses);
+            }
         }
 
         if ($request->filled('created_by')) {
@@ -376,13 +379,16 @@ class EnquiryFollowupController extends Controller
         } 
         $enquiries = $allQuery->orderBy('id', 'desc')->get();
 
-        if (auth()->user()->user_type === 'admin') {
+        $subordinateIds = auth()->user()->getSubordinateIds();
+        $subordinates = User::whereIn('id', $subordinateIds)->orderBy('name', 'asc')->get();
+
+        if (auth()->user()->user_type === 'admin' || auth()->user()->bypass_hierarchy == 1) {
             $users = User::orderBy('name', 'asc')->get();
         } else {
             $users = User::whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
         }
 
-        return view('backend.followups.calendar', compact('enquiries','users'));
+        return view('backend.followups.calendar', compact('enquiries', 'users', 'subordinates'));
     }
 
     public function calendarEvents(Request $request)
@@ -397,21 +403,42 @@ class EnquiryFollowupController extends Controller
             $query->where('followup_type', $request->type);
         }
 
-        if (auth()->user()->user_type !== 'admin') {
-            $allowedIds = auth()->user()->getAllowedUserIds();
-            
-            if ($request->filled('created_by')) {
-                $userId = $request->created_by;
-                if (!in_array($userId, $allowedIds)) {
-                    $userId = 0;
-                }
-                $query->where(function ($q) use ($userId) {
-                    $q->where('created_by', $userId)
-                      ->orWhereHas('participants', function ($subQ) use ($userId) {
-                          $subQ->where('user_id', $userId);
+        $filterUser = $request->input('created_by', 'mine');
+        if (empty($filterUser)) {
+            $filterUser = 'mine';
+        }
+
+        $user = auth()->user();
+        $allowedIds = $user->getAllowedUserIds();
+        $subordinateIds = $user->getSubordinateIds();
+
+        if ($filterUser === 'mine') {
+            $userId = $user->id;
+            $query->where(function ($q) use ($userId) {
+                $q->where('created_by', $userId)
+                  ->orWhereHas('participants', function ($subQ) use ($userId) {
+                      $subQ->where('user_id', $userId);
+                  })
+                  ->orWhereHas('enquiry', function ($enquiryQ) use ($userId) {
+                      $enquiryQ->where('owner_id', $userId);
+                  });
+            });
+        } elseif ($filterUser === 'subordinates') {
+            if (!empty($subordinateIds)) {
+                $query->where(function ($q) use ($subordinateIds) {
+                    $q->whereIn('created_by', $subordinateIds)
+                      ->orWhereHas('participants', function ($subQ) use ($subordinateIds) {
+                          $subQ->whereIn('user_id', $subordinateIds);
+                      })
+                      ->orWhereHas('enquiry', function ($enquiryQ) use ($subordinateIds) {
+                          $enquiryQ->whereIn('owner_id', $subordinateIds);
                       });
                 });
             } else {
+                $query->whereRaw('1 = 0');
+            }
+        } elseif ($filterUser === 'all') {
+            if ($user->user_type !== 'admin') {
                 $query->where(function ($q) use ($allowedIds) {
                     $q->whereIn('created_by', $allowedIds)
                        ->orWhereHas('participants', function ($subQ) use ($allowedIds) {
@@ -423,12 +450,17 @@ class EnquiryFollowupController extends Controller
                 });
             }
         } else {
-            if ($request->filled('created_by')) {
-                $userId = $request->created_by;
-                $query->where(function ($q) use ($userId) {
-                    $q->where('created_by', $userId)
-                      ->orWhereHas('participants', function ($subQ) use ($userId) {
-                          $subQ->where('user_id', $userId);
+            $targetUserId = (int) $filterUser;
+            if ($user->user_type !== 'admin' && !in_array($targetUserId, $allowedIds)) {
+                $query->whereRaw('1 = 0');
+            } else {
+                $query->where(function ($q) use ($targetUserId) {
+                    $q->where('created_by', $targetUserId)
+                      ->orWhereHas('participants', function ($subQ) use ($targetUserId) {
+                          $subQ->where('user_id', $targetUserId);
+                      })
+                      ->orWhereHas('enquiry', function ($enquiryQ) use ($targetUserId) {
+                          $enquiryQ->where('owner_id', $targetUserId);
                       });
                 });
             }

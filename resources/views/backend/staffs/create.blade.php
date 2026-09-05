@@ -335,17 +335,19 @@
                             </div>
                         </div>
 
-                        <div class="p-3 rounded mt-2" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
-                            <div class="custom-control custom-switch">
-                                <input type="checkbox" class="custom-control-input" id="bypass_hierarchy" name="bypass_hierarchy" value="1" @if(old('bypass_hierarchy')) checked @endif>
-                                <label class="custom-control-label font-weight-600 text-dark" for="bypass_hierarchy" style="cursor: pointer;">
-                                    Bypass Hierarchy Bounds
-                                </label>
+                        @if(auth()->user()->user_type === 'admin')
+                            <div class="p-3 rounded mt-2" style="background: #f8fafc; border: 1px dashed #cbd5e1;">
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="bypass_hierarchy" name="bypass_hierarchy" value="1" @if(old('bypass_hierarchy')) checked @endif>
+                                    <label class="custom-control-label font-weight-600 text-dark" for="bypass_hierarchy" style="cursor: pointer;">
+                                        Bypass Hierarchy Bounds
+                                    </label>
+                                </div>
+                                <small class="text-muted d-block mt-1">
+                                    <i class="las la-info-circle"></i> If enabled, this staff member will be able to view and access all user details and records across the entire CRM, regardless of their position in the reporting hierarchy.
+                                </small>
                             </div>
-                            <small class="text-muted d-block mt-1">
-                                <i class="las la-info-circle"></i> If enabled, this staff member will be able to view and access all user details and records across the entire CRM, regardless of their position in the reporting hierarchy.
-                            </small>
-                        </div>
+                        @endif
                     </div>
                 </div>
             </div>

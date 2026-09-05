@@ -58,7 +58,7 @@ class EnquiryController extends Controller
         }
     
         if ($request->filled('enquiry_source_id')) {
-            $sourceIds = array_filter((array) $request->input('enquiry_source_id'));
+            $sourceIds = array_filter((array) $request->input('enquiry_source_id'), fn($val) => $val !== null && $val !== '');
             if (!empty($sourceIds)) {
                 $query->whereIn('enquiry_source_id', $sourceIds);
             }
@@ -146,8 +146,11 @@ class EnquiryController extends Controller
             }
         }
         
-        if ($date != null) {
-            $query->whereDate('enquiry_date', '>=', date('Y-m-d', strtotime(explode(" to ", $date)[0])))->whereDate('enquiry_date', '<=', date('Y-m-d', strtotime(explode(" to ", $date)[1])));
+        if (!empty($date) && str_contains($date, ' to ')) {
+            [$fromRaw, $toRaw] = array_map('trim', explode(' to ', $date));
+            $from = Carbon::createFromFormat('d-m-Y', $fromRaw)->startOfDay();
+            $to   = Carbon::createFromFormat('d-m-Y', $toRaw)->endOfDay();
+            $query->whereBetween('enquiry_date', [$from, $to]);
         }
 
         
