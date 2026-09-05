@@ -95,6 +95,7 @@ class StaffController extends Controller
             $user->followup_mail_status = $request->followup_mail_status;
             $user->reporting_to_id = $request->reporting_to_id;
             $user->manager_id = $request->manager_id;
+            $user->bypass_hierarchy = $request->has('bypass_hierarchy') ? 1 : 0;
 
             if(!empty($request->cc_emails)) {
                 $user->followup_cc = json_encode(array_values(array_filter($request->cc_emails)));
@@ -168,6 +169,7 @@ class StaffController extends Controller
         $user->followup_cc = json_encode(array_filter($request->cc_emails ?? []));
         $user->reporting_to_id = $request->reporting_to_id;
         $user->manager_id = $request->manager_id;
+        $user->bypass_hierarchy = $request->has('bypass_hierarchy') ? 1 : 0;
         
         if($user->save()){
 
@@ -225,6 +227,21 @@ class StaffController extends Controller
         }
         
         $user->followup_mail_status = $request->status;
+        $user->save();
+       
+        return 1;
+    }
+
+    public function updateBypassHierarchy(Request $request)
+    {
+        $user = User::findOrFail($request->id);
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($user->id, auth()->user()->getAllowedUserIds())) {
+                return response()->json(['error' => 'Unauthorized'], 403);
+            }
+        }
+        
+        $user->bypass_hierarchy = $request->status;
         $user->save();
        
         return 1;

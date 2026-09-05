@@ -23,7 +23,7 @@
                     @endforeach
                 </select>
             </div>
-            @can('view_all_users_followups')
+            @if(auth()->user()->user_type === 'admin' || count($users) > 1 || auth()->user()->can('view_all_users_followups'))
                 <div class="col-md-3  mb-1">
                     <label>Users</label>
                     <select name="created_by" class="form-control form-control-sm aiz-selectpicker" data-live-search="true">
@@ -35,7 +35,7 @@
                         @endforeach
                     </select>
                 </div>
-            @endcan
+            @endif
         
             
             <!-- Time Range -->

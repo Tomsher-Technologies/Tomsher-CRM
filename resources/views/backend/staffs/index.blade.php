@@ -46,6 +46,7 @@
                     <th>{{trans('messages.role')}}</th>
                     <th>Reporting To</th>
                     <th>Manager</th>
+                    <th class="text-center">Bypass Hierarchy</th>
                     <th class="text-center">Follow-up Mail Status</th>
                     <th class="text-center">Active Status</th>
                     <th class="text-center">{{trans('messages.options')}}</th>
@@ -65,6 +66,23 @@
                             </td>
                             <td>{{ $staff->reportingTo->name ?? '-' }}</td>
                             <td>{{ $staff->manager->name ?? '-' }}</td>
+                            <td class="text-center">
+                                @can('edit_staff')
+                                    <label class="aiz-switch aiz-switch-success mb-0" title="Bypass Hierarchy Bounds">
+                                        <input type="checkbox" onchange="update_bypass_hierarchy(this)" value="{{ $staff->id }}"
+                                            <?php if ($staff->bypass_hierarchy == 1) {
+                                                echo 'checked';
+                                            } ?>>
+                                        <span></span>
+                                    </label>
+                                @else
+                                    @if($staff->bypass_hierarchy == 1)
+                                        <span class="badge badge-inline badge-success">Yes</span>
+                                    @else
+                                        <span class="badge badge-inline badge-secondary">No</span>
+                                    @endif
+                                @endcan  
+                            </td>
                             <td class="text-center">
                                 @can('edit_staff')
                                     <label class="aiz-switch aiz-switch-success mb-0">
@@ -184,6 +202,41 @@
                     }, function(data) {
                         if (data == 1) {
                             AIZ.plugins.notify('success', 'Staff follow-up mail status updated successfully');
+                        } else {
+                            AIZ.plugins.notify('danger', 'Something went wrong');
+                        }
+                        setTimeout(function() {
+                            window.location.reload();
+                        }, 2000);
+                    });
+                } else {
+                    el.checked = !el.checked;
+                }
+            });
+        }
+
+        function update_bypass_hierarchy(el) {
+            var status = el.checked ? 1 : 0;
+            var message = status ? "enable hierarchy bypass for" : "disable hierarchy bypass for";
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You want to " + message + " this staff?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3085d6',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Yes, proceed!',
+                cancelButtonText: 'Cancel'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    $.post('{{ route('staff.bypass-hierarchy') }}', {
+                        _token: '{{ csrf_token() }}',
+                        id: el.value,
+                        status: status
+                    }, function(data) {
+                        if (data == 1) {
+                            AIZ.plugins.notify('success', 'Bypass hierarchy status updated successfully');
                         } else {
                             AIZ.plugins.notify('danger', 'Something went wrong');
                         }

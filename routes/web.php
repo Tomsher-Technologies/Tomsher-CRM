@@ -39,6 +39,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/staffs/destroy/{id}', [StaffController::class, 'destroy'])->name('staffs.destroy');
     Route::post('/staff/status', [StaffController::class, 'updateStatus'])->name('staff.status');
     Route::post('/staff/mail-status', [StaffController::class, 'updateFollowupMailStatus'])->name('staff.mail-status');
+    Route::post('/staff/bypass-hierarchy', [StaffController::class, 'updateBypassHierarchy'])->name('staff.bypass-hierarchy');
 
     // Manage Imdustries
     Route::get('/industries', [IndustryController::class, 'index'])->name('industries.index');

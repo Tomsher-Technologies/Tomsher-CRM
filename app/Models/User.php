@@ -28,6 +28,7 @@ class User extends Authenticatable
         'password',
         'reporting_to_id',
         'manager_id',
+        'bypass_hierarchy',
     ];
 
     /**
@@ -48,6 +49,7 @@ class User extends Authenticatable
     protected $casts = [
         'email_verified_at' => 'datetime',
         'password' => 'hashed',
+        'bypass_hierarchy' => 'boolean',
     ];
 
     public function recentlyViewedProducts()
@@ -116,7 +118,7 @@ class User extends Authenticatable
      */
     public function getAllowedUserIds()
     {
-        if ($this->user_type === 'admin') {
+        if ($this->user_type === 'admin' || $this->bypass_hierarchy == 1) {
             return User::pluck('id')->toArray();
         }
 

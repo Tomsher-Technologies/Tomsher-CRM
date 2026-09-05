@@ -36,7 +36,7 @@ class EnquiryFollowupController extends Controller
             $users = User::whereIn('id', auth()->user()->getAllowedUserIds())->orderBy('name', 'asc')->get();
         }
         $date_range = $request->has('date_range') ? $request->date_range : '';
-        $query = EnquiryFollowup::query()->with(['enquiry.customer']);
+        $query = EnquiryFollowup::query()->with(['enquiry.customer', 'added_by', 'participants']);
 
         if($request->filled('source_mode')){
             $source_mode = $request->source_mode;
@@ -74,6 +74,9 @@ class EnquiryFollowupController extends Controller
                         $q->where('created_by', $userId)
                         ->orWhereHas('participants', function ($subQ) use ($userId) {
                             $subQ->where('user_id', $userId);
+                        })
+                        ->orWhereHas('enquiry', function ($enquiryQ) use ($userId) {
+                            $enquiryQ->where('owner_id', $userId);
                         });
                     });
         }
@@ -84,6 +87,9 @@ class EnquiryFollowupController extends Controller
                         $q->whereIn('created_by', $allowedIds)
                         ->orWhereHas('participants', function ($subQ) use ($allowedIds) {
                             $subQ->whereIn('user_id', $allowedIds);
+                        })
+                        ->orWhereHas('enquiry', function ($enquiryQ) use ($allowedIds) {
+                            $enquiryQ->whereIn('owner_id', $allowedIds);
                         });
                     });
         } 
@@ -122,9 +128,18 @@ class EnquiryFollowupController extends Controller
         // dd(DB::getQueryLog());
         $allQuery = Enquiry::with('customer');
         if (auth()->user()->user_type !== 'admin') {
-            $allQuery->whereIn('owner_id', auth()->user()->getAllowedUserIds());
+            $allowedIds = auth()->user()->getAllowedUserIds();
+            $allQuery->where(function ($q) use ($allowedIds) {
+                $q->whereIn('owner_id', $allowedIds)
+                  ->orWhereHas('followups', function ($fQ) use ($allowedIds) {
+                      $fQ->whereIn('created_by', $allowedIds)
+                         ->orWhereHas('participants', function ($pQ) use ($allowedIds) {
+                             $pQ->whereIn('user_id', $allowedIds);
+                         });
+                  });
+            });
         } 
-        $enquiries = $allQuery->get();
+        $enquiries = $allQuery->orderBy('id', 'desc')->get();
 
         return view('backend.followups.index', compact('followups', 'enquiries','date_range','users'));
     }
@@ -398,13 +413,13 @@ class EnquiryFollowupController extends Controller
                 });
             } else {
                 $query->where(function ($q) use ($allowedIds) {
-                    $q->where('followup_type', 'meeting') // show all meetings
-                    ->orWhere(function ($q2) use ($allowedIds) {
-                        $q2->whereIn('created_by', $allowedIds)
-                           ->orWhereHas('participants', function ($subQ) use ($allowedIds) {
-                               $subQ->whereIn('user_id', $allowedIds);
-                           });
-                    });
+                    $q->whereIn('created_by', $allowedIds)
+                       ->orWhereHas('participants', function ($subQ) use ($allowedIds) {
+                           $subQ->whereIn('user_id', $allowedIds);
+                       })
+                       ->orWhereHas('enquiry', function ($enquiryQ) use ($allowedIds) {
+                           $enquiryQ->whereIn('owner_id', $allowedIds);
+                       });
                 });
             }
         } else {
