@@ -335,6 +335,17 @@
                                         data-id="{{ $dat->id }}">
                                         <i class="las la-history" style="margin-top: 2px;"></i>
                                     </a>
+
+                                    @can('delete_data')
+                                        @if (auth()->user()->user_type === 'admin' || in_array($dat->sales_person, auth()->user()->getAllowedUserIds()))
+                                            <a href="#"
+                                                class="btn btn-soft-danger btn-sm btn-icon btn-circle confirm-delete m-auto"
+                                                data-href="{{ route('data.destroy', $dat->id) }}"
+                                                title="Delete Data">
+                                                <i class="las la-trash" style="margin-top: 2px;"></i>
+                                            </a>
+                                        @endif
+                                    @endcan
                                 </td>
                             </tr>
                         @endforeach
@@ -816,4 +827,8 @@
             }
         });
     </script>
+@endsection
+
+@section('modal')
+    @include('modals.delete_modal')
 @endsection

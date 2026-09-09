@@ -95,7 +95,10 @@
                                         <img src="{{ asset('assets/img/3d_customers.png') }}" class="dashboard-metric-3d-icon" alt="New Customers">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">NTC Customers</span>
+                                        <span class="dashboard-metric-title">
+                                            NTC Customers
+                                            <svg class="metric-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-toggle="tooltip" data-placement="top" data-html="true" title="Total New Customers (NTC)" onclick="event.preventDefault(); event.stopPropagation();"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        </span>
                                         <strong class="dashboard-metric-value">{{ $totalCustomers }}</strong>
                                     </div>
                                 </div>
@@ -112,7 +115,10 @@
                                         <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Total Enquiries">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">Total Enquiries</span>
+                                        <span class="dashboard-metric-title">
+                                            Total Enquiries
+                                            <svg class="metric-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-toggle="tooltip" data-placement="top" data-html="true" title="Total enquiries from non-Zoho sources." onclick="event.preventDefault(); event.stopPropagation();"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        </span>
                                         <strong class="dashboard-metric-value">{{ $totalEnquiries }}</strong>
                                     </div>
                                 </div>
@@ -129,7 +135,10 @@
                                         <img src="{{ asset('assets/img/3d_enquiries.png') }}" class="dashboard-metric-3d-icon" alt="Zoho Enquiries">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">Zoho Enquiries</span>
+                                        <span class="dashboard-metric-title">
+                                            Zoho Enquiries
+                                            <svg class="metric-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-toggle="tooltip" data-placement="top" data-html="true" title="Total enquiries from Zoho sources." onclick="event.preventDefault(); event.stopPropagation();"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        </span>
                                         <strong class="dashboard-metric-value">{{ $zohoEnquiries }}</strong>
                                     </div>
                                 </div>
@@ -158,7 +167,10 @@
                                         <img src="{{ asset('assets/img/3d_followups.png') }}" class="dashboard-metric-3d-icon" alt="Total Followups">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">Pending Followups</span>
+                                        <span class="dashboard-metric-title">
+                                            Pending Followups
+                                            <svg class="metric-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-toggle="tooltip" data-placement="top" data-html="true" title="Total followups in 'pending' status." onclick="event.preventDefault(); event.stopPropagation();"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        </span>
                                         <strong class="dashboard-metric-value">{{ $totalFollowups }}</strong>
                                     </div>
                                 </div>
@@ -174,7 +186,10 @@
                                         <img src="{{ asset('assets/img/3d_projects.png') }}" class="dashboard-metric-3d-icon" alt="Total Projects">
                                     </div>
                                     <div class="dashboard-metric-copy">
-                                        <span class="dashboard-metric-title">Total Projects</span>
+                                        <span class="dashboard-metric-title">
+                                            Total Projects
+                                            <svg class="metric-info-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" data-toggle="tooltip" data-placement="top" data-html="true" title="Total projects created within the filtered date range." onclick="event.preventDefault(); event.stopPropagation();"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        </span>
                                         <strong class="dashboard-metric-value">{{ $totalProjects }}</strong>
                                     </div>
                                 </div>
@@ -568,10 +583,10 @@
 
     .dashboard-metric-inner {
         border-radius: 8px;
-        padding: 16px 20px;
+        padding: 16px 10px;
         display: flex;
         align-items: center;
-        gap: 16px;
+        gap: 10px;
         height: 100%;
     }
 
@@ -622,7 +637,9 @@
 
     .dashboard-metric-title {
         color: #4a5568;
-        display: block;
+        display: flex;
+        align-items: center;
+        gap: 5px;
         font-size: 13.5px;
         font-weight: 600;
         letter-spacing: 0;
@@ -638,6 +655,28 @@
         letter-spacing: 0;
         line-height: 1;
         margin-top: 4px;
+    }
+
+    .dashboard-metric-value-row {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+    }
+
+    .metric-info-icon {
+        width: 15px !important;
+        height: 15px !important;
+        color: #64748b !important;
+        cursor: pointer;
+        vertical-align: middle;
+        transition: color 0.15s ease, transform 0.15s ease;
+        display: inline-block !important;
+        flex-shrink: 0;
+    }
+
+    .metric-info-icon:hover {
+        color: #2563eb !important;
+        transform: scale(1.15);
     }
 
     .dashboard-status-content span {
@@ -1345,5 +1384,13 @@
                 plugins: [ChartDataLabels]
             });
         }
+
+        $(document).ready(function() {
+            if ($.fn.tooltip) {
+                $('[data-toggle="tooltip"]').tooltip({
+                    trigger: 'hover focus'
+                });
+            }
+        });
     </script>
 @endsection

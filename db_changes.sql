@@ -268,3 +268,6 @@
 -- ALTER TABLE `enquiry_followups` CHANGE `enquiry_status` `enquiry_status` ENUM('new_enquiry','started_discussion','proposal_submitted','project_approved','project_rejected','not_interested','not_responding','invalid_spam','signed_payment_pending','ongoing_discussion','preparing_scope','pipeline') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL COMMENT 'New Enquiry, Started Discussion, Proposal Submitted, Project Approved, Project Rejected, Not Interested, Not Responding, Invalid/Spam';
 
 ALTER TABLE `enquiries` CHANGE `source_mode` `source_mode` ENUM('inhouse','self','cross_up_sell') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NULL DEFAULT NULL;
+
+-- ALTER TABLE `datas` ADD `deleted_at` TIMESTAMP NULL DEFAULT NULL AFTER `updated_at`;
+-- INSERT INTO `permissions` (`id`, `parent_id`, `name`, `title`, `guard_name`, `is_active`, `created_at`, `updated_at`) VALUES (NULL, '85', 'delete_data', 'Delete Data', 'web', '1', NOW(), NOW());

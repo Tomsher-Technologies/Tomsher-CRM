@@ -95,6 +95,13 @@
                     </a>
                 @endcan
             @endif
+            @can('delete_data')
+                @if (auth()->user()->user_type === 'admin' || in_array($data->sales_person, auth()->user()->getAllowedUserIds()))
+                    <a href="#" class="btn btn-sm btn-danger confirm-delete" data-href="{{ route('data.destroy', $data->id) }}" title="Delete Data">
+                        <i class="fas fa-trash"></i> Delete
+                    </a>
+                @endif
+            @endcan
         </div>
     </div>
 
@@ -284,4 +291,8 @@
 
     
 </div>
+@endsection
+
+@section('modal')
+    @include('modals.delete_modal')
 @endsection

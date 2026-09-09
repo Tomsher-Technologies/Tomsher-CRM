@@ -76,6 +76,7 @@
                     $selectedStatuses = array_filter((array) request('status', []));
                 @endphp
                 <select name="status[]" id="status" class="form-control form-control-sm aiz-selectpicker" multiple title="All Statuses" data-actions-box="true" data-selected-text-format="count > 2">
+                    <option value="upcoming" {{ in_array('upcoming', $selectedStatuses) ? 'selected' : '' }}>Upcoming</option>
                     <option value="pending" {{ in_array('pending', $selectedStatuses) ? 'selected' : '' }}>Pending</option>
                     <option value="rescheduled" {{ in_array('rescheduled', $selectedStatuses) ? 'selected' : '' }}>Rescheduled</option>
                     <option value="completed" {{ in_array('completed', $selectedStatuses) ? 'selected' : '' }}>Completed</option>
@@ -194,12 +195,12 @@
                                             @php
                                                 $statusClass = 'pending-upcoming';
                                             @endphp
-                                            <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-upcoming">Upcoming</span>
                                         @else
                                             @php
                                                 $statusClass = 'pending-due';
                                             @endphp
-                                            <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-due">Pending</span>
                                         @endif
                                     @else
                                         @php
@@ -210,12 +211,12 @@
                                             @php
                                                 $statusClass = 'pending-upcoming';
                                             @endphp
-                                            <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-upcoming">Upcoming</span>
                                         @else
                                             @php
                                                 $statusClass = 'pending-due';
                                             @endphp
-                                            <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-due">Pending</span>
                                         @endif
                                     @endif
 
@@ -445,7 +446,11 @@
             let statusclass = $(this).data('statusclass');
             let badge = $('#modal-status');
 
-            badge.text(status.charAt(0).toUpperCase() + status.slice(1));
+            if (statusclass === 'pending-upcoming') {
+                badge.text('Upcoming');
+            } else {
+                badge.text(status.charAt(0).toUpperCase() + status.slice(1));
+            }
             badge.removeClass().addClass('badge badge-inline');
             badge.addClass(statusclass);
 

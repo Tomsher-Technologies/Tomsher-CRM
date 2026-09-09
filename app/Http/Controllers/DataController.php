@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\DB;
 use App\Imports\DataImport;
 use Maatwebsite\Excel\Facades\Excel;
 use Carbon\Carbon;
+use Illuminate\Validation\Rule;
 
 class DataController extends Controller
 {
@@ -27,10 +28,11 @@ class DataController extends Controller
     {
         $this->middleware('auth');
        
-        $this->middleware('permission:manage_data',  ['only' => ['index','destroy']]);
+        $this->middleware('permission:manage_data',  ['only' => ['index']]);
         $this->middleware('permission:view_data',  ['only' => ['show']]);
         $this->middleware('permission:add_data',  ['only' => ['create','store']]);
         $this->middleware('permission:edit_data',  ['only' => ['edit','update','updateStatus']]);
+        $this->middleware('permission:delete_data',  ['only' => ['destroy']]);
     }
 
     public function index(Request $request)
@@ -140,7 +142,7 @@ class DataController extends Controller
 
     public function create()
     {
-        $lastdata = Data::orderBy('id', 'desc')->first();
+        $lastdata = Data::withTrashed()->orderBy('id', 'desc')->first();
         $nextId = $lastdata ? $lastdata->id + 1 : 1;
 
         $dataCode = 'DATA' . str_pad($nextId, 5, '0', STR_PAD_LEFT); // Example: CUS00001
@@ -162,7 +164,7 @@ class DataController extends Controller
     {
         $validated = $request->validate([
             'data_code'             => 'required|unique:datas,data_code',
-            'company_name'          => 'required',
+            'company_name'          => ['required', Rule::unique('datas', 'company_name')->whereNull('deleted_at')],
             'company_email'         => 'nullable|email',
             'website'               => 'nullable|url',
             'address'               => 'nullable|string',
@@ -248,8 +250,8 @@ class DataController extends Controller
     {
         $validated = $request->validate([
             'data_code'         => 'required|unique:datas,data_code,' . $id,
-            'company_name'          => 'required',
-            'user_id'          => 'required'
+            'company_name'      => ['required', Rule::unique('datas', 'company_name')->ignore($id)->whereNull('deleted_at')],
+            'user_id'           => 'required'
         ]);
 
         DB::transaction(function () use ($request, $id) {
@@ -474,6 +476,44 @@ class DataController extends Controller
             }
         }
         return view('backend.data.timeline', compact('data'));
+    }
+
+    public function destroy($id)
+    {
+        $data = Data::findOrFail($id);
+
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403, 'Unauthorized access');
+            }
+        }
+
+        $data->delete();
+
+        flash('Data deleted successfully.')->success();
+        $route = session()->get('data_last_url') ?? route('data.index');
+        return redirect($route);
+    }
+
+    public function checkCompanyName(Request $request)
+    {
+        $companyName = trim($request->input('company_name', ''));
+        $dataId = $request->input('data_id', null);
+
+        if (empty($companyName)) {
+            return response()->json(['exists' => false]);
+        }
+
+        $dataQuery = Data::where('company_name', $companyName);
+        if ($dataId) {
+            $dataQuery->where('id', '!=', $dataId);
+        }
+        $exists = $dataQuery->exists();
+
+        return response()->json([
+            'exists' => $exists,
+            'message' => $exists ? 'A record with this company name already exists!' : ''
+        ]);
     }
 
 } 
