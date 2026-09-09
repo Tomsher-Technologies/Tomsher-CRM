@@ -73,6 +73,7 @@ Route::group(['middleware' => ['auth']], function () {
     Route::get('/enquiry-sources/delete/{id}', [EnquirySourcesController::class, 'destroy'])->name('enquiry_sources.destroy');
 
     Route::resource('data', DataController::class);
+    Route::get('/data/destroy/{id}', [DataController::class, 'destroy'])->name('data.destroy');
     Route::post('/data/change-status', [DataController::class, 'changeStatus'])->name('data.changeStatus');
     Route::get('/data/{id}', [DataController::class, 'show'])->name('data.show');
     Route::get('/data-details/{id}/{status}', [DataController::class, 'getStatusData']);

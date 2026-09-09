@@ -27,10 +27,11 @@ class DataController extends Controller
     {
         $this->middleware('auth');
        
-        $this->middleware('permission:manage_data',  ['only' => ['index','destroy']]);
+        $this->middleware('permission:manage_data',  ['only' => ['index']]);
         $this->middleware('permission:view_data',  ['only' => ['show']]);
         $this->middleware('permission:add_data',  ['only' => ['create','store']]);
         $this->middleware('permission:edit_data',  ['only' => ['edit','update','updateStatus']]);
+        $this->middleware('permission:delete_data',  ['only' => ['destroy']]);
     }
 
     public function index(Request $request)
@@ -474,6 +475,23 @@ class DataController extends Controller
             }
         }
         return view('backend.data.timeline', compact('data'));
+    }
+
+    public function destroy($id)
+    {
+        $data = Data::findOrFail($id);
+
+        if (auth()->user()->user_type !== 'admin') {
+            if (!in_array($data->sales_person, auth()->user()->getAllowedUserIds())) {
+                abort(403, 'Unauthorized access');
+            }
+        }
+
+        $data->delete();
+
+        flash('Data deleted successfully.')->success();
+        $route = session()->get('data_last_url') ?? route('data.index');
+        return redirect($route);
     }
 
 } 
