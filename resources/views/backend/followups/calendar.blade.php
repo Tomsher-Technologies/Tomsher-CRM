@@ -287,8 +287,10 @@
                     const now = new Date();
                     if (followupTime > now) {
                         statusEl.className = 'badge  badge-inline pending-upcoming';
+                        statusEl.textContent = 'Upcoming';
                     }else{
                         statusEl.className = 'badge  badge-inline pending-due';
+                        statusEl.textContent = 'Pending';
                     }
                 } else if (status === 'Canceled') {
                     statusEl.className = 'badge  badge-inline badge-secondary';

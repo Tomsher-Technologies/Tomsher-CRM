@@ -194,12 +194,12 @@
                                             @php
                                                 $statusClass = 'pending-upcoming';
                                             @endphp
-                                            <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-upcoming">Upcoming</span>
                                         @else
                                             @php
                                                 $statusClass = 'pending-due';
                                             @endphp
-                                            <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-due">Pending</span>
                                         @endif
                                     @else
                                         @php
@@ -210,12 +210,12 @@
                                             @php
                                                 $statusClass = 'pending-upcoming';
                                             @endphp
-                                            <span class="badge  badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-upcoming">Upcoming</span>
                                         @else
                                             @php
                                                 $statusClass = 'pending-due';
                                             @endphp
-                                            <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                            <span class="badge badge-inline pending-due">Pending</span>
                                         @endif
                                     @endif
 
@@ -445,7 +445,11 @@
             let statusclass = $(this).data('statusclass');
             let badge = $('#modal-status');
 
-            badge.text(status.charAt(0).toUpperCase() + status.slice(1));
+            if (statusclass === 'pending-upcoming') {
+                badge.text('Upcoming');
+            } else {
+                badge.text(status.charAt(0).toUpperCase() + status.slice(1));
+            }
             badge.removeClass().addClass('badge badge-inline');
             badge.addClass(statusclass);
 
