@@ -76,6 +76,7 @@
                     $selectedStatuses = array_filter((array) request('status', []));
                 @endphp
                 <select name="status[]" id="status" class="form-control form-control-sm aiz-selectpicker" multiple title="All Statuses" data-actions-box="true" data-selected-text-format="count > 2">
+                    <option value="upcoming" {{ in_array('upcoming', $selectedStatuses) ? 'selected' : '' }}>Upcoming</option>
                     <option value="pending" {{ in_array('pending', $selectedStatuses) ? 'selected' : '' }}>Pending</option>
                     <option value="rescheduled" {{ in_array('rescheduled', $selectedStatuses) ? 'selected' : '' }}>Rescheduled</option>
                     <option value="completed" {{ in_array('completed', $selectedStatuses) ? 'selected' : '' }}>Completed</option>
