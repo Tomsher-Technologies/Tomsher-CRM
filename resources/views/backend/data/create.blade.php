@@ -64,7 +64,11 @@
                     </div>
                     <div class="col-md-4 mb-1">
                         <label for="company_name" class="form-label">Company Name <span class="text-danger">*</span></label>
-                        <input type="text" class="form-control form-control-sm" id="company_name" name="company_name">
+                        <input type="text" class="form-control form-control-sm" id="company_name" name="company_name" value="{{ old('company_name') }}" autocomplete="off">
+                        <div id="company_name_error" class="text-danger small mt-1" style="display: none;"></div>
+                        @error('company_name')
+                            <div class="text-danger small mt-1">{{ $message }}</div>
+                        @enderror
                     </div>
                     <div class="col-md-4 mb-1">
                         <label for="company_email" class="form-label">Company Email</label>
@@ -328,13 +332,50 @@
                     }
                 });
 
+                if ($('#company_name_error').is(':visible')) {
+                    AIZ.plugins.notify('danger', $('#company_name_error').text());
+                    isValid = false;
+                }
+
                 if (isValid) {
                     form.submit();
                 }
             }
         });
     });
-    
+
+    let companyCheckTimeout = null;
+    $('#company_name').on('keyup change blur', function () {
+        clearTimeout(companyCheckTimeout);
+        const companyName = $(this).val().trim();
+
+        if (companyName.length < 2) {
+            $('#company_name_error').hide().text('');
+            $('#company_name').removeClass('is-invalid');
+            return;
+        }
+
+        companyCheckTimeout = setTimeout(function () {
+            $.ajax({
+                url: "{{ route('data.checkCompanyName') }}",
+                type: 'POST',
+                data: {
+                    _token: '{{ csrf_token() }}',
+                    company_name: companyName
+                },
+                success: function (response) {
+                    if (response.exists) {
+                        $('#company_name_error').text(response.message).show();
+                        $('#company_name').addClass('is-invalid');
+                    } else {
+                        $('#company_name_error').hide().text('');
+                        $('#company_name').removeClass('is-invalid');
+                    }
+                }
+            });
+        }, 300);
+    });
+
     $(document).on('change', 'input[type="checkbox"][name$="[is_primary]"]', function () {
         if (this.checked) {
             // Uncheck all other primary checkboxes
