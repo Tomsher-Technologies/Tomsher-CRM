@@ -142,7 +142,7 @@ class DataController extends Controller
 
     public function create()
     {
-        $lastdata = Data::orderBy('id', 'desc')->first();
+        $lastdata = Data::withTrashed()->orderBy('id', 'desc')->first();
         $nextId = $lastdata ? $lastdata->id + 1 : 1;
 
         $dataCode = 'DATA' . str_pad($nextId, 5, '0', STR_PAD_LEFT); // Example: CUS00001

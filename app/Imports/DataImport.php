@@ -17,6 +17,7 @@ use PhpOffice\PhpSpreadsheet\Shared\Date;
 class DataImport implements ToCollection, WithHeadingRow
 {
     protected array $rowErrors = [];
+    protected array $seenCompanies = [];
 
     public function collection(Collection $rows)
     {
@@ -43,6 +44,22 @@ class DataImport implements ToCollection, WithHeadingRow
                     }
                 }
                 
+                $companyName = trim($row['company_name']);
+
+                // Validate company name uniqueness
+                $existsInDb = Data::where('company_name', $companyName)->exists();
+                $alreadySeen = in_array(strtolower($companyName), $this->seenCompanies);
+
+                if ($existsInDb || $alreadySeen) {
+                    $this->rowErrors[] = [
+                        'row' => $rowNumber,
+                        'error' => "Company name '{$companyName}' already exists"
+                    ];
+                    continue;
+                }
+
+                $this->seenCompanies[] = strtolower($companyName);
+
                 // Lookups
                 $sourceId = EnquirySource::where('name', trim($row['source']))->value('id');
                 $industryId = Industry::where('name', trim($row['industry']))->value('id');
@@ -127,7 +144,7 @@ class DataImport implements ToCollection, WithHeadingRow
 
     protected function generateDataCode(): string
     {
-        $lastId = Data::lockForUpdate()->max('id') ?? 0;
+        $lastId = Data::withTrashed()->lockForUpdate()->max('id') ?? 0;
         return 'DATA' . str_pad($lastId + 1, 5, '0', STR_PAD_LEFT);
     }
 
