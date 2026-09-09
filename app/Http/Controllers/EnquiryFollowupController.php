@@ -61,7 +61,66 @@ class EnquiryFollowupController extends Controller
         if ($request->filled('status')) {
             $statuses = array_filter((array) $request->input('status'));
             if (!empty($statuses)) {
-                $query->whereIn('status', $statuses);
+                $hasUpcoming = in_array('upcoming', $statuses);
+                $hasPending  = in_array('pending', $statuses);
+                $otherStatuses = array_values(array_diff($statuses, ['upcoming', 'pending']));
+                $now = now();
+
+                $query->where(function ($q) use ($hasUpcoming, $hasPending, $otherStatuses, $now) {
+                    $first = true;
+
+                    if (!empty($otherStatuses)) {
+                        $q->whereIn('status', $otherStatuses);
+                        $first = false;
+                    }
+
+                    if ($hasUpcoming && $hasPending) {
+                        if ($first) {
+                            $q->where('status', 'pending');
+                            $first = false;
+                        } else {
+                            $q->orWhere('status', 'pending');
+                        }
+                    } elseif ($hasUpcoming) {
+                        $upcomingClause = function ($subQ) use ($now) {
+                            $subQ->where('status', 'pending')
+                                ->where(function ($timeQ) use ($now) {
+                                    $timeQ->where(function ($meetingQ) use ($now) {
+                                        $meetingQ->where('followup_type', 'meeting')
+                                                 ->where('followup_from', '>', $now);
+                                    })->orWhere(function ($nonMeetingQ) use ($now) {
+                                        $nonMeetingQ->where('followup_type', '!=', 'meeting')
+                                                    ->where('followup_time', '>', $now);
+                                    });
+                                });
+                        };
+                        if ($first) {
+                            $q->where($upcomingClause);
+                            $first = false;
+                        } else {
+                            $q->orWhere($upcomingClause);
+                        }
+                    } elseif ($hasPending) {
+                        $pendingClause = function ($subQ) use ($now) {
+                            $subQ->where('status', 'pending')
+                                ->where(function ($timeQ) use ($now) {
+                                    $timeQ->where(function ($meetingQ) use ($now) {
+                                        $meetingQ->where('followup_type', 'meeting')
+                                                 ->where('followup_from', '<=', $now);
+                                    })->orWhere(function ($nonMeetingQ) use ($now) {
+                                        $nonMeetingQ->where('followup_type', '!=', 'meeting')
+                                                    ->where('followup_time', '<=', $now);
+                                    });
+                                });
+                        };
+                        if ($first) {
+                            $q->where($pendingClause);
+                            $first = false;
+                        } else {
+                            $q->orWhere($pendingClause);
+                        }
+                    }
+                });
             }
         }
 

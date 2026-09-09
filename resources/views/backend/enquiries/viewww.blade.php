@@ -742,7 +742,11 @@
                 let statusclass = $(this).data('statusclass');
                 let badge = $('#modal-status');
 
-                badge.text(status.charAt(0).toUpperCase() + status.slice(1));
+                if (statusclass === 'pending-upcoming') {
+                    badge.text('Upcoming');
+                } else {
+                    badge.text(status.charAt(0).toUpperCase() + status.slice(1));
+                }
                 badge.removeClass().addClass('badge badge-inline');
                 badge.addClass(statusclass);
 

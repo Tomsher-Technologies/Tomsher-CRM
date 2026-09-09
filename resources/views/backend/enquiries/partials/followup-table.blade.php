@@ -60,12 +60,12 @@
                                     @php
                                         $statusClass = 'pending-upcoming';
                                     @endphp
-                                    <span class="badge badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                    <span class="badge badge-inline pending-upcoming">Upcoming</span>
                                 @else
                                     @php
                                         $statusClass = 'pending-due';
                                     @endphp
-                                    <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                    <span class="badge badge-inline pending-due">Pending</span>
                                 @endif
                             @else
                                 @php
@@ -75,12 +75,12 @@
                                     @php
                                         $statusClass = 'pending-upcoming';
                                     @endphp
-                                    <span class="badge badge-inline pending-upcoming">{{ ucfirst($followup->status) }}</span>
+                                    <span class="badge badge-inline pending-upcoming">Upcoming</span>
                                 @else
                                     @php
                                         $statusClass = 'pending-due';
                                     @endphp
-                                    <span class="badge badge-inline pending-due">{{ ucfirst($followup->status) }}</span>
+                                    <span class="badge badge-inline pending-due">Pending</span>
                                 @endif
                             @endif
                         @elseif($followup->status == 'completed')
